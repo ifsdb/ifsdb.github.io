@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="IFS Encyclopedia" description="An encyclopedia of Iterated Function Systems">
+  <main>
+    <section class="hero">
+      <h1>Welcome to the IFS Encyclopedia</h1>
+      <p>
+        An open reference for <strong>Iterated Function Systems</strong> (IFS) — a powerful
+        framework for generating fractals through repeated application of contraction mappings.
+        Explore mathematical definitions, visualizations, and properties of classic and
+        lesser-known fractal attractors.
+      </p>
+      <a href="/ifs">Browse the full catalog →</a>
+    </section>
+
+    <section>
+      <h2>Featured Systems</h2>
+      <div class="catalog-grid">
+        <div class="entry-card">
+          <h3><a href="/ifs/barnsley-fern">Barnsley Fern</a></h3>
+          <p>A classic IFS that strikingly resembles a natural black spleenwort fern, built from four affine transformations.</p>
+          <a href="/ifs/barnsley-fern">View entry →</a>
+        </div>
+        <div class="entry-card">
+          <h3><a href="/ifs/sierpinski-triangle">Sierpiński Triangle</a></h3>
+          <p>One of the most famous fractals: a self-similar triangle subdivided infinitely by three contraction mappings.</p>
+          <a href="/ifs/sierpinski-triangle">View entry →</a>
+        </div>
+        <div class="entry-card">
+          <h3><a href="/ifs/dragon-curve">Dragon Curve</a></h3>
+          <p>A space-filling fractal arising from two rotational contractions, resembling a folded paper strip.</p>
+          <a href="/ifs/dragon-curve">View entry →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

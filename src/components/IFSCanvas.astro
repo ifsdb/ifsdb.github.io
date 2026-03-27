@@ -1,0 +1,16 @@
+---
+interface Props {
+  id: string;
+  width?: number;
+  height?: number;
+  label?: string;
+}
+
+const { id, width = 400, height = 400, label } = Astro.props;
+---
+<div class="ifs-canvas-wrapper">
+  <!-- WASM rendering will be initialized here.
+       Use data-ifs-id attribute to hook ifstile WASM module. -->
+  <canvas id={id} data-ifs-id={id} width={width} height={height}></canvas>
+  <p class="canvas-placeholder">Canvas: {label ?? id} — WASM rendering coming soon</p>
+</div>

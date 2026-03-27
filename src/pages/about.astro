@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const ifsDefinition = "A finite set of contraction mappings $\\{f_1, f_2, \\ldots, f_n\\}$ on a complete metric space $(X, d)$.";
+const attractorFormula = "$$A = \\bigcup_{i=1}^{n} f_i(A)$$";
+const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
+---
+<BaseLayout title="About — IFS Encyclopedia" description="What is an Iterated Function System?">
+  <main>
+    <h1>About IFS Encyclopedia</h1>
+
+    <h2>What is an Iterated Function System?</h2>
+    <p>
+      An <strong>Iterated Function System</strong> (IFS) is <span set:html={ifsDefinition}></span>
+      Each mapping <em>f<sub>i</sub></em> satisfies a contractivity condition: there exists
+      0 &le; <em>c</em> &lt; 1 such that d(f<sub>i</sub>(x), f<sub>i</sub>(y)) &le; c·d(x,y)
+      for all x, y in X.
+    </p>
+
+    <h2>The Attractor</h2>
+    <p>
+      By the Banach fixed-point theorem, every IFS has a unique non-empty compact
+      <strong>attractor</strong> (also called the invariant set) <em>A</em> satisfying:
+    </p>
+    <p set:html={attractorFormula}></p>
+    <p>
+      Starting from any compact set, repeated application of all mappings simultaneously
+      converges to this attractor in the Hausdorff metric.
+    </p>
+
+    <h2>Affine Form</h2>
+    <p>
+      The most common IFS mappings are <strong>affine contractions</strong> of the form:
+    </p>
+    <p set:html={affineFormula}></p>
+    <p>
+      where <em>A<sub>i</sub></em> is a 2×2 (or n×n) matrix and <strong>b</strong><sub>i</sub>
+      is a translation vector. The contractivity condition requires that the spectral radius
+      of <em>A<sub>i</sub></em> is less than 1.
+    </p>
+
+    <h2>About This Site</h2>
+    <p>
+      This encyclopedia is an open reference for IFS attractors. Visualizations are rendered
+      using <strong>ifstile</strong>, a custom WASM module, directly in the browser — no
+      images are stored on the server. Mathematical formulas are rendered with
+      <a href="https://katex.org" target="_blank" rel="noopener">KaTeX</a>.
+    </p>
+    <p>
+      Content is licensed under
+      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">
+        CC BY 4.0
+      </a>.
+      Contributions welcome on
+      <a href="https://github.com/ifsdb/ifsdb.github.io" target="_blank" rel="noopener">
+        GitHub
+      </a>.
+    </p>
+  </main>
+</BaseLayout>

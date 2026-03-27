@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import IFSCanvas from '../../components/IFSCanvas.astro';
+---
+<BaseLayout title="IFS Catalog" description="Browse all Iterated Function Systems in the encyclopedia">
+  <main>
+    <h1>IFS Catalog</h1>
+    <p>A curated collection of Iterated Function System attractors with mathematical definitions and visualizations.</p>
+
+    <div class="catalog-grid">
+      <div class="entry-card">
+        <h3><a href="/ifs/barnsley-fern">Barnsley Fern</a></h3>
+        <p>A naturalistic fractal built from four affine transformations, resembling a black spleenwort fern.</p>
+        <IFSCanvas id="catalog-barnsley-fern" width={300} height={300} label="Barnsley Fern" />
+        <a href="/ifs/barnsley-fern">View full entry →</a>
+      </div>
+
+      <div class="entry-card">
+        <h3><a href="/ifs/sierpinski-triangle">Sierpiński Triangle</a></h3>
+        <p>Self-similar triangle with fractal dimension log(3)/log(2) ≈ 1.585, formed by three contractions.</p>
+        <IFSCanvas id="catalog-sierpinski-triangle" width={300} height={300} label="Sierpiński Triangle" />
+        <a href="/ifs/sierpinski-triangle">View full entry →</a>
+      </div>
+
+      <div class="entry-card">
+        <h3><a href="/ifs/dragon-curve">Dragon Curve</a></h3>
+        <p>Space-filling fractal arising from two rotational contractions at 45°, resembling folded paper.</p>
+        <IFSCanvas id="catalog-dragon-curve" width={300} height={300} label="Dragon Curve" />
+        <a href="/ifs/dragon-curve">View full entry →</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,69 @@
+---
+import IFSEntryLayout from '../../layouts/IFSEntryLayout.astro';
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+const t1 = "$$f_1(x,y) = \\begin{pmatrix}0 & 0\\\\0 & 0.16\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix}, \\quad p_1 = 0.01$$";
+const t2 = "$$f_2(x,y) = \\begin{pmatrix}0.85 & 0.04\\\\-0.04 & 0.85\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} + \\begin{pmatrix}0\\\\1.6\\end{pmatrix}, \\quad p_2 = 0.85$$";
+const t3 = "$$f_3(x,y) = \\begin{pmatrix}0.2 & -0.26\\\\0.23 & 0.22\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} + \\begin{pmatrix}0\\\\1.6\\end{pmatrix}, \\quad p_3 = 0.07$$";
+const t4 = "$$f_4(x,y) = \\begin{pmatrix}-0.15 & 0.28\\\\0.26 & 0.24\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} + \\begin{pmatrix}0\\\\0.44\\end{pmatrix}, \\quad p_4 = 0.07$$";
+---
+<IFSEntryLayout
+  title="Barnsley Fern — IFS Encyclopedia"
+  description="The Barnsley Fern is a fractal named after mathematician Michael Barnsley, defined by four affine transformations."
+  name="Barnsley Fern"
+  dimension="≈ 1.6667"
+>
+  <h2>Overview</h2>
+  <p>
+    The <strong>Barnsley Fern</strong> is a fractal named after British mathematician
+    <a href="https://en.wikipedia.org/wiki/Michael_Barnsley" target="_blank" rel="noopener">
+      Michael Barnsley
+    </a>. It is a classic example of an IFS attractor that closely resembles a natural
+    black spleenwort fern (<em>Asplenium adiantum-nigrum</em>). The fern demonstrates how
+    biological shapes can emerge from simple mathematical rules.
+  </p>
+  <p>
+    Barnsley first described this IFS in his 1988 book
+    <em>Fractals Everywhere</em>. The four affine transformations are chosen so that
+    one maps the entire fern to its stem, one to the successively smaller leaflets,
+    and two to the bottom left and right fronds.
+  </p>
+
+  <h2>Visualization</h2>
+  <IFSCanvas id="barnsley-fern" width={500} height={500} label="Barnsley Fern" />
+
+  <h2>Definition</h2>
+  <p>The Barnsley Fern is defined by four affine transformations applied with given probabilities:</p>
+
+  <h3>Transformation 1 — Stem</h3>
+  <p set:html={t1}></p>
+
+  <h3>Transformation 2 — Successively smaller leaflets</h3>
+  <p set:html={t2}></p>
+
+  <h3>Transformation 3 — Left frond</h3>
+  <p set:html={t3}></p>
+
+  <h3>Transformation 4 — Right frond</h3>
+  <p set:html={t4}></p>
+
+  <h2>Properties</h2>
+  <ul>
+    <li><strong>Fractal dimension:</strong> ≈ 1.6667 (Hausdorff dimension)</li>
+    <li><strong>Self-similarity:</strong> Each frond is a scaled and rotated copy of the whole fern</li>
+    <li><strong>Number of transformations:</strong> 4</li>
+    <li><strong>Random iteration:</strong> The chaos game algorithm samples this attractor with probabilities p₁=0.01, p₂=0.85, p₃=0.07, p₄=0.07</li>
+  </ul>
+
+  <h2>References</h2>
+  <ul>
+    <li>
+      Barnsley, M. (1988). <em>Fractals Everywhere</em>. Academic Press.
+    </li>
+    <li>
+      <a href="https://en.wikipedia.org/wiki/Barnsley_fern" target="_blank" rel="noopener">
+        Barnsley fern — Wikipedia
+      </a>
+    </li>
+  </ul>
+</IFSEntryLayout>

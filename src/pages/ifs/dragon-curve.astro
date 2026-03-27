@@ -1,0 +1,62 @@
+---
+import IFSEntryLayout from '../../layouts/IFSEntryLayout.astro';
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+const t1 = "$$f_1(x,y) = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}\\cos 45^\\circ & -\\sin 45^\\circ\\\\ \\sin 45^\\circ & \\cos 45^\\circ\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} = \\begin{pmatrix}0.5 & -0.5\\\\0.5 & 0.5\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix}$$";
+const t2 = "$$f_2(x,y) = \\frac{1}{\\sqrt{2}}\\begin{pmatrix}\\cos 135^\\circ & -\\sin 135^\\circ\\\\ \\sin 135^\\circ & \\cos 135^\\circ\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} + \\begin{pmatrix}1\\\\0\\end{pmatrix} = \\begin{pmatrix}-0.5 & 0.5\\\\-0.5 & -0.5\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} + \\begin{pmatrix}1\\\\0\\end{pmatrix}$$";
+const dimFormula = "$$d \\approx 1.5236$$";
+---
+<IFSEntryLayout
+  title="Dragon Curve — IFS Encyclopedia"
+  description="The Dragon Curve is a space-filling fractal arising from two rotational contraction mappings."
+  name="Dragon Curve"
+  dimension="≈ 1.5236"
+>
+  <h2>Overview</h2>
+  <p>
+    The <strong>Dragon Curve</strong> (also called the Heighway Dragon, after NASA physicist
+    John Heighway who first studied it in the 1960s) is a self-similar fractal that can be
+    constructed by repeatedly folding a strip of paper in half and unfolding it so each fold
+    is at a right angle.
+  </p>
+  <p>
+    As an IFS, the Dragon Curve is the attractor of two affine contractions, each a rotation
+    by ±45° combined with a scaling by 1/√2. The resulting curve is continuous, non-self-
+    intersecting, and tiles the plane.
+  </p>
+
+  <h2>Visualization</h2>
+  <IFSCanvas id="dragon-curve" width={500} height={500} label="Dragon Curve" />
+
+  <h2>Definition</h2>
+  <p>The Dragon Curve is the attractor of two rotational contractions:</p>
+
+  <h3>Transformation 1 — Rotation by +45°, scale 1/√2</h3>
+  <p set:html={t1}></p>
+
+  <h3>Transformation 2 — Rotation by +135°, scale 1/√2, translate (1,0)</h3>
+  <p set:html={t2}></p>
+
+  <h2>Properties</h2>
+  <p>The Hausdorff dimension is:</p>
+  <p set:html={dimFormula}></p>
+  <ul>
+    <li><strong>Contractivity ratio:</strong> 1/√2 for both mappings</li>
+    <li><strong>Number of transformations:</strong> 2</li>
+    <li><strong>Tiling:</strong> Four Dragon Curves together tile the plane</li>
+    <li><strong>Boundary:</strong> The curve is nowhere differentiable</li>
+    <li><strong>Constructed by:</strong> John Heighway, NASA (1960s); popularized by Martin Gardner</li>
+  </ul>
+
+  <h2>References</h2>
+  <ul>
+    <li>
+      Gardner, M. (1967). "Mathematical Games." <em>Scientific American</em>, 216(3), 124–125.
+    </li>
+    <li>
+      <a href="https://en.wikipedia.org/wiki/Dragon_curve" target="_blank" rel="noopener">
+        Dragon curve — Wikipedia
+      </a>
+    </li>
+  </ul>
+</IFSEntryLayout>
