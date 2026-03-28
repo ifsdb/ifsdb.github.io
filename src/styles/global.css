@@ -240,6 +240,55 @@ footer {
   margin-left: 0.25rem;
 }
 
+/* ===== Download list ===== */
+.download-list {
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.download-list li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.download-list li:last-child {
+  border-bottom: none;
+}
+
+.download-list .platform {
+  font-weight: 600;
+  min-width: 130px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.download-list .dl-links {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+/* ===== Primary button ===== */
+.btn-primary {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: #fff !important;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
   header {
