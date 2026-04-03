@@ -16,7 +16,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg: #0f0f1a;
     --color-surface: #1a1a2e;
     --color-text: #e8e8ff;
@@ -27,6 +27,18 @@
     --color-header-bg: #0a0a18;
     --color-header-text: #e8e8ff;
   }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0f0f1a;
+  --color-surface: #1a1a2e;
+  --color-text: #e8e8ff;
+  --color-text-muted: #a0a0c0;
+  --color-accent: #8080ff;
+  --color-border: #333355;
+  --color-card-bg: #1e1e34;
+  --color-header-bg: #0a0a18;
+  --color-header-text: #e8e8ff;
 }
 
 /* ===== Reset ===== */
@@ -287,6 +299,199 @@ footer {
 
 .btn-primary:hover {
   opacity: 0.85;
+}
+
+/* ===== IFSCanvas hover hint ===== */
+.ifs-canvas-frame {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.ifs-open-hint {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  font-family: var(--font-sans);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ifs-canvas-frame:hover .ifs-open-hint {
+  opacity: 1;
+}
+
+/* ===== Tags ===== */
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+}
+
+.entry-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+/* ===== Breadcrumb ===== */
+.breadcrumb {
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-muted);
+}
+
+.breadcrumb a {
+  color: var(--color-text-muted);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* ===== Edit on GitHub ===== */
+.edit-on-github {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.edit-on-github a {
+  color: var(--color-text-muted);
+}
+
+.edit-on-github a:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* ===== Similar entries ===== */
+.similar-entries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.similar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-decoration: none !important;
+  color: var(--color-text);
+  background-color: var(--color-card-bg);
+  min-width: 160px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.similar-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(64, 64, 204, 0.12);
+}
+
+.similar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* ===== Catalog stats ===== */
+.catalog-stats {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-left: 0.5rem;
+}
+
+/* ===== Theme toggle button ===== */
+.theme-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--color-header-text);
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ===== AIFS details block ===== */
+.aifs-details {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.aifs-details summary {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  user-select: none;
+  background: var(--color-surface);
+}
+
+.aifs-details summary:hover {
+  color: var(--color-text);
+}
+
+.aifs-code-block {
+  position: relative;
+  background: var(--color-surface);
+}
+
+.aifs-code-block pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--color-border);
+}
+
+.copy-aifs-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 5px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.copy-aifs-btn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 /* ===== Responsive ===== */

@@ -4,13 +4,98 @@ interface Props {
   width?: number;
   height?: number;
   label?: string;
+  aifs?: string;
 }
 
-const { id, width = 400, height = 400, label } = Astro.props;
+const { id, width = 400, height = 400, label, aifs } = Astro.props;
 ---
 <div class="ifs-canvas-wrapper">
-  <!-- WASM rendering will be initialized here.
-       Use data-ifs-id attribute to hook ifstile WASM module. -->
-  <canvas id={id} data-ifs-id={id} width={width} height={height}></canvas>
-  <p class="canvas-placeholder">Canvas: {label ?? id} — WASM rendering coming soon</p>
+  <div class="ifs-canvas-frame">
+    <canvas id={id} data-ifs-id={id} width={width} height={height}
+            aria-label={label ?? id}
+            title="Open in IFStile"
+            style="cursor:pointer"
+            data-aifs={aifs ?? ''}></canvas>
+    <div class="ifs-open-hint">Open in IFStile ↗</div>
+  </div>
 </div>
+
+<script>
+  // ── Shared worker (module-level; Astro deduplicates this script across instances) ──
+
+  declare const __IFSLIB_VERSION__: string;
+
+  let _worker: Worker | null = null;
+  const _pending = new Map<string, HTMLCanvasElement>();
+
+  function getWorker(): Worker {
+    if (_worker) return _worker;
+    _worker = new Worker('/ifslib-worker.js');
+    _worker.onmessage = (e: MessageEvent) => {
+      const { id, type, pixels, width, height, message } = e.data;
+      const canvas = _pending.get(id);
+      if (!canvas) return;
+
+      if (type === 'frame') {
+        const arr = new Uint8ClampedArray((pixels as Uint8ClampedArray).buffer as ArrayBuffer);
+        const imgData = new ImageData(arr, width, height);
+        createImageBitmap(imgData).then(bitmap => {
+          const ctx = canvas.getContext('2d')!;
+          // Nearest-neighbour while upscaling, smooth at final resolution
+          ctx.imageSmoothingEnabled = width < canvas.width;
+          ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          bitmap.close();
+        });
+      } else if (type === 'done') {
+        _pending.delete(id);
+      } else if (type === 'error') {
+        console.error('IFS worker error:', message, '— canvas:', id);
+        _pending.delete(id);
+      }
+    };
+    _worker.onerror = (e) => console.error('IFS worker crashed:', e);
+    return _worker;
+  }
+
+  async function renderCanvas(canvas: HTMLCanvasElement): Promise<void> {
+    const ifsId = canvas.dataset.ifsId;
+    if (!ifsId) return;
+
+    // Prefer inline AIFS; fall back to fetching the file.
+    let aifs = canvas.dataset.aifs ?? '';
+    if (!aifs) {
+      const resp = await fetch(`/aifs/${ifsId}.aifs`);
+      if (!resp.ok) return;
+      aifs = await resp.text();
+    }
+
+    _pending.set(ifsId, canvas);
+    getWorker().postMessage({
+      id: ifsId,
+      aifs,
+      width: canvas.width,
+      height: canvas.height,
+      version: __IFSLIB_VERSION__,
+    });
+  }
+
+  function openInIFStile(canvas: HTMLCanvasElement) {
+    const aifs = canvas.dataset.aifs;
+    if (!aifs) return;
+    const b64 = btoa(unescape(encodeURIComponent(aifs)));
+    window.open('https://app.ifstile.com?aifs=' + b64, '_blank', 'noopener');
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLCanvasElement>('canvas[data-ifs-id]').forEach(c => {
+      renderCanvas(c).catch(err => console.error('IFS render error:', err));
+      c.addEventListener('click', () => openInIFStile(c));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
+  }
+</script>

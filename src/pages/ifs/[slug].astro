@@ -1,0 +1,93 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import IFSEntryLayout from '../../layouts/IFSEntryLayout.astro';
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('ifs');
+  return entries.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'ifs'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { name, description, dimension, aifs, references } = entry.data;
+const currentTags = entry.data.tags ?? [];
+
+const allEntries = await getCollection('ifs');
+const similar = allEntries
+  .filter(e => e.id !== entry.id)
+  .map(e => ({
+    entry: e,
+    common: (e.data.tags ?? []).filter(t => currentTags.includes(t)).length,
+  }))
+  .filter(({ common }) => common > 0)
+  .sort((a, b) => b.common - a.common)
+  .slice(0, 3)
+  .map(({ entry: e }) => e);
+---
+<IFSEntryLayout
+  title={`${name} — IFS Encyclopedia`}
+  description={description}
+  name={name}
+  dimension={dimension}
+  slug={entry.id}
+>
+  <h2>Visualization</h2>
+  <IFSCanvas id={entry.id} width={500} height={500} label={name} aifs={aifs} />
+
+  <details class="aifs-details">
+    <summary>AIFS program</summary>
+    <div class="aifs-code-block">
+      <pre><code>{aifs}</code></pre>
+      <button class="copy-aifs-btn" data-aifs={aifs}>Copy</button>
+    </div>
+  </details>
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('.copy-aifs-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = btn.dataset.aifs ?? '';
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+  </script>
+
+  <Content />
+
+  {references && references.length > 0 && (
+    <h2>References</h2>
+    <ul>
+      {references.map(ref => (
+        <li>
+          {ref.url
+            ? <a href={ref.url} target="_blank" rel="noopener">{ref.text}</a>
+            : ref.text}
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {similar.length > 0 && (
+    <h2>Similar</h2>
+    <div class="similar-entries">
+      {similar.map(e => (
+        <a href={`/ifs/${e.id}`} class="similar-card">
+          <strong>{e.data.name}</strong>
+          <div class="similar-tags">
+            {(e.data.tags ?? []).map(tag => <span class="tag">{tag}</span>)}
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</IFSEntryLayout>

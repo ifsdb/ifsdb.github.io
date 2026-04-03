@@ -6,12 +6,19 @@ interface Props {
   description?: string;
   name: string;
   dimension?: string;
+  slug?: string;
 }
 
-const { title, description, name, dimension } = Astro.props;
+const { title, description, name, dimension, slug } = Astro.props;
+const githubUrl = slug
+  ? `https://github.com/ifsdb/ifsdb.github.io/blob/main/src/content/ifs/${slug}.md`
+  : null;
 ---
 <BaseLayout title={title} description={description}>
   <main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/ifs">← Catalog</a>
+    </nav>
     <h1>{name}</h1>
     {dimension && (
       <div class="meta-block">
@@ -20,5 +27,8 @@ const { title, description, name, dimension } = Astro.props;
       </div>
     )}
     <slot />
+    <div class="edit-on-github">
+      {githubUrl && <a href={githubUrl} target="_blank" rel="noopener">Edit this page on GitHub ↗</a>}
+    </div>
   </main>
 </BaseLayout>

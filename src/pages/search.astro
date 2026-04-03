@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const entries = await getCollection('ifs');
+
+// Build a lightweight index: id, name, description, cardDescription, dimension, transforms, tags
+const index = entries.map(e => ({
+  id: e.id,
+  name: e.data.name,
+  text: [
+    e.data.name,
+    e.data.cardDescription ?? e.data.description,
+    e.data.dimension ?? '',
+    (e.data.tags ?? []).join(' '),
+  ].join(' ').toLowerCase(),
+  dimension: e.data.dimension ?? '',
+  transforms: e.data.transforms,
+  tags: e.data.tags ?? [],
+  cardDescription: e.data.cardDescription ?? e.data.description,
+}));
+---
+<BaseLayout title="Search — IFS Encyclopedia" description="Search the IFS Encyclopedia">
+  <main>
+    <h1>Search</h1>
+    <input
+      id="search-input"
+      type="search"
+      placeholder="Search by name, tag, dimension…"
+      autocomplete="off"
+    />
+    <div id="search-results" class="catalog-grid"></div>
+    <p id="search-empty" style="display:none">No results found.</p>
+  </main>
+</BaseLayout>
+
+<script define:vars={{ index }}>
+  const input = document.getElementById('search-input');
+  const resultsEl = document.getElementById('search-results');
+  const emptyEl = document.getElementById('search-empty');
+
+  function render(items) {
+    resultsEl.innerHTML = items.map(e => `
+      <div class="entry-card">
+        <h3><a href="/ifs/${e.id}">${e.name}</a></h3>
+        <p>${e.cardDescription}</p>
+        <div class="entry-card-meta">
+          ${e.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        ${e.dimension ? `<div class="entry-meta-small">Dimension: ${e.dimension} · Transforms: ${e.transforms}</div>` : ''}
+        <a href="/ifs/${e.id}">View full entry →</a>
+      </div>
+    `).join('');
+    emptyEl.style.display = items.length === 0 ? '' : 'none';
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { resultsEl.innerHTML = ''; emptyEl.style.display = 'none'; return; }
+    render(index.filter(e => e.text.includes(q)));
+  });
+</script>

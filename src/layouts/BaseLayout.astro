@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { title, description = 'IFS Encyclopedia' } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://ifsdb.github.io').href;
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +18,20 @@ const { title, description = 'IFS Encyclopedia' } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="IFS Encyclopedia" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Theme init: run synchronously to prevent flash of wrong theme -->
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem('ifs-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"

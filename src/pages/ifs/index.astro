@@ -1,33 +1,92 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import IFSCanvas from '../../components/IFSCanvas.astro';
+
+const entries = await getCollection('ifs');
+const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
 ---
 <BaseLayout title="IFS Catalog" description="Browse all Iterated Function Systems in the encyclopedia">
   <main>
     <h1>IFS Catalog</h1>
-    <p>A curated collection of Iterated Function System attractors with mathematical definitions and visualizations.</p>
+    <p>A curated collection of Iterated Function System attractors with mathematical definitions and visualizations.
+      <span class="catalog-stats">{entries.length} entries &middot; {allTags.length} tags</span>
+    </p>
 
-    <div class="catalog-grid">
-      <div class="entry-card">
-        <h3><a href="/ifs/barnsley-fern">Barnsley Fern</a></h3>
-        <p>A naturalistic fractal built from four affine transformations, resembling a black spleenwort fern.</p>
-        <IFSCanvas id="catalog-barnsley-fern" width={300} height={300} label="Barnsley Fern" />
-        <a href="/ifs/barnsley-fern">View full entry →</a>
+    <div class="catalog-controls">
+      <div class="catalog-filters">
+        <span>Filter:</span>
+        <button class="tag-btn active" data-tag="">All</button>
+        {allTags.map(tag => (
+          <button class="tag-btn" data-tag={tag}>{tag}</button>
+        ))}
       </div>
+      <div class="catalog-sort">
+        <label for="sort-select">Sort by:</label>
+        <select id="sort-select">
+          <option value="name">Name</option>
+          <option value="dimension">Dimension</option>
+          <option value="transforms">Transforms</option>
+        </select>
+      </div>
+    </div>
 
-      <div class="entry-card">
-        <h3><a href="/ifs/sierpinski-triangle">Sierpiński Triangle</a></h3>
-        <p>Self-similar triangle with fractal dimension log(3)/log(2) ≈ 1.585, formed by three contractions.</p>
-        <IFSCanvas id="catalog-sierpinski-triangle" width={300} height={300} label="Sierpiński Triangle" />
-        <a href="/ifs/sierpinski-triangle">View full entry →</a>
-      </div>
-
-      <div class="entry-card">
-        <h3><a href="/ifs/dragon-curve">Dragon Curve</a></h3>
-        <p>Space-filling fractal arising from two rotational contractions at 45°, resembling folded paper.</p>
-        <IFSCanvas id="catalog-dragon-curve" width={300} height={300} label="Dragon Curve" />
-        <a href="/ifs/dragon-curve">View full entry →</a>
-      </div>
+    <div class="catalog-grid" id="catalog-grid">
+      {entries.map(entry => (
+        <div class="entry-card"
+             data-tags={(entry.data.tags ?? []).join(',')}
+             data-name={entry.data.name}
+             data-dimension={entry.data.dimension ?? ''}
+             data-transforms={entry.data.transforms}>
+          <h3><a href={`/ifs/${entry.id}`}>{entry.data.name}</a></h3>
+          <p>{entry.data.cardDescription ?? entry.data.description}</p>
+          <IFSCanvas
+            id={`catalog-${entry.id}`}
+            width={300}
+            height={300}
+            label={entry.data.name}
+            aifs={entry.data.aifs}
+          />
+          <div class="entry-card-meta">
+            {(entry.data.tags ?? []).map(tag => <span class="tag">{tag}</span>)}
+          </div>
+          <a href={`/ifs/${entry.id}`}>View full entry →</a>
+        </div>
+      ))}
     </div>
   </main>
 </BaseLayout>
+
+<script>
+  const grid = document.getElementById('catalog-grid')!;
+  const cards = () => Array.from(grid.querySelectorAll<HTMLElement>('.entry-card'));
+
+  // ── Filtering ──
+  let activeTag = '';
+  document.querySelectorAll<HTMLButtonElement>('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTag = btn.dataset.tag ?? '';
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilterSort();
+    });
+  });
+
+  // ── Sorting ──
+  document.getElementById('sort-select')!.addEventListener('change', applyFilterSort);
+
+  function applyFilterSort() {
+    const sortBy = (document.getElementById('sort-select') as HTMLSelectElement).value;
+    const sorted = cards().sort((a, b) => {
+      if (sortBy === 'name') return a.dataset.name!.localeCompare(b.dataset.name!);
+      if (sortBy === 'transforms') return Number(a.dataset.transforms) - Number(b.dataset.transforms);
+      if (sortBy === 'dimension') return (a.dataset.dimension ?? '').localeCompare(b.dataset.dimension ?? '');
+      return 0;
+    });
+    sorted.forEach(card => {
+      const tags = card.dataset.tags?.split(',') ?? [];
+      card.style.display = (!activeTag || tags.includes(activeTag)) ? '' : 'none';
+      grid.appendChild(card);
+    });
+  }
+</script>

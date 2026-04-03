@@ -5,7 +5,33 @@
   <nav>
     <a href="/">Home</a>
     <a href="/ifs">Catalog</a>
+    <a href="/search">Search</a>
     <a href="/tools">Tools</a>
     <a href="/about">About</a>
   </nav>
+  <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light theme" title="Toggle theme">◑</button>
 </header>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+
+  function isDark(): boolean {
+    const t = document.documentElement.dataset.theme;
+    if (t === 'dark') return true;
+    if (t === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function updateIcon() {
+    if (btn) btn.textContent = isDark() ? '☀' : '☾';
+  }
+
+  btn?.addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('ifs-theme', next);
+    updateIcon();
+  });
+
+  updateIcon();
+</script>
