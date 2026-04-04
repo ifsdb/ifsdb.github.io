@@ -1,0 +1,127 @@
+---
+name: "Ammann–Beenker Dual"
+description: "The dual cut-and-project tiling of the Ammann–Beenker tiling, obtained by swapping the roles of direct and internal space in the octagonal projection scheme."
+cardDescription: "Dual of the Ammann–Beenker tiling via the second octagonal CPS eigenplane. Same 8-fold symmetry, two interleaved fractal tile types."
+dimension: "2"
+transforms: 12
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,1]
+  s=$companion([1,0,0,0])
+  r=$exchange()
+  g=s-s^3+1
+  h0=s^4*r*[-1,-1,-1,-1]
+  h1=s^5*[-1,-1,-1,-1]
+  h2=s^3*[0,0,-2,-2]
+  h3=s^5*[0,-2,0,0]
+  h4=s^3*[1,-1,-1,-1]
+  h5=s^4*[-1,-1,-1,-1]
+  h6=s^3*r*[-1,-1,-1,-1]
+  h7=[1,1,1,-1]
+  h8=r*s*[1,1,1,-1]
+  h9=s^4*[0,-2,0,0]
+  h10=s*r*[-1,-1,1,1]
+  h11=r*s*[2,0,2,0]
+  $root=A
+  A = h0^-1*g*A | h1^-1*g*A | h2^-1*g*A | h5^-1*g*B | h6^-1*g*B | h7^-1*g*B | h8^-1*g*B
+  B = h3^-1*g*A | h4^-1*g*A | h9^-1*g*B | h10^-1*g*B | h11^-1*g*B
+references:
+  - text: "Ammann–Beenker tiling — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/"
+  - text: "Beenker, F. P. M. (1982). Algebraic theory of non-periodic tilings of the plane by two simple building blocks. Eindhoven TH report 82-WSK04."
+  - text: "Ammann–Beenker tiling — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Ammann%E2%80%93Beenker_tiling"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA = `@
+$dim=4
+$subspace=[s,1]
+s=$companion([1,0,0,0])
+r=$exchange()
+g=s-s^3+1
+h0=s^4*r*[-1,-1,-1,-1]
+h1=s^5*[-1,-1,-1,-1]
+h2=s^3*[0,0,-2,-2]
+h3=s^5*[0,-2,0,0]
+h4=s^3*[1,-1,-1,-1]
+h5=s^4*[-1,-1,-1,-1]
+h6=s^3*r*[-1,-1,-1,-1]
+h7=[1,1,1,-1]
+h8=r*s*[1,1,1,-1]
+h9=s^4*[0,-2,0,0]
+h10=s*r*[-1,-1,1,1]
+h11=r*s*[2,0,2,0]
+$root=A
+A = h0^-1*g*A | h1^-1*g*A | h2^-1*g*A | h5^-1*g*B | h6^-1*g*B | h7^-1*g*B | h8^-1*g*B
+B = h3^-1*g*A | h4^-1*g*A | h9^-1*g*B | h10^-1*g*B | h11^-1*g*B`;
+
+export const aifsB = `@
+$dim=4
+$subspace=[s,1]
+s=$companion([1,0,0,0])
+r=$exchange()
+g=s-s^3+1
+h0=s^4*r*[-1,-1,-1,-1]
+h1=s^5*[-1,-1,-1,-1]
+h2=s^3*[0,0,-2,-2]
+h3=s^5*[0,-2,0,0]
+h4=s^3*[1,-1,-1,-1]
+h5=s^4*[-1,-1,-1,-1]
+h6=s^3*r*[-1,-1,-1,-1]
+h7=[1,1,1,-1]
+h8=r*s*[1,1,1,-1]
+h9=s^4*[0,-2,0,0]
+h10=s*r*[-1,-1,1,1]
+h11=r*s*[2,0,2,0]
+$root=B
+A = h0^-1*g*A | h1^-1*g*A | h2^-1*g*A | h5^-1*g*B | h6^-1*g*B | h7^-1*g*B | h8^-1*g*B
+B = h3^-1*g*A | h4^-1*g*A | h9^-1*g*B | h10^-1*g*B | h11^-1*g*B`;
+
+## Overview
+
+The **Ammann–Beenker Dual** is obtained from the [Ammann–Beenker tiling](/ifs/ammann-beenker) by
+swapping the roles of the two orthogonal spaces in the **cut-and-project scheme** (CPS).
+
+In the algebraic framework, both tilings share the same 4D rational space
+$\mathbb{Z}[e^{i\pi/4}]^2$ (with $s^4 = -1$) and the same tile maps $h_0, \ldots, h_{11}$.
+The difference is the **projection subspace**:
+- Ammann–Beenker: projects onto eigenplane of $e^{i\pi/4}$ (`$subspace=[s,0]`)
+- Ammann–Beenker Dual: projects onto eigenplane of $e^{3i\pi/4}$ (`$subspace=[s,1]`)
+
+This second projection gives the **internal space** of the cut-and-project scheme, whose
+cross-section defines the window (acceptance domain).
+
+The dual uses **inverse maps**: $h_k^{-1} \cdot g$ instead of $g^{-1} \cdot h_k$.
+This reflects the dual GIFS structure where the expansion is applied on the right.
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="ab-dual-A" aifs={aifsA} width={380} height={380} label="Ammann-Beenker dual tile A" />
+    <figcaption>Dual tile $A$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="ab-dual-B" aifs={aifsB} width={380} height={380} label="Ammann-Beenker dual tile B" />
+    <figcaption>Dual tile $B$</figcaption>
+  </figure>
+</div>
+
+## Dual GIFS Structure
+
+The dual GIFS uses the inverse-map form:
+
+$$
+A = h_0^{-1}g(A) \cup h_1^{-1}g(A) \cup h_2^{-1}g(A) \cup h_5^{-1}g(B) \cup h_6^{-1}g(B) \cup h_7^{-1}g(B) \cup h_8^{-1}g(B)
+$$
+
+$$
+B = h_3^{-1}g(A) \cup h_4^{-1}g(A) \cup h_9^{-1}g(B) \cup h_{10}^{-1}g(B) \cup h_{11}^{-1}g(B)
+$$
+
+The maps $h_k^{-1} g$ are contractions because $|g|^{-1} = (1+\sqrt{2})^{-1} < 1$ on the
+eigenplane of $e^{3i\pi/4}$ (both eigenplanes of $s$ have the same modulus structure for $g$).

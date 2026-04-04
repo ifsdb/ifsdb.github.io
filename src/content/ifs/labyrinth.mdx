@@ -1,0 +1,221 @@
+---
+name: "Labyrinth Tiling"
+description: "An aperiodic tiling with 8-fold rotational symmetry and three fractal-boundary prototile types, with silver-ratio inflation. Named for its labyrinthine fractal tile shapes."
+cardDescription: "Three interleaved fractal tile types with 8-fold symmetry and silver-ratio inflation."
+dimension: "2"
+transforms: 19
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  g=1+s-s^3
+  s=$companion([1,0,0,0])
+  r=$exchange()
+  q0=1*[0,1,0,0]
+  q1=1
+  q2=s^2*[0,-1,-1,-1]
+  q3=s^4*[-1,-1,0,0]
+  q4=s^6*[-1,-1,0,1]
+  q5=s^2*[0,0,0,-1]
+  q6=s^4*[-1,-2,-1,0]
+  q7=1*[0,1,1,0]
+  q8=s^6*[-1,0,1,1]
+  h0=q0
+  h1=q4
+  h2=q1
+  h3=q2
+  h4=q6
+  h5=q5
+  h6=q7
+  h7=q8
+  h8=q3
+  h9=q0
+  h10=q1
+  h11=q2
+  h12=q4
+  h13=q5
+  h14=q3
+  h15=q0
+  h16=q1
+  h17=q2
+  h18=q3
+  $root=A0
+  A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
+  A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
+  A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2
+references:
+  - text: "Labyrinth — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/labyrinth/"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA0 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s-s^3
+s=$companion([1,0,0,0])
+r=$exchange()
+q0=1*[0,1,0,0]
+q1=1
+q2=s^2*[0,-1,-1,-1]
+q3=s^4*[-1,-1,0,0]
+q4=s^6*[-1,-1,0,1]
+q5=s^2*[0,0,0,-1]
+q6=s^4*[-1,-2,-1,0]
+q7=1*[0,1,1,0]
+q8=s^6*[-1,0,1,1]
+h0=q0
+h1=q4
+h2=q1
+h3=q2
+h4=q6
+h5=q5
+h6=q7
+h7=q8
+h8=q3
+h9=q0
+h10=q1
+h11=q2
+h12=q4
+h13=q5
+h14=q3
+h15=q0
+h16=q1
+h17=q2
+h18=q3
+$root=A0
+A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
+A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
+A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
+
+export const aifsA1 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s-s^3
+s=$companion([1,0,0,0])
+r=$exchange()
+q0=1*[0,1,0,0]
+q1=1
+q2=s^2*[0,-1,-1,-1]
+q3=s^4*[-1,-1,0,0]
+q4=s^6*[-1,-1,0,1]
+q5=s^2*[0,0,0,-1]
+q6=s^4*[-1,-2,-1,0]
+q7=1*[0,1,1,0]
+q8=s^6*[-1,0,1,1]
+h0=q0
+h1=q4
+h2=q1
+h3=q2
+h4=q6
+h5=q5
+h6=q7
+h7=q8
+h8=q3
+h9=q0
+h10=q1
+h11=q2
+h12=q4
+h13=q5
+h14=q3
+h15=q0
+h16=q1
+h17=q2
+h18=q3
+$root=A1
+A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
+A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
+A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
+
+export const aifsA2 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s-s^3
+s=$companion([1,0,0,0])
+r=$exchange()
+q0=1*[0,1,0,0]
+q1=1
+q2=s^2*[0,-1,-1,-1]
+q3=s^4*[-1,-1,0,0]
+q4=s^6*[-1,-1,0,1]
+q5=s^2*[0,0,0,-1]
+q6=s^4*[-1,-2,-1,0]
+q7=1*[0,1,1,0]
+q8=s^6*[-1,0,1,1]
+h0=q0
+h1=q4
+h2=q1
+h3=q2
+h4=q6
+h5=q5
+h6=q7
+h7=q8
+h8=q3
+h9=q0
+h10=q1
+h11=q2
+h12=q4
+h13=q5
+h14=q3
+h15=q0
+h16=q1
+h17=q2
+h18=q3
+$root=A2
+A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
+A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
+A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
+
+## Overview
+
+The **Labyrinth tiling** is an aperiodic tiling with **8-fold** rotational symmetry,
+related algebraically to the [Ammann–Beenker tiling](/ifs/ammann-beenker).
+Both use the same 4D rational space with $s^4 = -1$ and the same expansion factor
+$g = 1+s-s^3$ (the silver ratio $1+\sqrt{2}$ on the rendering eigenplane).
+
+The tiling has **three prototile types** $A_0, A_1, A_2$ with mutual dependencies,
+forming a connected GIFS system. The tile shapes have fractal boundaries arising
+from the algebraic cut-and-project structure.
+
+## Algebraic Structure
+
+The companion matrix $s$ (AIFS: `$companion([1,0,0,0])`) satisfies $s^4 + 1 = 0$,
+so $s$ represents $45°$ rotation. The expansion at eigenvalue $e^{i\pi/4}$ is:
+
+$$
+g\big|_{e^{i\pi/4}} = 1 + e^{i\pi/4} - e^{3i\pi/4} = 1 + \tfrac{\sqrt{2}}{2}(1+i) + \tfrac{\sqrt{2}}{2}(1-i) = 1 + \sqrt{2}
+$$
+
+The 9 unique isometry maps $q_0, \ldots, q_8$ are reassigned to $h_0, \ldots, h_{18}$
+to define the three-attractor GIFS:
+
+$$
+A_0 = g^{-1}(h_0(A_0) \cup h_1\cdots h_4(A_1) \cup h_5\cdots h_8(A_2))
+$$
+
+$$
+A_1 = g^{-1}(h_9(A_0) \cup h_{10}\cdots h_{12}(A_1) \cup h_{13}\cdots h_{14}(A_2))
+$$
+
+$$
+A_2 = g^{-1}(h_{15}(A_0) \cup h_{16}\cdots h_{17}(A_1) \cup h_{18}(A_2))
+$$
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="labyrinth-A0" aifs={aifsA0} width={310} height={310} label="Labyrinth tile A0" />
+    <figcaption>Tile $A_0$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="labyrinth-A1" aifs={aifsA1} width={310} height={310} label="Labyrinth tile A1" />
+    <figcaption>Tile $A_1$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="labyrinth-A2" aifs={aifsA2} width={310} height={310} label="Labyrinth tile A2" />
+    <figcaption>Tile $A_2$</figcaption>
+  </figure>
+</div>

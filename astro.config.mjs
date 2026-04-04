@@ -3,8 +3,13 @@ import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
+import mdx from '@astrojs/mdx';
+
 export default defineConfig({
-  integrations: [sitemap()],
+  integrations: [sitemap(), mdx({
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex],
+  })],
   site: 'https://ifsdb.github.io',
   server: { host: '127.0.0.1' },
   markdown: {

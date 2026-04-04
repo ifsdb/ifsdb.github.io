@@ -1,0 +1,111 @@
+---
+name: "Octagonal Tiling (1225)"
+description: "An aperiodic tiling with 8-fold rotational symmetry and two interleaved fractal-boundary prototile types, with silver-ratio inflation."
+cardDescription: "Two interleaved fractal tile types with 8-fold symmetry and silver-ratio inflation. A 2-prototile companion to the Labyrinth tiling."
+dimension: "2"
+transforms: 10
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  g=1+s-s^3
+  s=$companion([1,0,0,0])
+  r=$exchange()
+  h0=1*[0,2,0,0]
+  h1=1*[0,0,0,0]
+  h2=r*s*[0,0,0,0]
+  h3=1*[2,2,0,0]
+  h4=1*[2,2,1,0]
+  h5=r*s^2*[0,0,0,0]
+  h6=s^5*[-2,-2,0,2]
+  h7=1*[2,0,0,0]
+  h8=s^6*[-1,0,3,2]
+  h9=s^2*[1,-2,-3,-2]
+  $root=A0
+  A0=g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A0|g^-1*h9*A0
+  A1=g^-1*h0*A1|g^-1*h1*A0|g^-1*h2*A0
+references:
+  - text: "Ammann-Beenker — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA0 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s-s^3
+s=$companion([1,0,0,0])
+r=$exchange()
+h0=1*[0,2,0,0]
+h1=1*[0,0,0,0]
+h2=r*s*[0,0,0,0]
+h3=1*[2,2,0,0]
+h4=1*[2,2,1,0]
+h5=r*s^2*[0,0,0,0]
+h6=s^5*[-2,-2,0,2]
+h7=1*[2,0,0,0]
+h8=s^6*[-1,0,3,2]
+h9=s^2*[1,-2,-3,-2]
+$root=A0
+A0=g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A0|g^-1*h9*A0
+A1=g^-1*h0*A1|g^-1*h1*A0|g^-1*h2*A0`;
+
+export const aifsA1 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s-s^3
+s=$companion([1,0,0,0])
+r=$exchange()
+h0=1*[0,2,0,0]
+h1=1*[0,0,0,0]
+h2=r*s*[0,0,0,0]
+h3=1*[2,2,0,0]
+h4=1*[2,2,1,0]
+h5=r*s^2*[0,0,0,0]
+h6=s^5*[-2,-2,0,2]
+h7=1*[2,0,0,0]
+h8=s^6*[-1,0,3,2]
+h9=s^2*[1,-2,-3,-2]
+$root=A1
+A0=g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A0|g^-1*h9*A0
+A1=g^-1*h0*A1|g^-1*h1*A0|g^-1*h2*A0`;
+
+## Overview
+
+The **Octagonal 1225** tiling is an aperiodic 2-prototile tiling with **8-fold** rotational
+symmetry. It shares the same algebraic framework as the [Ammann–Beenker](/ifs/ammann-beenker)
+and [Labyrinth](/ifs/labyrinth) tilings — all three use the 4D rational space with
+$s^4 = -1$ and expansion by the silver ratio $g = 1+s-s^3$.
+
+With only **two prototile types** ($A_0$ and $A_1$) and 10 affine maps, it is the most
+compact member of the 8-fold family in this file.
+
+## Algebraic Structure
+
+The companion $s$ (AIFS: `$companion([1,0,0,0])`) satisfies $s^4+1=0$ (rotation by $45°$).
+The silver-ratio expansion $g = 1+s-s^3$ contracts by $1/(1+\sqrt{2})$ on the eigenplane of $e^{i\pi/4}$.
+
+The GIFS has two tile types: $A_0$ (the larger tile, 7 maps) and $A_1$ (the smaller tile, 3 maps):
+
+$$
+A_0 = g^{-1}(h_3 \cup h_4)(A_1) \cup g^{-1}(h_5 \cup h_6 \cup h_7 \cup h_8 \cup h_9)(A_0)
+$$
+
+$$
+A_1 = g^{-1} h_0(A_1) \cup g^{-1}(h_1 \cup h_2)(A_0)
+$$
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="octagonal-A0" aifs={aifsA0} width={380} height={380} label="Octagonal tile A0" />
+    <figcaption>Tile $A_0$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="octagonal-A1" aifs={aifsA1} width={380} height={380} label="Octagonal tile A1" />
+    <figcaption>Tile $A_1$</figcaption>
+  </figure>
+</div>

@@ -1,0 +1,364 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="AIFS Language Reference — IFS Encyclopedia"
+  description="Complete reference for the AIFS (Algebraic Iterated Function System) language used by IFStile and ifslib."
+>
+  <main>
+    <nav class="breadcrumb"><a href="/tools">← Tools</a></nav>
+    <h1>AIFS Language Reference</h1>
+
+    <p>
+      <strong>AIFS</strong> is the program format used by <a href="/tools/ifstile">IFStile</a>
+      and the <code>ifslib</code> rendering library. It describes iterated function systems
+      ranging from simple 2D contractions to high-dimensional algebraic IFS projected onto
+      the plane. The language is documented formally in
+      <a href="https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479" target="_blank" rel="noopener">
+        Mekhontsev (2019), Appendix E
+      </a>.
+    </p>
+
+    <h2>File Structure</h2>
+    <pre><code>@@import other.aifs    # optional: include another .aifs file
+
+@ID:ParentID           # start of a block; ID and ParentID are optional
+# comment
+$dim=2                 # dimension of the rational space (required per block)
+...</code></pre>
+    <p>
+      A file contains any number of blocks separated by <code>@ID:ParentID</code> lines.
+      Each block is a <strong>GIFS</strong> that may define multiple attractor sets.
+      Each block inherits all definitions from its parent and can override them.
+      <code>ID</code> may be empty (<code>@</code>); <code>ParentID</code> may be empty (no parent).
+    </p>
+    <h3>Rendering selection</h3>
+    <ul>
+      <li>
+        <strong><code>ifslib</code></strong> (used in this site) renders the
+        <strong>first visible block</strong> and within it the
+        <strong>first visible attractor set</strong>, unless <code>$root</code> overrides this.
+      </li>
+      <li>
+        <strong>IFStile</strong> lets you browse all blocks and all sets within a block
+        via its IFS List UI.
+      </li>
+    </ul>
+
+    <h2>Variable Types</h2>
+    <table>
+      <thead><tr><th>Prefix</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>(none)</td><td>Ordinary variable — computed once</td></tr>
+        <tr><td><code>$name</code></td><td>Built-in special variable (e.g. <code>$dim</code>, <code>$subspace</code>)</td></tr>
+        <tr><td><code>&amp;name</code></td><td>Substitution macro — re-evaluated at every use site</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Operators</h2>
+    <table>
+      <thead><tr><th>Syntax</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>f1*f2</code></td><td>Composition: x → f1(f2(x))</td></tr>
+        <tr><td><code>S1|S2</code></td><td>Union of sets (or operators): S1 ∪ S2</td></tr>
+        <tr><td><code>f^n</code></td><td>n-fold composition f ∘ f ∘ … ∘ f</td></tr>
+        <tr><td><code>f^-1</code></td><td>Inverse map f⁻¹</td></tr>
+        <tr><td><code>+&nbsp;-&nbsp;*&nbsp;/&nbsp;^</code></td><td>Arithmetic on scalars and matrices</td></tr>
+        <tr><td><code>a%b</code></td><td>Modulo — result has sign of <code>b</code> (Python-style); <code>b=0</code> returns <code>a</code></td></tr>
+        <tr><td><code>$i</code></td><td>Identity map</td></tr>
+        <tr><td><code>$e</code></td><td>Empty set ∅</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Precedence note:</strong> <code>2*[1,0]</code> = 2(x+[1,0]) = 2x+[2,0],
+      but <code>[1,0]*2</code> = 2x+[1,0]. The general rule is
+      <code>[t]*M</code> gives <strong>f(x) = M·x + t</strong> (standard affine form).
+    </p>
+
+    <h2>Vectors and Matrices</h2>
+    <p>
+      <code>[a1, a2, ..., an]</code> defines a vector of n elements, automatically
+      converted to a translation or matrix by context:
+    </p>
+    <ul>
+      <li>For <code>$dim=2</code>: a 2-vector is a translation, a 4-vector is a 2×2 matrix (row-major).</li>
+      <li>For <code>$dim=n</code>: an n-vector is a translation, n²-vector is an n×n matrix.</li>
+      <li>Element access: if <code>v=[a1,..,an]</code> then <code>v[0]=a1</code>, <code>v[n-1]=an</code>.</li>
+    </ul>
+
+    <h2>Affine Maps</h2>
+    <p>The standard 2D affine map form is:</p>
+    <pre><code>f=[tx,ty]*[a,b,c,d]   # f(x) = [[a,b],[c,d]]·x + [tx,ty]
+[tx,ty]               # pure translation by [tx,ty]
+[0.5,0,0,0.5]         # pure scaling by 0.5 (no translation)</code></pre>
+
+    <h2>Special Matrix Constructors</h2>
+    <table>
+      <thead><tr><th>Syntax</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>$companion([a0,...,an-1])</code></td>
+          <td>
+            Companion matrix for the monic polynomial
+            a₀ + a₁x + … + aₙ₋₁xⁿ⁻¹ + xⁿ
+          </td>
+        </tr>
+        <tr>
+          <td><code>$exchange()</code></td>
+          <td>Anti-diagonal identity matrix (exchange matrix χₙ)</td>
+        </tr>
+        <tr>
+          <td><code>$charpoly(M)</code></td>
+          <td>Characteristic polynomial coefficients of matrix M as a vector <code>[a0,...,an-1]</code> (monic, ascending)</td>
+        </tr>
+        <tr>
+          <td><code>$numden(val, eps?)</code></td>
+          <td>Rational approximation of val — returns <code>[numerator, denominator]</code>, or <code>[0,0]</code> if none found within tolerance</td>
+        </tr>
+        <tr>
+          <td><code>$pi</code></td>
+          <td>The constant π</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Example:</strong> <code>s=$companion([1,-1,1,-1])</code> builds the companion
+      matrix for x⁴−x³+x²−x+1 (the 10th cyclotomic polynomial), whose eigenvalues are
+      primitive 10th roots of unity — two complex conjugate pairs.
+      Index 0 selects the first complex pair (a 2D real Jordan cell), so
+      <code>$subspace=[s,0]</code> alone projects to a 2D plane where the action of <code>s</code>
+      is a rotation by π/5 = 36°.
+    </p>
+
+    <h2>Special Variables</h2>
+    <table>
+      <thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>$dim=n</code></td>
+          <td>Dimension of the rational space. All affine maps must have this dimension. Required in every block.</td>
+        </tr>
+        <tr>
+          <td><code>$n=name</code></td>
+          <td>Human-readable name for the block, displayed in IFStile's block list. No effect on rendering.</td>
+        </tr>
+        <tr>
+          <td><code>$subspace=[M, i1, i2, …]</code></td>
+          <td>
+            Projects from the n-dimensional rational space to a rendering subspace.
+            <code>M</code> is a matrix identifier (typically defined via <code>$companion</code>);
+            each index selects one <strong>real Jordan cell</strong> of <code>M</code>.
+            A real eigenvalue → 1D cell (contributes 1 rendering dimension);
+            a complex conjugate pair → 2D cell (contributes 2 rendering dimensions).
+            The total rendering dimension is the sum of the selected cells' dimensions.
+            Indices are 0-based positions in the sequence of eigenvalues with Im(λ) ≥ 0,
+            ordered by <strong>decreasing modulus</strong> (ties broken by decreasing real part).
+          </td>
+        </tr>
+        <tr>
+          <td><code>$root=name</code></td>
+          <td>
+            Selects which attractor set is shown first in this block.
+            <code>ifslib</code> always renders this set; IFStile uses it as the
+            initial selection when the user first switches to the block.
+            Not needed if the desired set is already the first one defined in the block.
+          </td>
+        </tr>
+        <tr>
+          <td><code>$a=c</code></td>
+          <td>Marks the block as <strong>checked</strong> in IFStile's UI. UI-only — has no effect on <code>ifslib</code>.</td>
+        </tr>
+        <tr>
+          <td><code>$a=h</code></td>
+          <td>
+            Marks the block as <strong>hidden</strong>. Both <code>ifslib</code> and IFStile skip hidden blocks;
+            <code>ifslib</code> searches for the first non-hidden block to render.
+            Hidden blocks can still be used as parent blocks.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      When <code>$dim=2</code> no <code>$subspace</code> is needed — the rational and
+      rendering spaces coincide. For higher-dimensional rational forms use
+      <code>$subspace</code> to select the 2D eigenplane where the attractor lives.
+    </p>
+
+    <h2>Mathematical Functions</h2>
+    <p>
+      Available for scalar expressions:
+      <code>sin</code>, <code>cos</code>, <code>tan</code>,
+      <code>asin</code>, <code>acos</code>, <code>atan</code>,
+      <code>exp</code>, <code>log</code>, <code>floor</code>, <code>ceil</code>, <code>arg</code>,
+      <code>if</code> — conditional (three forms):
+    </p>
+    <ul>
+      <li><code>if(cond)</code> → 1 if <code>cond &gt; 0</code>, else 0</li>
+      <li><code>if(cond, val1, val2)</code> → <code>val1</code> if <code>cond &gt; 0</code>, else <code>val2</code></li>
+      <li><code>if(cond1, val1, cond2, val2, default)</code> → multi-branch: first positive condition wins</li>
+    </ul>
+
+    <h2>Array Operations</h2>
+    <table>
+      <thead><tr><th>Syntax</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>a[-1]</code></td><td>Negative index: last element (<code>a[-2]</code> = second-to-last, etc.)</td></tr>
+        <tr><td><code>a()</code></td><td>Array size (number of elements)</td></tr>
+        <tr><td><code>a[start:end:step]</code></td><td>Python-style slicing; step optional (default 1); negative step reverses</td></tr>
+        <tr><td><code>a[]</code></td><td>Flatten one nesting level</td></tr>
+        <tr><td><code>a[idxArr]</code></td><td>Fancy indexing: select multiple elements by index array</td></tr>
+        <tr><td><code>[e0,e1,...](idx)</code></td><td>Lazy indexing: evaluates only element at <code>idx</code>, others are not computed</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Auto-generation syntax</strong> — a single array can contain any number of generator segments interleaved with static elements:</p>
+    <pre><code>[static..., $, termCond, genExpr, static..., $, termCond, genExpr, static...]</code></pre>
+    <ul>
+      <li>Static elements before, between, and after generator segments are appended as-is.</li>
+      <li><code>$</code> — marks start of a generator segment; <code>$</code> is shorthand for <code>$(0)</code> — a reference to the <strong>current array being built</strong></li>
+      <li><code>$()</code> = <code>$(0)()</code> = current length of the array being built (equals current index during generation)</li>
+      <li><code>$[-1]</code> = <code>$(0)[-1]</code> = last element of the current array (i.e. the previously appended element)</li>
+      <li><code>$(1)</code>, <code>$(2)</code>, … — references to enclosing (parent, grandparent, …) arrays; useful when building nested arrays</li>
+      <li><code>termCond</code> — generate while <code>termCond &gt; 0</code>; <code>N-$()</code> generates until total count reaches N</li>
+      <li><code>genExpr</code> — expression for each generated element</li>
+      <li><code>tail...</code> — zero or more static elements appended after generation stops</li>
+    </ul>
+    <p><strong>Examples:</strong></p>
+    <ul>
+      <li>
+        <code>[0, 1, $, 7-$(), $[-1]+$[-2]]</code> → 7 Fibonacci values <code>[0,1,1,2,3,5,8]</code><br/>
+        Stops by count: <code>7-$()</code> becomes 0 once 7 elements have been appended.
+      </li>
+      <li>
+        <code>[1, $, 1000-$[-1], $[-1]*2]</code> → powers of 2 while last element &lt; 1000: <code>[1,2,4,8,...,512]</code><br/>
+        Stops by value: <code>1000-$[-1]</code> goes non-positive once the last element reaches 1000.
+      </li>
+    </ul>
+
+    <h2>Block Functions</h2>
+    <p>Any block (<code>@name</code>) can be used as a reusable function:</p>
+    <pre><code>@funcName
+param1 = defaultVal    # parameter with default value
+param2 = defaultVal
+ret = expr             # return value
+
+@
+result = funcName(arg1, arg2)         # call by position
+result = funcName()                   # call with all defaults
+result = $new(funcName, param2, val)  # named override
+field  = result.param1                # field access on block instance</code></pre>
+    <ul>
+      <li>The <strong>last variable defined</strong> in the block is the return value. Naming it <code>ret</code> is a readable convention — the name has no special meaning.</li>
+      <li>Block inheritance: <code>@child:parent</code> — child overrides parent variables; any block can be a parent.</li>
+      <li><code>@:ParentID</code> — anonymous child block, inherits from parent.</li>
+    </ul>
+
+    <h2>JavaScript Interop</h2>
+    <p>AIFS files can embed ES module JavaScript before the first <code>@@</code> separator:</p>
+    <pre><code>export function funcName(arg) &#123; return arg + 1; &#125;
+export const constArr = [11, 12];
+@@
+
+@
+$init = funcName        # call JS function once at init
+result = funcName(3)    # call JS function from AIFS
+val    = constArr[1]    # access JS constant</code></pre>
+    <ul>
+      <li>JS functions callable from AIFS must be <code>export</code>ed.</li>
+      <li><code>console.log(...)</code> is available inside JS functions.</li>
+      <li><code>$init = jsFunc</code> calls <code>jsFunc</code> once during block initialization; the function can set <code>this.varName = value</code> to inject AIFS variables.</li>
+    </ul>
+
+    <h2>Attractor Equations</h2>
+    <h3>Ordinary IFS</h3>
+    <pre><code>S=(f1|f2|f3)*S    # S is the unique compact attractor of &#123;f1,f2,f3&#125;</code></pre>
+    <p>
+      <strong>The attractor equation is mandatory.</strong>
+      Without it <code>ifslib_init</code> returns 0 and nothing renders.
+    </p>
+
+    <h3>GIFS — Generalized IFS (multiple attractors)</h3>
+    <p>
+      When a self-similar system defines two or more interleaved attractors,
+      each gets its own equation. Attractor variables appear on both sides:
+    </p>
+    <pre><code>A1=g^-1*(h1*A1|h2*A1|h3*A2)
+A2=g^-1*(h4*A1|h5*A2)</code></pre>
+    <p>
+      Here <code>h*A</code> denotes the image of attractor set <code>A</code> under map <code>h</code>.
+      <code>g</code> must be an <strong>expansion</strong> (spectral radius &gt; 1 after projection) to guarantee
+      that the attractor exists; if <code>g</code> is a contraction, existence depends on the GIFS dependency graph.
+      See the <a href="/ifs/robinson-triangles">Robinson Triangles</a> entry for a worked example.
+    </p>
+
+    <h2>Templates (Finder / Search)</h2>
+    <p>
+      Templates describe families of maps for use with the IFStile Finder module.
+      They are not required for rendering with <code>ifslib</code>:
+    </p>
+    <table>
+      <thead><tr><th>Syntax</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>$real(a,b)</code> / <code>$integer(a,b)</code></td><td>Distribution <code>T</code>: uniform on [a, b] (real or integer)</td></tr>
+        <tr><td><code>$number(T)</code></td><td>Distribution <code>T</code> for a scalar — passed as argument to <code>$semigroup</code>, <code>$vector</code>, etc.</td></tr>
+        <tr><td><code>$semigroup([g1,...,gm], T)</code></td><td>Random element of the semigroup generated by g1…gm, with element distribution T</td></tr>
+        <tr><td><code>$vector(L, T)</code></td><td>Random vector of length L with component distribution T</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <code>T</code> can be a <code>$real(a,b)</code> or <code>$integer(a,b)</code> uniform distribution,
+      or a number (log-variance of a normal distribution on ℝ, i.e. σ = e^(T/2)),
+      or omitted (IFStile uses its Finder “log variance” search parameter as default).
+    </p>
+
+    <h2>Complete Examples</h2>
+
+    <h3>Sierpiński Triangle — simple 2D IFS</h3>
+    <pre><code>@
+$dim=2
+f1=[0.5,0,0,0.5]
+f2=[0.5,0]*[0.5,0,0,0.5]
+f3=[0.25,0.5]*[0.5,0,0,0.5]
+S=(f1|f2|f3)*S</code></pre>
+    <p>See: <a href="/ifs/sierpinski-triangle">Sierpiński Triangle</a></p>
+
+    <h3>Rauzy Fractal — 3D rational form with companion matrix</h3>
+    <pre><code>@
+$dim=3
+$subspace=[g,0]
+g=$companion([-1,1,1])   # companion for x³+x²+x-1 (tribonacci)
+A=(g^-1|g^-2*[0,1,0]|g^-3*[0,1,1])*A</code></pre>
+    <p>See: <a href="/ifs/rauzy-fractal">Rauzy Fractal</a></p>
+
+    <h3>Robinson Triangles — GIFS with 4D rational form</h3>
+    <pre><code>@
+$dim=4
+$subspace=[s,0]
+s=$companion([1,-1,1,-1])   # 10th cyclotomic polynomial
+r=$exchange()
+g=s-s^4
+h1=s^4*[-1,0,-1,0]
+h2=s^2*r*[-1,0,0,0]
+h3=s^9
+h4=s^6*r*[0,-1,0,-1]
+h5=s^3*[1,-1,0,-1]
+A1=g^-1*(h1*A1|h2*A1|h3*A2)
+A2=g^-1*(h4*A1|h5*A2)</code></pre>
+    <p>See: <a href="/ifs/robinson-triangles">Robinson Triangles</a></p>
+
+    <h2>Reference</h2>
+    <ul>
+      <li>
+        Mekhontsev, D. (2019).
+        <a href="https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479" target="_blank" rel="noopener">
+          <em>An algebraic framework for finding and analyzing self-affine tiles and fractals</em>
+        </a>.
+        Doctoral thesis, Ernst-Moritz-Arndt-Universität Greifswald. Appendix E contains the
+        full language specification.
+      </li>
+      <li>
+        <a href="https://ifstile.com" target="_blank" rel="noopener">IFStile</a> —
+        the software package that implements the AIFS language.
+      </li>
+    </ul>
+  </main>
+</BaseLayout>

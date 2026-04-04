@@ -1,0 +1,61 @@
+---
+name: "Lévy C Curve"
+description: "The Lévy C curve is a self-similar fractal defined by two affine maps that each scale by 1/√2 and rotate by ±45°."
+cardDescription: "Two maps, each a 45° rotation scaled by 1/√2. The attractor tiles the plane and resembles the letter C at each scale."
+dimension: "2"
+transforms: 2
+tags: [plane, curve, self-similar, tiling]
+aifs: |
+  @
+  $dim=2
+  s=$companion([1,0])
+  g=s+1
+  A=(s*g^-1|g^-1*[0,1])*A
+references:
+  - text: "Lévy, P. (1938). Les courbes planes ou gauches et les surfaces composées de parties semblables au tout. J. École Polytechnique."
+  - text: "Lévy C curve — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/L%C3%A9vy_C_curve"
+  - text: "Riddle, L. Classic IFS — Lévy Dragon. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/levy/levy.htm"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Quadratic Pletals (Gaussian integer Z[i] family)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
+---
+
+## Overview
+
+The **Lévy C curve** (also called the Lévy dragon) was studied by French mathematician Paul Lévy
+in 1938. It is a self-similar curve with the remarkable property that multiple copies of itself
+tile the plane without overlap. Its name comes from its resemblance to the letter *C* at every
+level of magnification.
+
+## Definition
+
+The IFS lives in $\mathbb{Z}[i]$ (the Gaussian integers). The companion matrix
+$s$ (defined as `$companion([1,0])` in AIFS) satisfies $s^2+1=0$, so $s \leftrightarrow i$.
+The expansion $g = s+1 \leftrightarrow 1+i$ has $|g|=\sqrt{2}$, so $g^{-1}$ contracts by $\frac{1}{\sqrt{2}}$.
+
+| Map | AIFS | Complex form | Effect |
+|-----|------|-------------|--------|
+| $f_1$ | `s*g^-1` | $\frac{i}{1+i} = \frac{1+i}{2}$ | rotate $+45°$, scale $\tfrac{1}{\sqrt{2}}$, no translation |
+| $f_2$ | `g^-1*[0,1]` | $\frac{1-i}{2}\,\mathbf{x} + (\tfrac{1}{2},\tfrac{1}{2})$ | rotate $-45°$, scale $\tfrac{1}{\sqrt{2}}$, translate $(\tfrac{1}{2},\tfrac{1}{2})$ |
+
+The translation $(\tfrac{1}{2},\tfrac{1}{2})$ arises as $g^{-1}\cdot[0,1] = \frac{1}{2}(0+1,\,-0+1) = (\tfrac{1}{2},\tfrac{1}{2})$ —
+an integer input vector producing an exact rational output with no floating-point approximation.
+
+## Properties
+
+- **Fractal dimension:** $\frac{\log 2}{\log \sqrt{2}} = 2$ (the attractor has positive area)
+- **Tiling:** Four copies of the curve tile a square
+- **Number of transforms:** 2
+- **Self-similarity:** Each half of the curve is a scaled rotated copy of the whole
+
+## Related
+
+All four of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
+
+| IFS | Second map rotation | Translation |
+|-----|--------------------|--------------|
+| Lévy C Curve | $-45°$ (`g^-1`) | $(0,0)$ and $(\tfrac{1}{2},\tfrac{1}{2})$ |
+| [Pythagoras Tree](/ifs/pythagoras-tree) | $-45°$ (`g^-1`) | $(0,1)$ and $(\tfrac{1}{2},\tfrac{3}{2})$ |
+| [Heighway Dragon](/ifs/heighway-dragon) | $+135°$ (`s^2*g^-1`) | $(0,0)$ and $(1,0)$ |
+| [Dragon Curve](/ifs/dragon-curve) | $-135°$ (`s^3*g^-1`) | $(0,0)$ and $(1,0)$ |

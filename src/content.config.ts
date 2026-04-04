@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const ifs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/ifs' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/ifs' }),
   schema: z.object({
     name: z.string(),
     description: z.string(),

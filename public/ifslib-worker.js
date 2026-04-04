@@ -1,24 +1,30 @@
 'use strict';
 
-let wasmExports = null;
+// ifslib_init does not reset WASM global state between calls, so each render
+// request requires a fresh instance. We cache the compiled module so that
+// re-instantiation is cheap (no re-compilation overhead).
+let wasmModule = null;
 
-async function ensureWasm(version) {
-  if (wasmExports) return;
-  const resp = await fetch('/ifslib.wasm?v=' + version);
-  if (!resp.ok) throw new Error('Failed to load ifslib.wasm: ' + resp.status);
-  const buf = await resp.arrayBuffer();
-  const { instance } = await WebAssembly.instantiate(buf, {});
+async function getWasmInstance(version) {
+  if (!wasmModule) {
+    const resp = await fetch('/ifslib.wasm?v=' + version);
+    if (!resp.ok) throw new Error('Failed to load ifslib.wasm: ' + resp.status);
+    const buf = await resp.arrayBuffer();
+    wasmModule = await WebAssembly.compile(buf);
+  }
+  // Fresh instance every time — guarantees clean renderer state.
+  const instance = await WebAssembly.instantiate(wasmModule, {});
   if (typeof instance.exports._initialize === 'function') {
     instance.exports._initialize();
   }
-  wasmExports = instance.exports;
+  return instance.exports;
 }
 
-function writeCString(str) {
+function writeCString(wasm, str) {
   const bytes = new TextEncoder().encode(str + '\0');
-  const ptr = wasmExports.malloc(bytes.length);
+  const ptr = wasm.malloc(bytes.length);
   if (!ptr) throw new Error('malloc returned null');
-  new Uint8Array(wasmExports.memory.buffer).set(bytes, ptr);
+  new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
   return ptr;
 }
 
@@ -48,11 +54,11 @@ self.onmessage = function (e) {
 };
 
 async function handleRequest({ id, aifs, width, height, version }) {
-  await ensureWasm(version);
+  const wasm = await getWasmInstance(version);
 
-  const ptr = writeCString(aifs);
-  const ok = wasmExports.ifslib_init(ptr);
-  wasmExports.free(ptr);
+  const ptr = writeCString(wasm, aifs);
+  const ok = wasm.ifslib_init(ptr);
+  wasm.free(ptr);
 
   if (!ok) {
     self.postMessage({ id, type: 'error', message: 'ifslib_init failed' });
@@ -64,7 +70,7 @@ async function handleRequest({ id, aifs, width, height, version }) {
     const rw = Math.max(1, Math.round(width * s / maxDim));
     const rh = Math.max(1, Math.round(height * s / maxDim));
 
-    const pixPtr = wasmExports.ifslib_render(rw, rh, 1.0, 1.0);
+    const pixPtr = wasm.ifslib_render(rw, rh, 1.0, 1.0);
     if (!pixPtr) {
       self.postMessage({ id, type: 'error', message: 'ifslib_render failed at size ' + s });
       return;
@@ -72,7 +78,7 @@ async function handleRequest({ id, aifs, width, height, version }) {
 
     // slice() copies the data before the next WASM call can overwrite it
     const pixels = new Uint8ClampedArray(
-      wasmExports.memory.buffer.slice(pixPtr, pixPtr + rw * rh * 4)
+      wasm.memory.buffer.slice(pixPtr, pixPtr + rw * rh * 4)
     );
     // Transfer the buffer to avoid copying on the message boundary
     self.postMessage({ id, type: 'frame', pixels, width: rw, height: rh }, [pixels.buffer]);

@@ -1,0 +1,88 @@
+---
+name: "Gosper Island"
+description: "The Gosper Island is a self-similar 2D fractal tile associated with the polynomial x²−5x+7. Seven affine maps each contracting by 1/√7 produce a compact set that tiles the plane."
+cardDescription: "Seven self-similar maps with hexagonal algebra. A solid 2D tile related to x²−5x+7."
+dimension: "2"
+transforms: 7
+tags: [plane, self-similar, tiling, algebraic]
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=[0,-1,1,1]
+  g=[3,1,-1,2]
+  h0=s^2*[1,0]
+  h1=s^5*[0,-1]
+  h2=s^2*[-1,0]
+  h3=1
+  h4=[0,-1]
+  h5=s^2*[0,-1]
+  h6=s*[1,0]
+  A=g^-1*(h0|h1|h2|h3|h4|h5|h6)*A
+references:
+  - text: "Gosper, R. W. (1970s). Unpublished correspondence with Martin Gardner."
+  - text: "Mandelbrot, B. B. (1982). The Fractal Geometry of Nature. W. H. Freeman."
+  - text: "Gosper island — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Gosper_island"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Flowsnake / Gosper Curve (heptahextal, cis and trans variants)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Quadratic/Hextals/Heptahextals/cyclic.php"
+---
+
+## Overview
+
+The **Gosper Island** (also called the **flowsnake** or **Gosper hexagon**) is a self-similar fractal named after computer scientist Bill Gosper, who discovered it in the early 1970s. It is the attractor of a system of **7 affine maps**, each contracting the plane by a factor of $\frac{1}{\sqrt{7}}$.
+
+The island is a **rep-7 tile**: seven congruent copies of it fit together perfectly to form a scaled copy of itself. Because of this, Gosper Islands tile the entire plane.
+
+## Algebraic Structure
+
+The construction uses two integer matrices:
+
+$$
+s = \begin{pmatrix}0 & -1 \\ 1 & 1\end{pmatrix}, \qquad
+g = \begin{pmatrix}3 & 1 \\ -1 & 2\end{pmatrix}.
+$$
+
+The matrix $s$ is the companion matrix of $x^2 - x + 1$, whose roots are the primitive 6th roots of unity $e^{\pm i\pi/3}$. Since $|\det(s)| = 1$, the matrix $s$ is an isometry — it represents a **60° rotation** in the plane. In particular, $s^6 = I$ and $s^3 = -I$.
+
+The matrix $g$ has characteristic polynomial $x^2 - 5x + 7$, with complex roots
+
+$$
+\alpha = \frac{5 + i\sqrt{3}}{2}, \qquad |\alpha| = \sqrt{7}.
+$$
+
+The map $g^{-1}$ contracts distances by $\frac{1}{\sqrt{7}}$, and $\det(g) = 7$ confirms that all 7 maps together tile exactly once: $7 \cdot \bigl(\tfrac{1}{\sqrt{7}}\bigr)^2 = 1$.
+
+## IFS Definition
+
+The Gosper Island $A$ is the unique non-empty compact set satisfying:
+
+$$
+A = g^{-1}\!\bigl(h_0(A) \cup h_1(A) \cup \cdots \cup h_6(A)\bigr),
+$$
+
+where the seven maps are (with $T_v(x) = x + v$):
+
+$$
+h_0 = s^2 \circ T_{(1,\,0)}, \quad
+h_1 = s^5 \circ T_{(0,\,-1)}, \quad
+h_2 = s^2 \circ T_{(-1,\,0)},
+$$
+
+$$
+h_3 = \mathrm{id}, \quad
+h_4 = T_{(0,\,-1)}, \quad
+h_5 = s^2 \circ T_{(0,\,-1)}, \quad
+h_6 = s \circ T_{(1,\,0)}.
+$$
+
+The powers of $s$ describe the rotational structure: $s^0 = I$ (0°), $s^1$ (60°), $s^2$ (120°), $s^3 = -I$ (180°), $s^4$ (240°), $s^5$ (300°). Together, the seven maps place copies of the island in six rotated orientations symmetric around a central unrotated copy.
+
+## Properties
+
+- **Hausdorff dimension:** exactly $2$, since $7 \cdot (1/\sqrt{7})^2 = 1$ (the island has positive area)
+- **Lebesgue measure:** positive — the Gosper Island is a **solid** 2D region, unlike most fractals
+- **Tiling property:** it is a rep-7 tile; seven copies tile a $\sqrt{7}$-scaled copy
+- **Boundary:** the boundary of the Gosper Island is the **Gosper curve** (flowsnake), a fractal curve of Hausdorff dimension $\log(4) / \log(2) = 2$... actually more precisely it is a curve that replaces the boundary of a hexagon self-similarly
+- **Polynomial:** $x^2 - 5x + 7$ is irreducible over $\mathbb{Q}$; its roots live in $\mathbb{Z}[e^{i\pi/3}]$, the Eisenstein integers
+- **Moran equation:** $7 \cdot r^2 = 1$ where $r = 1/\sqrt{7}$ confirms $\dim_H = 2$

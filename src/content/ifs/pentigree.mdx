@@ -1,0 +1,95 @@
+---
+name: "McWorter's Pentigree"
+description: "A self-similar curve with pentagonal symmetry discovered by William McWorter, built from six maps with rotations that are multiples of 36°."
+cardDescription: "Six-map IFS with 5-fold symmetry over the cyclotomic field Q(ζ₁₀), with contraction ratio 1/φ² where φ is the golden ratio."
+dimension: "log(6)/log(φ²) ≈ 1.862"
+transforms: 6
+tags: [plane, curve, self-similar, pentagonal, algebraic, classic]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  s=$companion([1,-1,1,-1])
+  g=2+s^2-s^3
+  A=g^-1*(s|s^3*[1,-1,1,-1]|s^9*[-1,0,0,1]|s^7*[-1,0,-1,1]|s^9*[0,0,1,0]|s*[2,-1,1,-1])*A
+references:
+  - text: "McWorter Jr., W. A. & Tazelaar, J. M. (1987). Creating Fractals. Byte, August 1987, 123–132."
+    url: "https://archive.org/details/byte-magazine-1987-08/page/n137/mode/2up"
+  - text: "Edgar, G. A. (1990). Measure, Topology, and Fractal Geometry. Springer, p. 197."
+  - text: "Riddle, L. Classic IFS — McWorter's Pentigree. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/pentigre/pentigre2.htm"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+## Overview
+
+**McWorter's Pentigree** is a self-similar fractal curve with **5-fold** (pentagonal) symmetry,
+discovered accidentally by William McWorter during his searches for "dragon"-type fractals. It was
+first published in *Byte* magazine in 1987 and later analysed in detail by Gerald Edgar.
+
+The name *pentigree* is a portmanteau of *pentagon* and *filigree*. Five copies of the pentigree
+fit together to form a set with exact 5-fold rotational symmetry.
+
+## Construction
+
+Starting from the unit segment $[0,1]$, the basic motif replaces each segment with six shorter
+segments of length $r = \frac{3-\sqrt{5}}{2} = \frac{1}{\varphi^2} \approx 0.382$
+where $\varphi = \frac{1+\sqrt{5}}{2}$ is the golden ratio. The six segments rotate by
+$+36°$, $+108°$, $-36°$, $-108°$, $-36°$, $+36°$ successively, with the final endpoint
+landing exactly at $(1,0)$.
+
+The contraction ratio $r = 1/\varphi^2$ is determined by the constraint
+$$r + 2r\cos 36° = 1 \implies r = \frac{1}{1 + 2\cos 36°} = \frac{1}{1+\varphi} = \frac{1}{\varphi^2}$$
+
+## Algebraic Structure
+
+The IFS lives in $\mathbb{Q}(\zeta_{10})$ where $\zeta_{10} = e^{i\pi/5}$ is a primitive 10th root
+of unity. The companion matrix $s$ (defined as `$companion([1,-1,1,-1])` in AIFS) is the companion
+for $\Phi_{10}(x) = x^4 - x^3 + x^2 - x + 1$; in the projected plane $s \leftrightarrow e^{i\pi/5}$
+(rotation by 36°).
+
+The expansion matrix can be simplified using $s^5 = -1$ (a consequence of $\Phi_{10}(s) = 0$).
+Starting from $g = s^{-1}(s^2+s+1)$ and substituting $s^{-1} = -s^4$, then reducing $s^4 = s^3-s^2+s-1$:
+
+$$g = 2 + s^2 - s^3$$
+
+At the eigenvalue $\zeta_{10} = e^{i\pi/5}$, this projects to $2 + e^{2i\pi/5} - e^{3i\pi/5} = 2 + 2\cos(72°) = \varphi^2$
+(purely real, using $\cos(108°) = -\cos(72°)$ and $\sin(108°) = \sin(72°)$).
+Thus $g^{-1}$ is a **pure contraction** by $r = 1/\varphi^2$ with no rotation, and the rotation of each
+map $g^{-1} \circ s^k$ is exactly $36° \cdot k$.
+
+The six maps factor as $A = g^{-1}(h_1 \cup \cdots \cup h_6)(A)$ with:
+
+| Map | Rotation | AIFS | 4D translation $t_k$ | 2D translation |
+|-----|---------|------|---------------------|----------------|
+| $h_1$ | $+36°$ | `s` | $[0,0,0,0]$ | $(0,0)$ |
+| $h_2$ | $+108°$ | `s^3*[1,-1,1,-1]` | $[1,-1,1,-1]$ | $(r\cos36°,\, r\sin36°)$ |
+| $h_3$ | $-36°$ | `s^9*[-1,0,0,1]` | $[-1,0,0,1]$ | $(1-\cos36°,\, \sin36°)$ |
+| $h_4$ | $-108°$ | `s^7*[-1,0,-1,1]` | $[-1,0,-1,1]$ | $(\frac{1}{2},\, r\sin72°)$ |
+| $h_5$ | $-36°$ | `s^9*[0,0,1,0]` | $[0,0,1,0]$ | $(r,\, 0)$ |
+| $h_6$ | $+36°$ | `s*[2,-1,1,-1]` | $[2,-1,1,-1]$ | $(1-r\cos36°,\, -r\sin36°)$ |
+
+All 4D translation vectors are in $\mathbb{Z}^4$ — no floating-point approximation.
+The key identity $s^5 = -1$ (since $\zeta_{10}^5 = -1$) gives $s^9 = s^{-1}$ and
+$s^7 = s^{-3}$, explaining the short cycle of rotations.
+
+## Hausdorff Dimension
+
+The similarity dimension satisfies $6 \cdot r^d = 1$:
+
+$$d = \frac{\log 6}{\log(1/r)} = \frac{\log 6}{\log \varphi^2} = \frac{\log 6}{2\log\varphi} \approx 1.862$$
+
+## Five-fold Symmetry
+
+Five rotated copies of the pentigree, each rotated by $72° \cdot k$ ($k=0,1,2,3,4$), fit together
+without overlap to form a set with exact 5-fold rotational symmetry, sometimes called the
+"second form of McWorter's pentigree" (Edgar, 1990). This packing mirrors how five
+equilateral triangles meet at a vertex of a regular pentagon.
+
+## Related
+
+The [McWorter's Pentadendrite](/ifs/pentadendrite) lives in the same field $\mathbb{Q}(\zeta_{10})$
+with the same companion matrix $s$, but uses a different expansion $g = 3 - s + s^2 - s^3$,
+giving a different contraction ratio and a dendrite (tree-like) rather than curve-like attractor.
+Both are in the same algebraic family of pentagonal IFS discovered by McWorter.

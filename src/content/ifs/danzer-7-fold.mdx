@@ -1,0 +1,205 @@
+---
+name: "Danzer's 7-Fold Tiling"
+description: "An aperiodic substitution tiling with 7-fold rotational symmetry discovered by Ludwig Danzer, using three triangular prototiles with heptagonal angles."
+cardDescription: "Three triangular prototiles with 7-fold symmetry. Two variants of the substitution rule. Reference: Nischke & Danzer (1996)."
+dimension: "2"
+transforms: 14
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=6
+  $subspace=[s,0]
+  g=1+s^2-s^5
+  s=$companion([1,-1,1,-1,1,-1])
+  r=$exchange()
+  h0=1*[0,0,0,0,0,0]
+  h1=1*[1,0,1,0,0,-1]
+  h2=r*s^4*[1,0,0,0,0,0]
+  h3=s^6*[-1,0,-2,0,-1,1]
+  h4=s^10*[-1,0,0,1,0,1]
+  h5=1*[1,0,0,0,0,0]
+  h6=s^5*[0,-1,-1,-1,0,0]
+  h7=s^9*[0,0,-1,0,0,1]
+  h8=s^13*[0,1,0,0,0,1]
+  h9=s^6*[0,-1,-1,0,0,0]
+  h10=s*[1,-1,1,0,1,-1]
+  h11=r*s^4*[0,0,0,0,0,0]
+  h12=1*[1,0,0,0,0,0]
+  h13=s^4*[0,-1,0,-1,0,-1]
+  $root=A0
+  A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+  A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+  A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2
+references:
+  - text: "Danzer's 7-fold — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/danzers-7-fold/"
+  - text: "Nischke, K.-P. & Danzer, L. (1996). A construction of inflation rules based on n-fold symmetry. Discrete and Computational Geometry, 15(2), 221–236."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsV2A0 = `@
+$dim=6
+$subspace=[s,0]
+g=1+s^2-s^5
+s=$companion([1,-1,1,-1,1,-1])
+r=$exchange()
+h0=1*[0,0,0,0,0,0]
+h1=1*[1,0,1,0,0,-1]
+h2=r*s^4*[1,0,0,0,0,0]
+h3=s^6*[-1,0,-2,0,-1,1]
+h4=s^10*[-1,0,0,1,0,1]
+h5=1*[1,0,0,0,0,0]
+h6=s^5*[0,-1,-1,-1,0,0]
+h7=s^9*[0,0,-1,0,0,1]
+h8=s^13*[0,1,0,0,0,1]
+h9=s^6*[0,-1,-1,0,0,0]
+h10=s*[1,-1,1,0,1,-1]
+h11=r*s^4*[0,0,0,0,0,0]
+h12=1*[1,0,0,0,0,0]
+h13=s^4*[0,-1,0,-1,0,-1]
+$root=A0
+A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
+
+export const aifsV2A1 = `@
+$dim=6
+$subspace=[s,0]
+g=1+s^2-s^5
+s=$companion([1,-1,1,-1,1,-1])
+r=$exchange()
+h0=1*[0,0,0,0,0,0]
+h1=1*[1,0,1,0,0,-1]
+h2=r*s^4*[1,0,0,0,0,0]
+h3=s^6*[-1,0,-2,0,-1,1]
+h4=s^10*[-1,0,0,1,0,1]
+h5=1*[1,0,0,0,0,0]
+h6=s^5*[0,-1,-1,-1,0,0]
+h7=s^9*[0,0,-1,0,0,1]
+h8=s^13*[0,1,0,0,0,1]
+h9=s^6*[0,-1,-1,0,0,0]
+h10=s*[1,-1,1,0,1,-1]
+h11=r*s^4*[0,0,0,0,0,0]
+h12=1*[1,0,0,0,0,0]
+h13=s^4*[0,-1,0,-1,0,-1]
+$root=A1
+A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
+
+export const aifsV2A2 = `@
+$dim=6
+$subspace=[s,0]
+g=1+s^2-s^5
+s=$companion([1,-1,1,-1,1,-1])
+r=$exchange()
+h0=1*[0,0,0,0,0,0]
+h1=1*[1,0,1,0,0,-1]
+h2=r*s^4*[1,0,0,0,0,0]
+h3=s^6*[-1,0,-2,0,-1,1]
+h4=s^10*[-1,0,0,1,0,1]
+h5=1*[1,0,0,0,0,0]
+h6=s^5*[0,-1,-1,-1,0,0]
+h7=s^9*[0,0,-1,0,0,1]
+h8=s^13*[0,1,0,0,0,1]
+h9=s^6*[0,-1,-1,0,0,0]
+h10=s*[1,-1,1,0,1,-1]
+h11=r*s^4*[0,0,0,0,0,0]
+h12=1*[1,0,0,0,0,0]
+h13=s^4*[0,-1,0,-1,0,-1]
+$root=A2
+A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
+
+export const aifsV1A0 = `@
+$dim=6
+$subspace=[s,0]
+g=1+s^2-s^5
+s=$companion([1,-1,1,-1,1,-1])
+r=$exchange()
+h0=s^8*[-1,0,-1,1,-1,1]
+h1=1*[1,0,1,0,0,-1]
+h2=1*[1,0,0,0,0,0]
+h3=s^6*[-1,0,-2,0,-1,1]
+h4=s^4*[0,-1,0,-1,0,-1]
+h5=1*[1,0,0,0,0,0]
+h6=s^5*[0,-1,-1,-1,0,0]
+h7=s^9*[0,0,-1,0,0,1]
+h8=s^13*[0,1,0,0,0,1]
+h9=s^6*[0,-1,-1,0,0,0]
+h10=s*[1,-1,1,0,1,-1]
+h11=s^8*[-1,0,-1,1,-1,1]
+h12=1*[1,0,0,0,0,0]
+h13=s^4*[0,-1,0,-1,0,-1]
+$root=A0
+A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
+
+## Overview
+
+**Danzer's 7-fold tiling** is an aperiodic substitution tiling with **7-fold** rotational
+symmetry, discovered by Ludwig Danzer. It uses **three triangular prototile types** with
+angles that are multiples of $\pi/7$:
+
+- $A_0$: triangle with angles $\pi/7$, $2\pi/7$, $4\pi/7$
+- $A_1$: triangle with angles $2\pi/7$, $2\pi/7$, $3\pi/7$  
+- $A_2$: triangle with angles $\pi/7$, $3\pi/7$, $3\pi/7$
+
+The four edge lengths are $\sin(\pi/7)$, $\sin(2\pi/7)$, $\sin(3\pi/7)$, and
+$\sin(2\pi/7)+\sin(3\pi/7)$. Simple local matching rules exist for the tiling.
+
+## Algebraic Structure
+
+The 7-fold structure lives in the 14th cyclotomic field $\mathbb{Q}(e^{2\pi i/7})$.
+The companion $s$ (AIFS: `$companion([1,-1,1,-1,1,-1])`) satisfies
+$x^6 - x^5 + x^4 - x^3 + x^2 - x + 1 = (x^7+1)/(x+1) = 0$,
+so $s = e^{2\pi i/7}$ (primitive 7th root of unity). The $\dim=6$ rational space
+reflects the degree-6 cyclotomic polynomial.
+
+The expansion is $g = 1+s^2-s^5$, which on the eigenplane of $e^{2\pi i/7}$ gives the 7-fold inflation factor.
+
+The GIFS equations:
+
+$$
+A_0 = g^{-1}(h_0 \cup h_1)(A_0) \cup g^{-1}(h_2 \cup h_3)(A_1) \cup g^{-1} h_4(A_2)
+$$
+
+$$
+A_1 = g^{-1}(h_5 \cup h_6)(A_0) \cup g^{-1}(h_7 \cup h_8 \cup h_9)(A_1) \cup g^{-1} h_{10}(A_2)
+$$
+
+$$
+A_2 = g^{-1} h_{11}(A_0) \cup g^{-1} h_{12}(A_1) \cup g^{-1} h_{13}(A_2)
+$$
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="danzer-v2-A0" aifs={aifsV2A0} width={310} height={310} label="Danzer tile A0 (variant 2)" />
+    <figcaption>Variant 2 — tile $A_0$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="danzer-v2-A1" aifs={aifsV2A1} width={310} height={310} label="Danzer tile A1 (variant 2)" />
+    <figcaption>Variant 2 — tile $A_1$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="danzer-v2-A2" aifs={aifsV2A2} width={310} height={310} label="Danzer tile A2 (variant 2)" />
+    <figcaption>Variant 2 — tile $A_2$</figcaption>
+  </figure>
+</div>
+
+## Variant 1
+
+A second variant uses slightly different maps $h_0, h_2, h_4, h_{11}$ while keeping
+the same GIFS dependency structure.
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="danzer-v1-A0" aifs={aifsV1A0} width={380} height={380} label="Danzer tile A0 (variant 1)" />
+    <figcaption>Variant 1 — tile $A_0$</figcaption>
+  </figure>
+</div>

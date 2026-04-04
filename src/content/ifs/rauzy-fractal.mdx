@@ -1,0 +1,71 @@
+---
+name: "Rauzy Fractal"
+description: "A self-similar plane tile associated with the tribonacci constant, with a fractal boundary."
+cardDescription: "Tribonacci-based tile: 3 contractions in a 3D rational space projected to the plane."
+dimension: "2 (tile with fractal boundary)"
+transforms: 3
+tags: [plane, self-similar, algebraic, aperiodic-tiling, classic]
+aifs: |
+  @
+  $dim=3
+  $subspace=[g,0]
+  g=$companion([-1,1,1])
+  A=(g^-1|g^-2*[0,1,0]|g^-3*[0,1,1])*A
+references:
+  - text: "Rauzy, G. (1982). Nombres algébriques et substitutions. Bulletin de la Société Mathématique de France, 110, 147–178."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals. §9.5."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+  - text: "Rauzy fractal — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Rauzy_fractal"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Rauzy Tiles."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Rauzy.php"
+---
+
+## Overview
+
+The **Rauzy fractal** (also called the *Rauzy gasket* or *tribonacci fractal*) was introduced
+by Gérard Rauzy in 1982 in connection with the tribonacci substitution
+
+$$\sigma: 1 \mapsto 12,\quad 2 \mapsto 13,\quad 3 \mapsto 1.$$
+
+It is a compact subset of $\mathbb{R}^2$ with non-empty interior that tiles the plane
+by integer translates. Its boundary is a fractal curve with Hausdorff dimension between 1 and 2.
+
+## Tribonacci Constant
+
+The **tribonacci constant** $\beta \approx 1.3247$ is the real root of
+
+$$\beta^3 = \beta^2 + \beta + 1,$$
+
+i.e. the dominant eigenvalue of the substitution matrix. The companion matrix for the
+polynomial $x^3 + x^2 + x - 1$ (the `$companion([-1,1,1])` constructor in AIFS) encodes this
+algebraic structure in a $3 \times 3$ integer matrix.
+
+## Rational Form
+
+The Rauzy fractal is the attractor of three affine maps in $\mathbb{Q}^3$:
+
+$$g^3 A = g^2 h_1(A) \cup g\, h_2(A) \cup h_3(A)$$
+
+where
+$$h_1(\mathbf{x}) = \mathbf{x},\quad h_2(\mathbf{x}) = \mathbf{x}+[0,1,0],\quad h_3(\mathbf{x}) = \mathbf{x}+[0,1,1],$$
+
+and $g$ is the companion matrix for $x^3+x^2+x-1$. Equivalently:
+
+$$A = (g^{-1} \,|\, g^{-2}*[0,1,0] \,|\, g^{-3}*[0,1,1]) * A$$
+
+The rendering plane is the 2D eigenspace of $g$ corresponding to its complex conjugate
+pair of eigenvalues $\lambda, \bar\lambda$ with $|\lambda| = 1/\sqrt{\beta} \cdot \beta \approx 1.356$.
+The directive `$subspace=[g,0]` selects this eigenspace (index 0 in the sorted eigenvalue list).
+
+## Contraction Factors
+
+On the projected 2D plane the three maps contract by factors
+$|\lambda|^{-1} \approx 0.738$, $|\lambda|^{-2} \approx 0.545$, and $|\lambda|^{-3} \approx 0.402$.
+
+## Properties
+
+- **Dimension**: 2 (positive area; the Rauzy fractal is a 2D tile)
+- **Tiling**: tiles $\mathbb{R}^2$ by translates of the integer lattice $\mathbb{Z}^2$ projected to the plane
+- **Boundary dimension**: between 1 and 2 (fractal boundary)
+- **Symmetry**: 3-fold symmetry related to the three letters of the tribonacci alphabet

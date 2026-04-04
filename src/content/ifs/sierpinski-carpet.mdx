@@ -1,0 +1,68 @@
+---
+name: "Sierpiński Carpet"
+description: "The Sierpiński Carpet is a plane fractal defined by subdividing a square into 9 equal parts and recursively removing the central square."
+cardDescription: "Eight affine maps tiling a square minus its centre. A 2D analogue of the Cantor set and Sierpiński triangle."
+dimension: "≈ 1.893"
+transforms: 8
+tags: [plane, self-similar, classic]
+aifs: |
+  @
+  $dim=2
+  g=3
+  A=g^-1*([0,0]|[1,0]|[2,0]|[0,1]|[2,1]|[0,2]|[1,2]|[2,2])*A
+references:
+  - text: "Sierpiński, W. (1916). Sur une courbe cantorienne qui contient une image biunivoque et continue de toute courbe donnée. C. R. Acad. Sci. Paris."
+  - text: "Sierpiński carpet — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Sierpi%C5%84ski_carpet"
+  - text: "Riddle, L. Classic IFS — Sierpiński Carpet. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/carpet/carpet.htm"
+---
+
+## Overview
+
+The **Sierpiński Carpet** is a self-similar plane fractal first described by Polish mathematician Wacław Sierpiński in 1916. It belongs to the same family as the Cantor set (1D) and the Menger sponge (3D): all three are defined by the same recursive removal principle applied to progressively higher-dimensional cubes.
+
+The carpet is constructed by repeatedly subdividing a square into a 3×3 grid of nine equal sub-squares and removing the central one, then applying the same rule to each of the eight remaining sub-squares. Despite having zero area, it is a surprisingly rich object: it is simultaneously a fractal, a topological curve, and a universal compact metric space.
+
+## History
+
+Sierpiński introduced the carpet in the 1916 note *Sur une courbe cantorienne qui contient une image biunivoque et continue de toute courbe donnée* ("On a Cantorian curve that contains a bijective and continuous image of every given curve"). The title itself states the carpet's key property: it is a **universal plane curve**. This means every compact, locally connected, one-dimensional metric space embeds homeomorphically into the Sierpiński Carpet — a remarkable topological result proved by Sierpiński in the same paper.
+
+The carpet is also the defining example used by Karl Menger in his 1926 work on topological dimension theory.
+
+## Construction
+
+At each iteration, divide the current square into a 3×3 grid and delete the centre cell.
+After $n$ steps, $8^n$ sub-squares of side length $3^{-n}$ remain.
+
+The attractor is the limit $S = \lim_{n\to\infty} S_n$ and is defined exactly by the eight IFS maps.
+
+## Definition
+
+In the algebraic form, the expansion $g = 3$ acts on integer vectors in $\mathbb{Z}^2$.
+The eight translations are all integer points of the $3\times 3$ grid except the centre $[1,1]$:
+
+$$A = g^{-1}\bigl([0,0]\mid[1,0]\mid[2,0]\mid[0,1]\mid[2,1]\mid[0,2]\mid[1,2]\mid[2,2]\bigr)(A)$$
+
+Each term $g^{-1}(\mathbf{x}+\mathbf{t})$ maps the attractor to a $\frac{1}{3}$-scaled copy
+translated to position $\mathbf{t}/3$ — exactly the eight non-central cells of the $3\times 3$ grid.
+All coordinates are exact integers; no floating-point approximation is needed.
+
+## Properties
+
+- **Hausdorff dimension:** $\dfrac{\log 8}{\log 3} \approx 1.893$, derived from the Moran equation $8 \cdot (1/3)^d = 1$
+- **Lebesgue measure:** exactly $0$ — at step $n$ the remaining area is $(8/9)^n \to 0$
+- **Topological dimension:** $1$ — despite living in the plane, the carpet contains no open 2D regions; it is a fractal "curve"
+- **Universal curve:** every compact, locally connected, one-dimensional metric space is homeomorphic to a subset of the Sierpiński Carpet (Sierpiński 1916)
+- **Connectivity:** the carpet is connected and locally connected; the complement in the unit square consists of countably many open squares
+- **Number of transforms:** 8, all with contraction ratio $\frac{1}{3}$, all axis-aligned (no rotation or reflection)
+
+## Related Fractals
+
+| Dimension | Fractal | Construction | Hausdorff dim |
+|---|---|---|---|
+| 1D | Cantor set | Remove middle third of intervals | $\log 2 / \log 3 \approx 0.631$ |
+| 2D | Sierpiński Carpet | Remove centre of 3×3 grid | $\log 8 / \log 3 \approx 1.893$ |
+| 3D | Menger Sponge | Remove centre of 3×3×3 grid | $\log 20 / \log 3 \approx 2.727$ |
+
+All three are universal in their respective dimensions: the Cantor set is universal among compact metric spaces, the Carpet among compact curves, and the Menger Sponge among compact 1-dimensional spaces embedded in 3D.

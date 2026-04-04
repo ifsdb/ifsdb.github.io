@@ -1,0 +1,71 @@
+---
+name: "Koch Curve"
+description: "The Koch curve is a fractal defined by replacing the middle third of each line segment with two sides of an equilateral triangle, repeated infinitely."
+cardDescription: "Four affine maps producing a snowflake-like curve with infinite perimeter and finite area."
+dimension: "≈ 1.261"
+transforms: 4
+tags: [plane, self-similar, curve, classic]
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=$companion([1,-1])
+  g=s+1
+  A=g^-2*(s|s^2*[1,-1]|[-1,2]|s*[2,0])*A
+references:
+  - text: "Koch, H. von (1904). Sur une courbe continue sans tangente. Arkiv för Matematik."
+  - text: "Koch snowflake — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Koch_snowflake"
+  - text: "Riddle, L. Classic IFS — Koch Curve. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/kcurve/kcurve.htm"
+---
+
+## Overview
+
+The **Koch curve** was introduced by Swedish mathematician Helge von Koch in 1904 as an example of a
+continuous curve that is nowhere differentiable. The familiar **Koch snowflake** is obtained by
+applying the construction to all three sides of an equilateral triangle.
+
+## Construction
+
+Starting from a unit line segment, at each step replace the middle third with two sides of an
+equilateral triangle (pointing outward), removing the base:
+
+$$\text{segment} \;\longrightarrow\; \text{four segments of length } \tfrac{1}{3}$$
+
+After $n$ steps the curve has $4^n$ segments each of length $(\frac{1}{3})^n$,
+so the total length grows as $(\frac{4}{3})^n \to \infty$.
+
+## Definition
+
+The IFS lives in $\mathbb{Q}(\omega_6)$ where $\omega_6 = e^{i\pi/3}$ is a primitive 6th root of unity.
+The companion matrix $s$ (defined as `$companion([1,-1])` in AIFS) satisfies $s^2 - s + 1 = 0$;
+in the projected plane it acts as rotation by 60°.
+
+The expansion $g = s + 1$ has $|g| = \sqrt{3}$ and $g^2 = 3s$, so $g^{-2} \cdot s = \tfrac{1}{3}I$
+— a pure contraction by $\frac{1}{3}$ with no rotation.
+
+The four maps factor as $A = g^{-2}(h_1 \cup h_2 \cup h_3 \cup h_4)(A)$ with
+integer-coefficient operators:
+
+| Map | AIFS | Net effect in $\mathbb{R}^2$ |
+|-----|------|--------------------------|
+| $h_1 = s$ | `s` | scale $\tfrac{1}{3}$, no rotation; $f_1(0)=(0,0)$ |
+| $h_2 = s^2(\mathbf{x}+[1,-1])$ | `s^2*[1,-1]` | scale $\tfrac{1}{3}$, rotate $+60°$; $f_2(0)=(\tfrac{1}{3},0)$ |
+| $h_3 = \mathbf{x}+[-1,2]$ | `[-1,2]` | scale $\tfrac{1}{3}$, rotate $-60°$; $f_3(0)=(\tfrac{1}{2},\tfrac{\sqrt{3}}{6})$ |
+| $h_4 = s(\mathbf{x}+[2,0])$ | `s*[2,0]` | scale $\tfrac{1}{3}$, no rotation; $f_4(0)=(\tfrac{2}{3},0)$ |
+
+The translations $[1,-1]$, $[-1,2]$, $[2,0]$ are exact integers in $\mathbb{Z}^2$;
+the irrational values $\tfrac{1}{3}$, $\tfrac{2}{3}$, $\tfrac{\sqrt{3}}{6}$ emerge only after projecting
+via $g^{-2}$, with no floating-point approximation.
+
+The directive `$subspace=[s,0]` tells the renderer to project the lattice $\mathbb{Z}^2$ onto
+the eigenplane of $s$, where basis vector $[1,0]$ maps to $(1,0)$ and $[0,1]$ maps to
+$e^{i\pi/3} = (\tfrac{1}{2}, \tfrac{\sqrt{3}}{2})$.
+
+## Properties
+
+- **Fractal dimension:** $\frac{\log 4}{\log 3} \approx 1.261$
+- **Perimeter:** Infinite
+- **Number of transforms:** 4, all contraction ratio $\frac{1}{3}$
+- **Self-similarity:** Each quarter of the curve is a scaled, rotated copy of the whole

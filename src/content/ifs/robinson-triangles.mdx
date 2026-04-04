@@ -1,0 +1,137 @@
+---
+name: "Robinson Triangles"
+description: "A GIFS of two interlocking triangle types that generates the Penrose aperiodic tiling via self-similar substitution."
+cardDescription: "Two interleaved triangle attractors (acute and obtuse) forming the Penrose rhombus tiling. Uses a 4D rational form."
+dimension: "2 (solid tiles)"
+transforms: 5
+tags: [plane, self-similar, aperiodic-tiling, pentagonal, algebraic, gifs, classic]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  s=$companion([1,-1,1,-1])
+  r=$exchange()
+  g=s-s^4
+  h1=s^4*[-1,0,-1,0]
+  h2=s^2*r*[-1,0,0,0]
+  h3=s^9
+  h4=s^6*r*[0,-1,0,-1]
+  h5=s^3*[1,-1,0,-1]
+  A1=g^-1*(h1*A1|h2*A1|h3*A2)
+  A2=g^-1*(h4*A1|h5*A2)
+references:
+  - text: "Grünbaum, B. & Shephard, G. C. (1987). Tilings and Patterns. Freeman, Fig. 10.3.14."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals. §9.4."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+  - text: "Penrose tiling — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Penrose_tiling"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA1 = `@
+$dim=4
+$subspace=[s,0]
+s=$companion([1,-1,1,-1])
+r=$exchange()
+g=s-s^4
+h1=s^4*[-1,0,-1,0]
+h2=s^2*r*[-1,0,0,0]
+h3=s^9
+h4=s^6*r*[0,-1,0,-1]
+h5=s^3*[1,-1,0,-1]
+$root=A1
+A1=g^-1*(h1*A1|h2*A1|h3*A2)
+A2=g^-1*(h4*A1|h5*A2)`;
+
+export const aifsA2 = `@
+$dim=4
+$subspace=[s,0]
+s=$companion([1,-1,1,-1])
+r=$exchange()
+g=s-s^4
+h1=s^4*[-1,0,-1,0]
+h2=s^2*r*[-1,0,0,0]
+h3=s^9
+h4=s^6*r*[0,-1,0,-1]
+h5=s^3*[1,-1,0,-1]
+$root=A2
+A1=g^-1*(h1*A1|h2*A1|h3*A2)
+A2=g^-1*(h4*A1|h5*A2)`;
+
+## Overview
+
+The **Robinson triangles** are a pair of isosceles triangles — the acute triangle $A_1$
+(angles 36°–72°–72°) and the obtuse triangle $A_2$ (angles 36°–36°–108°) — that generate
+the **Penrose P2 aperiodic tiling** (the "kite and dart" tiling) through self-similar substitution.
+
+This entry uses a **Generalized IFS (GIFS)** with two interleaved attractors.
+
+## The Two Triangle Types
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="robinson-a1" aifs={aifsA1} width={380} height={380} label="A1 — acute triangle (36-72-72)" />
+    <figcaption>$A_1$ — acute triangle (36°–72°–72°)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="robinson-a2" aifs={aifsA2} width={380} height={380} label="A2 — obtuse triangle (36-36-108)" />
+    <figcaption>$A_2$ — obtuse triangle (36°–36°–108°)</figcaption>
+  </figure>
+</div>
+
+## Substitution Rules
+
+Each triangle decomposes into smaller copies at ratio $\tau^{-1}$ where
+$\tau = \frac{1+\sqrt{5}}{2} \approx 1.618$ is the golden ratio:
+
+$$g A_1 = h_1(A_1) \cup h_2(A_1) \cup h_3(A_2)$$
+
+$$g A_2 = h_4(A_1) \cup h_5(A_2)$$
+
+The expansion factor $g = s - s^4$ in the rational space corresponds to scaling by $\tau$
+on the projected plane.
+
+## Algebraic Structure
+
+Like the Pentadendrite, the Robinson triangles live in $\mathbb{Q}(\zeta_{10})$
+with companion matrix $s$ (defined as `$companion([1,-1,1,-1])` in AIFS) for $\Phi_{10}(x) = x^4-x^3+x^2-x+1$.
+
+The additional matrix $r$ (`$exchange()` in AIFS, the anti-diagonal 4×4 identity) represents
+**reflection** in the projected plane, needed because maps $h_2$ and $h_4$ are
+orientation-reversing.
+
+| Map | Definition | Effect |
+|-----|-----------|--------|
+| $h_1$ | $s^4(\mathbf{x}+[-1,0,-1,0])$ | rotation + translation |
+| $h_2$ | $s^2 r(\mathbf{x}+[-1,0,0,0])$ | rotation + reflection |
+| $h_3$ | $s^9\,\mathbf{x}$ | rotation only |
+| $h_4$ | $s^6 r(\mathbf{x}+[0,-1,0,-1])$ | rotation + reflection |
+| $h_5$ | $s^3(\mathbf{x}+[1,-1,0,-1])$ | rotation + translation |
+
+All five maps are **similitudes** with the same contraction factor $1/\tau$.
+
+## GIFS Attractor Equations
+
+The AIFS uses two coupled equations — this is a GIFS (Generalized IFS):
+
+```
+A1=g^-1*(h1*A1|h2*A1|h3*A2)
+A2=g^-1*(h4*A1|h5*A2)
+```
+
+The notation `h*A` means the image of the set $A$ under map $h$.
+The unique solution $(A_1, A_2)$ is the pair of compact Robinson triangles.
+
+## Connection to Penrose Tilings
+
+By translating and rotating copies of $A_1$ and $A_2$ according to the substitution rules,
+one obtains an aperiodic tiling of the entire plane. The tiling is **aperiodic** — it has
+no translational periodicity — yet exhibits **5-fold local symmetry** at every point.
+
+## Properties
+
+- **Contraction ratio**: $1/\tau \approx 0.618$ (both triangle types)
+- **Symmetry**: dihedral group $D_5$ (same as the Pentadendrite)
+- **Aperiodicity**: no translational period; related to quasicrystal diffraction patterns
+- **Dimension**: 2 (both $A_1$ and $A_2$ are solid triangles with non-empty interior)

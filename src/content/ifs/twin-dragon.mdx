@@ -1,0 +1,69 @@
+---
+name: "Twin Dragon"
+description: "The Twin Dragon is a 2D self-similar fractal formed by two copies of the Heighway Dragon fitting together. Two maps contracting by 1/√2 produce a solid region that tiles the plane."
+cardDescription: "Two interlocking Heighway Dragon copies form a solid 2D tile. Controlled by the polynomial x²−2x+2."
+dimension: "2"
+transforms: 2
+tags: [plane, self-similar, tiling, algebraic]
+aifs: |
+  @
+  $dim=2
+  g=[1,-1,1,1]
+  s=[0,-1,1,0]
+  h0=1
+  h1=s^2*[-2,0]
+  A=g^-1*(h0|h1)*A
+references:
+  - text: "Davis, C. & Knuth, D. E. (1970). Number representations and dragon curves. Journal of Recreational Mathematics, 3(2–4)."
+  - text: "Twin dragon curve — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Dragon_curve#Twindragon"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Quadratic Pletals (Gaussian integer Z[i] family)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
+---
+
+## Overview
+
+The **Twin Dragon** (also called the **twindragon** or **Davis–Knuth dragon**) is a self-similar fractal with **Hausdorff dimension 2** — it has positive area and is a connected solid region. It is formed by joining two copies of the Heighway Dragon along their boundaries; the two copies fit together perfectly because the Heighway Dragon's boundary is a matching fractal curve.
+
+The Twin Dragon is a **rep-2 tile**: two congruent copies tile a scaled copy of itself, and by repeating this, four copies of the Twin Dragon tile the plane.
+
+## Algebraic Structure
+
+The IFS is controlled by the polynomial $x^2 - 2x + 2$, whose roots are $1 \pm i$. These are represented algebraically by the matrices:
+
+$$g = \begin{pmatrix}1 & -1 \\ 1 & 1\end{pmatrix}, \qquad s = \begin{pmatrix}0 & -1 \\ 1 & 0\end{pmatrix}.$$
+
+The matrix $g$ represents complex multiplication by $1 + i$: it expands distances by $|1+i| = \sqrt{2}$ and rotates by 45°. Its inverse $g^{-1} = \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix}$ corresponds to multiplication by $\frac{1-i}{2}$.
+
+The matrix $s$ is a 90° rotation, and $s^2 = -I$ (180° rotation).
+
+## IFS Definition
+
+The Twin Dragon $A$ is the unique non-empty compact set satisfying:
+
+$$A = g^{-1}\!\bigl(h_0(A) \cup h_1(A)\bigr),$$
+
+where:
+
+$$h_0(x) = x \quad \text{(identity)}, \qquad h_1(x) = s^2(x + (-2, 0)) = -x + (2, 0).$$
+
+Expanding, the two affine maps are:
+
+$$f_1(x) = g^{-1} x = \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix} x,$$
+
+$$f_2(x) = g^{-1}(-x + (2,0)) = \begin{pmatrix}-1/2 & -1/2 \\ 1/2 & -1/2\end{pmatrix} x + \begin{pmatrix}1 \\ -1\end{pmatrix}.$$
+
+In complex notation, with $z = x + iy$:
+
+$$f_1(z) = \frac{1-i}{2}\,z, \qquad f_2(z) = \frac{-(1+i)}{2}\,z + (1 - i).$$
+
+Both maps contract by $\frac{1}{\sqrt{2}}$, giving self-similar dimension $\frac{\log 2}{\log \sqrt{2}} = 2$.
+
+## Properties
+
+- **Hausdorff dimension:** exactly $2$ — the set has positive Lebesgue measure
+- **Contraction ratios:** both $f_1$ and $f_2$ contract by $1/\sqrt{2}$; Moran equation: $2 \cdot (1/\sqrt{2})^2 = 1$
+- **Tiling:** two Twin Dragons (one original, one rotated 180°) tile a $\sqrt{2}$-scaled copy; four copies tile the plane
+- **Relation to Heighway Dragon:** the Twin Dragon is the union of a Heighway Dragon and its image under $z \mapsto -z + (2, 0)$ (the 180° rotation about the midpoint $(1, 0)$)
+- **Number system:** the Dragon is the set of complex numbers $\sum_{k=0}^{\infty} \varepsilon_k \left(\frac{1-i}{2}\right)^k$ with $\varepsilon_k \in \lbrace 0, 1 \rbrace$, i.e., base $\frac{1-i}{2}$ digit expansions — a direct analogue of binary fractions for the Gaussian integers
+- **Polynomial:** $x^2 - 2x + 2$ with root $1 + i$; $\det(g) = 2$

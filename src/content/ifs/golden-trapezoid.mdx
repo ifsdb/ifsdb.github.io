@@ -1,0 +1,71 @@
+---
+name: "Golden Trapezoid"
+description: "A self-similar plane fractal arising from a 4D algebraic IFS based on the polynomial x⁴+x²−1, with contraction ratio related to the golden ratio."
+cardDescription: "Four-map algebraic IFS in a 4D rational space; attractor projects onto a golden-ratio trapezoid tiling of the plane."
+dimension: "2"
+transforms: 4
+tags: [plane, tiling, algebraic]
+aifs: |
+  @
+  $dim=4
+  $subspace=[g,0]
+  g=$companion([-1,0,1,0])
+  r=$companion([-1],[1],[-1],[1])
+  h0=-1*[-1,1,0,1]
+  h1=r*-1*[1,1,0,-1]
+  h2=r*[1,-1,0,0]
+  h3=1*[1,-1,1,0]
+  A=(g^-2*h0|g^-3*h1|g^-3*h2|g^-4*h3)*A
+references:
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Metallic Tiles (Golden bee and derivatives)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Metallic/Golden/golden.php"
+---
+
+## Overview
+
+The **Golden Trapezoid** is a self-affine tile whose shape is determined by the roots of
+$x^4 + x^2 - 1 = 0$. Like the Penrose tilings, it is linked to the golden ratio
+$\phi = \frac{1+\sqrt{5}}{2}$, but arises from a different algebraic polynomial.
+
+The attractor fills a solid trapezoidal region of the plane with Hausdorff dimension $2$.
+
+## Algebraic Structure
+
+The IFS is defined in $\mathbb{R}^4$ (the rational space $\mathbb{Q}[x]/(x^4+x^2-1)$) and
+projected to $\mathbb{R}^2$ via the dominant complex eigenspace of $g$.
+
+The expansion matrix $g$ (defined as `$companion([-1,0,1,0])` in AIFS) is the companion matrix
+for $x^4 + x^2 - 1 = 0$. Its eigenvalues come in two complex conjugate pairs:
+
+- Dominant pair (index 0): modulus $|\lambda|^2 = \sqrt{\phi} \approx 1.272$
+- Subdominant pair: modulus $< 1$
+
+The directive `$subspace=[g,0]` projects onto the Jordan cell of index 0 — the dominant
+complex pair — yielding the 2D rendered attractor.
+
+The matrix $r$ (defined as `$companion([-1],[1],[-1],[1])` in AIFS) is the companion for
+$x^4 - x^3 + x^2 - x + 1 = \Phi_{10}(x)$, acting as a rotation/reflection in the rational space.
+
+## The Four Maps
+
+The attractor satisfies $A = g^{-2}h_0(A) \cup g^{-3}h_1(A) \cup g^{-3}h_2(A) \cup g^{-4}h_3(A)$
+with four maps at different scales:
+
+| Map | Scale factor | Definition |
+|-----|-------------|------------|
+| $h_0$ | $g^{-2}$ | $-1 \cdot (\mathbf{x} + [-1,1,0,1])$ |
+| $h_1$ | $g^{-3}$ | $r \cdot (-1) \cdot (\mathbf{x} + [1,1,0,-1])$ |
+| $h_2$ | $g^{-3}$ | $r \cdot (\mathbf{x} + [1,-1,0,0])$ |
+| $h_3$ | $g^{-4}$ | $1 \cdot (\mathbf{x} + [1,-1,1,0])$ |
+
+The different scales break the strict self-similarity but the attractor remains a well-defined
+compact set whose Hausdorff dimension is 2.
+
+## Connection to the Golden Ratio
+
+Both $x^4 + x^2 - 1 = 0$ and the Penrose case $\Phi_{10}(x)$ are degree-4 polynomials
+over $\mathbb{Q}$ with roots on the unit circle or at modulus $\neq 1$. The dominant
+eigenvalue magnitude $|\lambda| = \phi^{1/4}$ where $\phi$ is the golden ratio links
+this fractal structurally to Penrose-type aperiodic tilings.

@@ -1,0 +1,215 @@
+---
+name: "Shield Tiling"
+description: "An aperiodic tiling with exact 12-fold rotational symmetry, discovered by Franz Gähler. Uses four fractal-boundary prototiles with dodecagonal inflation."
+cardDescription: "Four interleaved tile types with 12-fold symmetry and dodecagonal inflation. MLD-equivalent to the Socolar tiling."
+dimension: "2"
+transforms: 22
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  g=1+s
+  s=$companion([1,0,-1,0])
+  r=$exchange()
+  h0=s^11*[-1,0,1,1]
+  h1=s^9*[-1,0,0,0]
+  h2=s^4*[0,0,-1,-1]
+  h3=s^11*[-1,0,1,0]
+  h4=s^5*[0,0,-1,0]
+  h5=s^4*[0,0,-1,-1]
+  h6=s^11*[-1,0,1,1]
+  h7=s^2*[0,1,0,0]
+  h8=s^5*[0,0,-1,-1]
+  h9=s^2*[0,0,-1,0]
+  h10=s^11*[0,1,0,0]
+  h11=s^10*[0,1,1,1]
+  h12=s^4*[-1,-1,-1,0]
+  h13=s^3*[-1,-1,-1,0]
+  h14=s^7*[-2,-1,1,2]
+  h15=s^2*[0,-1,-2,-1]
+  h16=s^9*[-1,0,1,1]
+  h17=s*[0,0,-1,-1]
+  h18=s^5*[-2,-2,0,1]
+  h19=1*[1,1,-1,-2]
+  h20=s^5*[-1,-1,0,0]
+  h21=s*[1,1,-1,-2]
+  $root=A3
+  A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
+  A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
+  A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
+  A0=g^-1*h0*A3
+references:
+  - text: "Shield — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/shield/"
+  - text: "Socolar — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/socolar/"
+  - text: "Gähler, F. (1988). Crystallography of Dodecagonal Quasicrystals. Springer."
+  - text: "Socolar, J. E. S. (1989). Simple octagonal and dodecagonal quasicrystals. Phys. Rev. B, 39, 10519–10551."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA3 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s
+s=$companion([1,0,-1,0])
+r=$exchange()
+h0=s^11*[-1,0,1,1]
+h1=s^9*[-1,0,0,0]
+h2=s^4*[0,0,-1,-1]
+h3=s^11*[-1,0,1,0]
+h4=s^5*[0,0,-1,0]
+h5=s^4*[0,0,-1,-1]
+h6=s^11*[-1,0,1,1]
+h7=s^2*[0,1,0,0]
+h8=s^5*[0,0,-1,-1]
+h9=s^2*[0,0,-1,0]
+h10=s^11*[0,1,0,0]
+h11=s^10*[0,1,1,1]
+h12=s^4*[-1,-1,-1,0]
+h13=s^3*[-1,-1,-1,0]
+h14=s^7*[-2,-1,1,2]
+h15=s^2*[0,-1,-2,-1]
+h16=s^9*[-1,0,1,1]
+h17=s*[0,0,-1,-1]
+h18=s^5*[-2,-2,0,1]
+h19=1*[1,1,-1,-2]
+h20=s^5*[-1,-1,0,0]
+h21=s*[1,1,-1,-2]
+$root=A3
+A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
+A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
+A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
+A0=g^-1*h0*A3`;
+
+export const aifsA2 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s
+s=$companion([1,0,-1,0])
+r=$exchange()
+h0=s^11*[-1,0,1,1]
+h1=s^9*[-1,0,0,0]
+h2=s^4*[0,0,-1,-1]
+h3=s^11*[-1,0,1,0]
+h4=s^5*[0,0,-1,0]
+h5=s^4*[0,0,-1,-1]
+h6=s^11*[-1,0,1,1]
+h7=s^2*[0,1,0,0]
+h8=s^5*[0,0,-1,-1]
+h9=s^2*[0,0,-1,0]
+h10=s^11*[0,1,0,0]
+h11=s^10*[0,1,1,1]
+h12=s^4*[-1,-1,-1,0]
+h13=s^3*[-1,-1,-1,0]
+h14=s^7*[-2,-1,1,2]
+h15=s^2*[0,-1,-2,-1]
+h16=s^9*[-1,0,1,1]
+h17=s*[0,0,-1,-1]
+h18=s^5*[-2,-2,0,1]
+h19=1*[1,1,-1,-2]
+h20=s^5*[-1,-1,0,0]
+h21=s*[1,1,-1,-2]
+$root=A2
+A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
+A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
+A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
+A0=g^-1*h0*A3`;
+
+export const aifsA1 = `@
+$dim=4
+$subspace=[s,0]
+g=1+s
+s=$companion([1,0,-1,0])
+r=$exchange()
+h0=s^11*[-1,0,1,1]
+h1=s^9*[-1,0,0,0]
+h2=s^4*[0,0,-1,-1]
+h3=s^11*[-1,0,1,0]
+h4=s^5*[0,0,-1,0]
+h5=s^4*[0,0,-1,-1]
+h6=s^11*[-1,0,1,1]
+h7=s^2*[0,1,0,0]
+h8=s^5*[0,0,-1,-1]
+h9=s^2*[0,0,-1,0]
+h10=s^11*[0,1,0,0]
+h11=s^10*[0,1,1,1]
+h12=s^4*[-1,-1,-1,0]
+h13=s^3*[-1,-1,-1,0]
+h14=s^7*[-2,-1,1,2]
+h15=s^2*[0,-1,-2,-1]
+h16=s^9*[-1,0,1,1]
+h17=s*[0,0,-1,-1]
+h18=s^5*[-2,-2,0,1]
+h19=1*[1,1,-1,-2]
+h20=s^5*[-1,-1,0,0]
+h21=s*[1,1,-1,-2]
+$root=A1
+A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
+A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
+A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
+A0=g^-1*h0*A3`;
+
+## Overview
+
+The **Shield tiling** is a classic aperiodic tiling with **12-fold** (dodecagonal) rotational
+symmetry, discovered by Franz Gähler in 1988. It is **mutually locally derivable (MLD)** from
+the [Socolar tiling](https://tilings.math.uni-bielefeld.de/substitution/socolar/) and the
+[Wheel tiling](https://tilings.math.uni-bielefeld.de/substitution/wheel-tiling/), all three
+belonging to the same MLD class.
+
+The tiling admits local **matching rules**: tiles must fit edge-to-edge with matching orientation
+arrows and the tile decorations must form crosses at interior vertices.
+The window (acceptance domain) of the cut-and-project scheme is a **regular dodecagon**.
+
+## Algebraic Structure
+
+The 12-fold structure lives in the cyclotomic field $\mathbb{Q}(e^{i\pi/6})$.
+The companion matrix $s$ satisfies $s^4 - s^2 + 1 = 0$
+(12th cyclotomic polynomial), so $s$ represents a $30°$ rotation.
+
+The expansion is
+
+$$
+g = 1 + s
+$$
+
+which at the eigenvalue $s_0 = e^{i\pi/6}$ evaluates to $1 + e^{i\pi/6}$,
+giving area inflation factor $|g|^2 = 2 + \sqrt{3}$.
+
+The GIFS has **four tile types** $A_0, A_1, A_2, A_3$ with the cyclic dependency
+$A_0 \to A_3 \to (A_0, A_1, A_2)$:
+
+$$
+A_3 = g^{-1}(h_9 \cup \cdots \cup h_{15})(A_0) \cup g^{-1}(h_{16} \cup h_{17} \cup h_{18})(A_1) \cup g^{-1}(h_{19} \cup h_{20} \cup h_{21})(A_2)
+$$
+
+$$
+A_2 = g^{-1}(h_4 \cup h_5 \cup h_6 \cup h_7)(A_0) \cup g^{-1} h_8(A_2)
+$$
+
+$$
+A_1 = g^{-1}(h_1 \cup h_2)(A_1) \cup g^{-1} h_3(A_2), \qquad A_0 = g^{-1} h_0(A_3)
+$$
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="shield-A3" aifs={aifsA3} width={380} height={380} label="Shield tile A3" />
+    <figcaption>Tile $A_3$ — large shield prototile</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="shield-A2" aifs={aifsA2} width={380} height={380} label="Shield tile A2" />
+    <figcaption>Tile $A_2$ — medium prototile</figcaption>
+  </figure>
+</div>
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="shield-A1" aifs={aifsA1} width={380} height={380} label="Shield tile A1" />
+    <figcaption>Tile $A_1$ — small prototile</figcaption>
+  </figure>
+</div>

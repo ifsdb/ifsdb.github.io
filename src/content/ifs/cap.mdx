@@ -1,0 +1,221 @@
+---
+name: "CAP (Hat Monotile)"
+description: "A self-similar substitution tiling built from four metatile types (H, T, P, F) that encodes the aperiodic hat monotile discovered in 2022."
+cardDescription: "Canonical Aperiodic Prototile — substitution tiling underlying the hat monotile. Four GIFS attractor types, 30-fold algebraic symmetry."
+dimension: "2"
+transforms: 22
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=8
+  $subspace=[s,0]
+  g=1+s^2+s^3-s^7
+  s=$companion([1,1,0,-1,-1,-1,0,1])
+  r=$exchange()
+  O=[1,s,s^2,s^3,s^4,s^5,s^6,s^7,s^8,s^9,s^10,s^11,s^12,s^13,s^14,s^15,s^16,s^17,s^18,s^19,s^20,s^21,s^22,s^23,s^24,s^25,s^26,s^27,s^28,s^29,(s*r),(s^2*r),(s^3*r),(s^4*r),(s^5*r),(s^6*r),(s^7*r),(s^8*r),(s^9*r),(s^10*r),(s^11*r),(s^12*r),(s^13*r),(s^14*r),(s^15*r),(s^16*r),(s^17*r),(s^18*r),(s^19*r),(s^20*r),(s^21*r),(s^22*r),(s^23*r),(s^24*r),(s^25*r),(s^26*r),(s^27*r),(s^28*r),(s^29*r),r]
+  h0=O[0]*[-2,-2,2,0,0,0,0,-2]
+  h1=O[0]*[2,2,0,0,0,-2,-2,2]
+  h2=O[0]*[0,0,-2,0,0,2,2,0]
+  h3=O[15]
+  h4=O[0]*[-2,0,3,0,0,-1,-3,-2]
+  h5=O[10]*[-2,0,3,0,0,-1,-3,-2]
+  h6=O[20]*[-2,0,3,0,0,-1,-3,-2]
+  h7=O[0]*[2,4,1,0,0,-3,-5,2]
+  h8=O[10]*[2,4,1,0,0,-3,-5,2]
+  h9=O[20]*[2,4,1,0,0,-3,-5,2]
+  h10=O[0]
+  h11=O[15]*[1,3,0,0,0,-1,-1,1]
+  h12=O[0]*[1,3,0,0,0,-1,-1,1]
+  h13=O[5]
+  h14=O[25]*[-1,1,2,0,0,-1,-5,-1]
+  h15=O[10]*[-1,1,2,0,0,-1,-5,-1]
+  h16=O[15]*[1,3,0,0,0,-1,-1,1]
+  h17=O[0]*[1,3,0,0,0,-1,-1,1]
+  h18=O[5]
+  h19=O[25]*[-1,1,2,0,0,-1,-5,-1]
+  h20=O[10]*[-1,1,2,0,0,-1,-5,-1]
+  h21=O[0]*[1,5,1,0,0,-2,-4,1]
+  $root=H
+  H=g^-1*h0*H|g^-1*h1*H|g^-1*h2*H|g^-1*h3*T|g^-1*h4*P|g^-1*h5*P|g^-1*h6*P|g^-1*h7*F|g^-1*h8*F|g^-1*h9*F
+  T=g^-1*h10*H
+  P=g^-1*h11*H|g^-1*h12*H|g^-1*h13*P|g^-1*h14*F|g^-1*h15*F
+  F=g^-1*h16*H|g^-1*h17*H|g^-1*h18*P|g^-1*h19*F|g^-1*h20*F|g^-1*h21*F
+references:
+  - text: "CAP — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/cap/"
+  - text: "Hat — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/hat/"
+  - text: "Smith, D., Myers, J. S., Kaplan, C. S. & Goodman-Strauss, C. (2024). An Aperiodic Monotile. Combinatorial Theory, 4(1)."
+    url: "https://doi.org/10.5070/C64163843"
+  - text: "Baake, M., Gähler, F. & Sadun, L. Dynamics and topology of the Hat family of tilings. (preprint)"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsH = `@
+$dim=8
+$subspace=[s,0]
+g=1+s^2+s^3-s^7
+s=$companion([1,1,0,-1,-1,-1,0,1])
+r=$exchange()
+O=[1,s,s^2,s^3,s^4,s^5,s^6,s^7,s^8,s^9,s^10,s^11,s^12,s^13,s^14,s^15,s^16,s^17,s^18,s^19,s^20,s^21,s^22,s^23,s^24,s^25,s^26,s^27,s^28,s^29,(s*r),(s^2*r),(s^3*r),(s^4*r),(s^5*r),(s^6*r),(s^7*r),(s^8*r),(s^9*r),(s^10*r),(s^11*r),(s^12*r),(s^13*r),(s^14*r),(s^15*r),(s^16*r),(s^17*r),(s^18*r),(s^19*r),(s^20*r),(s^21*r),(s^22*r),(s^23*r),(s^24*r),(s^25*r),(s^26*r),(s^27*r),(s^28*r),(s^29*r),r]
+h0=O[0]*[-2,-2,2,0,0,0,0,-2]
+h1=O[0]*[2,2,0,0,0,-2,-2,2]
+h2=O[0]*[0,0,-2,0,0,2,2,0]
+h3=O[15]
+h4=O[0]*[-2,0,3,0,0,-1,-3,-2]
+h5=O[10]*[-2,0,3,0,0,-1,-3,-2]
+h6=O[20]*[-2,0,3,0,0,-1,-3,-2]
+h7=O[0]*[2,4,1,0,0,-3,-5,2]
+h8=O[10]*[2,4,1,0,0,-3,-5,2]
+h9=O[20]*[2,4,1,0,0,-3,-5,2]
+h10=O[0]
+h11=O[15]*[1,3,0,0,0,-1,-1,1]
+h12=O[0]*[1,3,0,0,0,-1,-1,1]
+h13=O[5]
+h14=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h15=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h16=O[15]*[1,3,0,0,0,-1,-1,1]
+h17=O[0]*[1,3,0,0,0,-1,-1,1]
+h18=O[5]
+h19=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h20=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h21=O[0]*[1,5,1,0,0,-2,-4,1]
+$root=H
+H=g^-1*h0*H|g^-1*h1*H|g^-1*h2*H|g^-1*h3*T|g^-1*h4*P|g^-1*h5*P|g^-1*h6*P|g^-1*h7*F|g^-1*h8*F|g^-1*h9*F
+T=g^-1*h10*H
+P=g^-1*h11*H|g^-1*h12*H|g^-1*h13*P|g^-1*h14*F|g^-1*h15*F
+F=g^-1*h16*H|g^-1*h17*H|g^-1*h18*P|g^-1*h19*F|g^-1*h20*F|g^-1*h21*F`;
+
+export const aifsP = `@
+$dim=8
+$subspace=[s,0]
+g=1+s^2+s^3-s^7
+s=$companion([1,1,0,-1,-1,-1,0,1])
+r=$exchange()
+O=[1,s,s^2,s^3,s^4,s^5,s^6,s^7,s^8,s^9,s^10,s^11,s^12,s^13,s^14,s^15,s^16,s^17,s^18,s^19,s^20,s^21,s^22,s^23,s^24,s^25,s^26,s^27,s^28,s^29,(s*r),(s^2*r),(s^3*r),(s^4*r),(s^5*r),(s^6*r),(s^7*r),(s^8*r),(s^9*r),(s^10*r),(s^11*r),(s^12*r),(s^13*r),(s^14*r),(s^15*r),(s^16*r),(s^17*r),(s^18*r),(s^19*r),(s^20*r),(s^21*r),(s^22*r),(s^23*r),(s^24*r),(s^25*r),(s^26*r),(s^27*r),(s^28*r),(s^29*r),r]
+h0=O[0]*[-2,-2,2,0,0,0,0,-2]
+h1=O[0]*[2,2,0,0,0,-2,-2,2]
+h2=O[0]*[0,0,-2,0,0,2,2,0]
+h3=O[15]
+h4=O[0]*[-2,0,3,0,0,-1,-3,-2]
+h5=O[10]*[-2,0,3,0,0,-1,-3,-2]
+h6=O[20]*[-2,0,3,0,0,-1,-3,-2]
+h7=O[0]*[2,4,1,0,0,-3,-5,2]
+h8=O[10]*[2,4,1,0,0,-3,-5,2]
+h9=O[20]*[2,4,1,0,0,-3,-5,2]
+h10=O[0]
+h11=O[15]*[1,3,0,0,0,-1,-1,1]
+h12=O[0]*[1,3,0,0,0,-1,-1,1]
+h13=O[5]
+h14=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h15=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h16=O[15]*[1,3,0,0,0,-1,-1,1]
+h17=O[0]*[1,3,0,0,0,-1,-1,1]
+h18=O[5]
+h19=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h20=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h21=O[0]*[1,5,1,0,0,-2,-4,1]
+$root=P
+H=g^-1*h0*H|g^-1*h1*H|g^-1*h2*H|g^-1*h3*T|g^-1*h4*P|g^-1*h5*P|g^-1*h6*P|g^-1*h7*F|g^-1*h8*F|g^-1*h9*F
+T=g^-1*h10*H
+P=g^-1*h11*H|g^-1*h12*H|g^-1*h13*P|g^-1*h14*F|g^-1*h15*F
+F=g^-1*h16*H|g^-1*h17*H|g^-1*h18*P|g^-1*h19*F|g^-1*h20*F|g^-1*h21*F`;
+
+export const aifsF = `@
+$dim=8
+$subspace=[s,0]
+g=1+s^2+s^3-s^7
+s=$companion([1,1,0,-1,-1,-1,0,1])
+r=$exchange()
+O=[1,s,s^2,s^3,s^4,s^5,s^6,s^7,s^8,s^9,s^10,s^11,s^12,s^13,s^14,s^15,s^16,s^17,s^18,s^19,s^20,s^21,s^22,s^23,s^24,s^25,s^26,s^27,s^28,s^29,(s*r),(s^2*r),(s^3*r),(s^4*r),(s^5*r),(s^6*r),(s^7*r),(s^8*r),(s^9*r),(s^10*r),(s^11*r),(s^12*r),(s^13*r),(s^14*r),(s^15*r),(s^16*r),(s^17*r),(s^18*r),(s^19*r),(s^20*r),(s^21*r),(s^22*r),(s^23*r),(s^24*r),(s^25*r),(s^26*r),(s^27*r),(s^28*r),(s^29*r),r]
+h0=O[0]*[-2,-2,2,0,0,0,0,-2]
+h1=O[0]*[2,2,0,0,0,-2,-2,2]
+h2=O[0]*[0,0,-2,0,0,2,2,0]
+h3=O[15]
+h4=O[0]*[-2,0,3,0,0,-1,-3,-2]
+h5=O[10]*[-2,0,3,0,0,-1,-3,-2]
+h6=O[20]*[-2,0,3,0,0,-1,-3,-2]
+h7=O[0]*[2,4,1,0,0,-3,-5,2]
+h8=O[10]*[2,4,1,0,0,-3,-5,2]
+h9=O[20]*[2,4,1,0,0,-3,-5,2]
+h10=O[0]
+h11=O[15]*[1,3,0,0,0,-1,-1,1]
+h12=O[0]*[1,3,0,0,0,-1,-1,1]
+h13=O[5]
+h14=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h15=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h16=O[15]*[1,3,0,0,0,-1,-1,1]
+h17=O[0]*[1,3,0,0,0,-1,-1,1]
+h18=O[5]
+h19=O[25]*[-1,1,2,0,0,-1,-5,-1]
+h20=O[10]*[-1,1,2,0,0,-1,-5,-1]
+h21=O[0]*[1,5,1,0,0,-2,-4,1]
+$root=F
+H=g^-1*h0*H|g^-1*h1*H|g^-1*h2*H|g^-1*h3*T|g^-1*h4*P|g^-1*h5*P|g^-1*h6*P|g^-1*h7*F|g^-1*h8*F|g^-1*h9*F
+T=g^-1*h10*H
+P=g^-1*h11*H|g^-1*h12*H|g^-1*h13*P|g^-1*h14*F|g^-1*h15*F
+F=g^-1*h16*H|g^-1*h17*H|g^-1*h18*P|g^-1*h19*F|g^-1*h20*F|g^-1*h21*F`;
+
+## Overview
+
+The **CAP** (Canonical Aperiodic Prototile) tiling is a **self-similar substitution tiling**
+underlying the [hat monotile](https://tilings.math.uni-bielefeld.de/substitution/hat/) —
+the first known aperiodic monotile (a single tile shape that can tile the plane only
+aperiodically), discovered in 2022 by David Smith and published in 2024.
+
+The substitution uses **four metatile types** (H, T, P, F), which are "super-tiles" assembled
+from the original hat-shaped tiles. The **H-metatile** (hat) is the most complex (10 maps);
+**T** (thin) is the simplest (1 map); **P** (parallelogram) and **F** (fat) are intermediate.
+
+The CAP substitution was used by Baake, Gähler, and Sadun to derive the
+**cut-and-project** description of the hat tiling, establishing it as a proper quasicrystal.
+
+## Algebraic Structure
+
+The underlying algebraic structure has **30-fold** symmetry. The 8D rational space uses
+$s$ (AIFS: `$companion([1,1,0,-1,-1,-1,0,1])`), which satisfies
+$x^8 + x^7 - x^5 - x^4 - x^3 + x + 1 = 0$ (related to the 15th cyclotomic polynomial).
+
+The full symmetry group $O$ of order 60 contains all rotations and reflections:
+$$
+O = \{s^k, s^k r : k = 0,1,\ldots,29\}
+$$
+
+The expansion is $g = 1+s^2+s^3-s^7$ and the GIFS has four attractor types:
+
+$$
+H = g^{-1}(h_0 \cup h_1 \cup h_2)(H) \cup g^{-1} h_3(T) \cup g^{-1}(h_4 \cup h_5 \cup h_6)(P) \cup g^{-1}(h_7 \cup h_8 \cup h_9)(F)
+$$
+
+$$
+T = g^{-1} h_{10}(H)
+$$
+
+$$
+P = g^{-1}(h_{11} \cup h_{12})(H) \cup g^{-1} h_{13}(P) \cup g^{-1}(h_{14} \cup h_{15})(F)
+$$
+
+$$
+F = g^{-1}(h_{16} \cup h_{17})(H) \cup g^{-1} h_{18}(P) \cup g^{-1}(h_{19} \cup h_{20} \cup h_{21})(F)
+$$
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="cap-H" aifs={aifsH} width={380} height={380} label="CAP metatile H (hat)" />
+    <figcaption>Metatile $H$ — hat shape</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="cap-P" aifs={aifsP} width={380} height={380} label="CAP metatile P (parallelogram)" />
+    <figcaption>Metatile $P$ — parallelogram</figcaption>
+  </figure>
+</div>
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="cap-F" aifs={aifsF} width={380} height={380} label="CAP metatile F (fat)" />
+    <figcaption>Metatile $F$ — fat</figcaption>
+  </figure>
+</div>

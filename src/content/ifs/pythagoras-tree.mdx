@@ -1,0 +1,67 @@
+---
+name: "Pythagoras Tree"
+description: "The Pythagoras tree is a fractal tree constructed by placing two scaled squares on the two legs of a right isosceles triangle on top of a base square, recursively."
+cardDescription: "Two maps at ±45°, each scaling by 1/√2. A self-similar tree that perfectly tiles a bounded region of the plane."
+dimension: "2"
+transforms: 2
+tags: [plane, self-similar, naturalistic, tiling]
+aifs: |
+  @
+  $dim=2
+  s=$companion([1,0])
+  g=s+1
+  A=([0,1]*s*g^-1|g^-1*[-1,2])*A
+references:
+  - text: "Pythagoras tree — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Pythagoras_tree_(fractal)"
+  - text: "Mandelbrot, B. (1982). The Fractal Geometry of Nature. W. H. Freeman."
+  - text: "Riddle, L. Classic IFS — Pythagorean Tree. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/pythagorean/pythTree.htm"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Quadratic Pletals (Gaussian integer Z[i] family)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
+---
+
+## Overview
+
+The **Pythagoras tree** is a fractal named after the Pythagorean theorem.
+Starting from a unit square (representing the trunk), an isosceles right triangle is placed
+on the top edge, and two smaller squares are built on its two legs.
+The process is repeated on each new square indefinitely.
+
+In the symmetric variant both child squares are the same size: each has side $\frac{1}{\sqrt{2}}$
+and is tilted by $\pm 45°$ relative to its parent.
+
+## Definition
+
+Like the [Lévy C Curve](/ifs/levy-c-curve), the Pythagoras Tree lives in $\mathbb{Z}[i]$
+with `$companion([1,0])` and $g = s+1 \leftrightarrow 1+i$.
+
+| Map | AIFS | Effect |
+|-----|------|--------|
+| $f_1$ | `[0,1]*s*g^-1` | rotate $+45°$, scale $\tfrac{1}{\sqrt{2}}$, translate $(0,1)$ (left branch) |
+| $f_2$ | `g^-1*[-1,2]` | rotate $-45°$, scale $\tfrac{1}{\sqrt{2}}$, translate $(\tfrac{1}{2},\tfrac{3}{2})$ (right branch) |
+
+For $f_2$: $g^{-1}\cdot[-1,2] = \tfrac{1}{2}(-1+2,\,1+2) = (\tfrac{1}{2},\tfrac{3}{2})$ — exact, no floating-point approximation.
+
+The **only difference from the Lévy C Curve** is the translations:
+Lévy has $f_1$ at the origin and $f_2$ translated by $g^{-1}[0,1]=(\tfrac{1}{2},\tfrac{1}{2})$;
+the Pythagoras Tree shifts both maps upward to build the tree above the base square.
+
+## Properties
+
+- **Fractal dimension:** 2 — the attractor eventually fills a bounded planar region with positive area
+- **Tiling:** The whole tree fits inside a $6 \times 4$ bounding box for the symmetric case
+- **Self-similarity:** Each subtree beyond a branching point is a scaled, rotated copy of the whole tree
+- **Number of transforms:** 2, both contraction ratio $\frac{1}{\sqrt{2}}$
+- **Variants:** Asymmetric versions (different branch angles) produce visually distinct trees while maintaining the IFS structure
+
+## Related
+
+All four of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
+
+| IFS | Second map rotation | Translation |
+|-----|--------------------|--------------|
+| [Lévy C Curve](/ifs/levy-c-curve) | $-45°$ (`g^-1`) | $(0,0)$ and $(\tfrac{1}{2},\tfrac{1}{2})$ |
+| Pythagoras Tree | $-45°$ (`g^-1`) | $(0,1)$ and $(\tfrac{1}{2},\tfrac{3}{2})$ |
+| [Heighway Dragon](/ifs/heighway-dragon) | $+135°$ (`s^2*g^-1`) | $(0,0)$ and $(1,0)$ |
+| [Dragon Curve](/ifs/dragon-curve) | $-135°$ (`s^3*g^-1`) | $(0,0)$ and $(1,0)$ |

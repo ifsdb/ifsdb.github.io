@@ -1,0 +1,84 @@
+---
+name: "McWorter's Pentadendrite"
+description: "A self-similar dendrite with pentagonal symmetry, discovered by McWorter as an L-system fractal."
+cardDescription: "Six-map IFS with 5-fold symmetry, expressed in a 4D rational space via the cyclotomic polynomial."
+dimension: "2log(6)/log(6+√5) ≈ 1.700"
+transforms: 6
+tags: [plane, self-similar, dendrite, pentagonal, algebraic, classic]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  s=$companion([1,-1,1,-1])
+  g=3-s+s^2-s^3
+  h1=[0,0,0,0]
+  h2=s^2*[0,0,0,-1]
+  h3=[1,0,1,0]
+  h4=s^6*[-2,1,-2,2]
+  h5=s^8*[-1,1,1,0]
+  h6=[2,-1,1,-1]
+  A=(g^-1*h1|g^-1*h2|g^-1*h3|g^-1*h4|g^-1*h5|g^-1*h6)*A
+references:
+  - text: "Edgar, G. A. (1990). Measure, Topology, and Fractal Geometry. Springer, p. 197."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals. §9.2."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+## Overview
+
+**McWorter's Pentadendrite** is a self-similar dendrite (tree-like fractal) with pentagonal
+symmetry, discovered by William McWorter as an L-system fractal and described in Edgar (1990).
+It has a connected exterior and six-fold self-similarity.
+
+## Algebraic Structure
+
+The pentadendrite lives in the algebraic number field $\mathbb{Q}(\zeta_{10})$, where
+$\zeta_{10} = e^{\pi i/5}$ is a primitive 10th root of unity. Its minimal polynomial over
+$\mathbb{Q}$ is the cyclotomic polynomial
+
+$$\Phi_{10}(x) = x^4 - x^3 + x^2 - x + 1.$$
+
+The companion matrix $s$ (defined as `$companion([1,-1,1,-1])` in AIFS) represents multiplication by $\zeta_{10}$
+in a 4-dimensional rational space. After projection via `$subspace=[s,0]`, it acts as a
+**rotation by $\pi/5 = 36°$** in the plane.
+
+The expansion matrix $g = 3I - s + s^2 - s^3$ has eigenvalue $6 + \sqrt{5}$ on the projected plane
+(the scaling factor of the IFS).
+
+## Self-Similar Structure
+
+The pentadendrite is the attractor of six maps:
+
+$$gA = h_1(A) \cup h_2(A) \cup h_3(A) \cup h_4(A) \cup h_5(A) \cup h_6(A),$$
+
+where each $h_i$ is an affine map in $\mathbb{Q}^4$:
+
+| Map | Definition |
+|-----|-----------|
+| $h_1$ | $\mathbf{x} + [0,0,0,0]$ |
+| $h_2$ | $s^2(\mathbf{x} + [0,0,0,-1])$ |
+| $h_3$ | $\mathbf{x} + [1,0,1,0]$ |
+| $h_4$ | $s^6(\mathbf{x} + [-2,1,-2,2])$ |
+| $h_5$ | $s^8(\mathbf{x} + [-1,1,1,0])$ |
+| $h_6$ | $\mathbf{x} + [2,-1,1,-1]$ |
+
+## Properties
+
+- **Hausdorff dimension**: $\dfrac{2\log 6}{\log(6+\sqrt{5})} \approx 1.700$
+- **Symmetry group**: dihedral group $D_5$ (10-fold dihedral symmetry)
+- **Topology**: dendrite (tree-like, connected, no interior)
+- **Intersection structure**: pieces meet at single points or along Jordan curves
+  of dimension $\dfrac{2\log 3}{\log(6+\sqrt{5})} \approx 1.042$
+
+## Complementary Attractor
+
+There is a second attractor living in the complementary eigenplane of $s$
+(selected by `$subspace=[s,1]`). The two attractors together fill a region
+with full pentagonal symmetry.
+
+## Related
+
+[McWorter's Pentigree](/ifs/pentigree) lives in the same field $\mathbb{Q}(\zeta_{10})$
+with the same companion matrix $s$, but uses expansion $g = s^2+s+1$ (contraction $1/\varphi^2$)
+instead of $g = 3-s+s^2-s^3$. The pentigree is a fractal *curve* (dimension ≈ 1.862),
+whereas the pentadendrite is a *dendrite* (dimension ≈ 1.700). Both were discovered by McWorter.

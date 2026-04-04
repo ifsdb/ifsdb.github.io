@@ -1,0 +1,86 @@
+---
+name: "Koch Snowflake"
+description: "A classical fractal with 6-fold symmetry built from seven self-similar pieces, filling a solid snowflake-shaped region."
+cardDescription: "Seven-map IFS that tiles a solid snowflake region with 6-fold symmetry. Boundary is the Koch curve with dimension log(4)/log(3)."
+dimension: "2 (filled region)"
+transforms: 7
+tags: [plane, self-similar, classic]
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=$companion([1,-1])
+  r=$exchange()
+  g=s+1
+  h0=s*r
+  h1=s*[0,1]
+  h2=s*[1,0]
+  h3=s*[-1,0]
+  h4=s*[0,-1]
+  h5=s*[-1,1]
+  h6=s*[1,-1]
+  A=(g^-1*h0|g^-2*h1|g^-2*h2|g^-2*h3|g^-2*h4|g^-2*h5|g^-2*h6)*A
+references:
+  - text: "von Koch, H. (1904). Sur une courbe continue sans tangente. Arkiv för Matematik, Astronomi och Fysik."
+  - text: "Koch snowflake — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Koch_snowflake"
+  - text: "Riddle, L. Classic IFS — Koch Snowflake. Agnes Scott College."
+    url: "https://larryriddle.agnesscott.org/ifs/ksnow/ksnow.htm"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+  - text: "Hinsley, S. R. Self-Similar Tiles — Koch Snowflake tiling (trihextal derivative)."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Quadratic/Hextals/Trihextals/Snowflake/KochSnowflake.php"
+---
+
+## Overview
+
+The **Koch Snowflake** is one of the earliest described fractals, introduced by Helge von Koch in 1904.
+It is a filled plane region bounded by the **Koch curve**, a continuous nowhere-differentiable curve with
+Hausdorff dimension $\log(4)/\log(3) \approx 1.2619$.
+
+The snowflake itself — the bounded closed region — has Hausdorff dimension $2$, filling a solid area
+with a fractal boundary.
+
+## Seven-Map Decomposition
+
+The snowflake decomposes into **seven self-similar pieces**:
+
+- **$h_0$**: one central copy at scale $1/\sqrt{3}$, which is a rotated (reflected) version of the whole
+- **$h_1$–$h_6$**: six outer copies at scale $1/3$, arranged with 6-fold rotational symmetry
+
+This satisfies the dimension equation:
+
+$$\left(\frac{1}{\sqrt{3}}\right)^2 + 6 \cdot \left(\frac{1}{3}\right)^2 = \frac{1}{3} + \frac{6}{9} = 1$$
+
+confirming Hausdorff dimension $d = 2$.
+
+## Algebraic Structure
+
+The IFS lives in $\mathbb{Q}(\omega_6)$ where $\omega_6 = e^{i\pi/3}$ is a primitive 6th root of unity.
+The companion matrix $s$ (defined as `$companion([1,-1])` in AIFS) is the companion for $x^2 - x + 1$,
+whose roots are $e^{\pm i\pi/3}$ — rotation by 60°.
+
+The expansion matrix $g = s + 1$ corresponds to multiplication by $1 + e^{i\pi/3} = \sqrt{3}\,e^{i\pi/6}$
+(scaling by $\sqrt{3}$, rotation by 30°), so $g^{-1}$ contracts by $1/\sqrt{3}$ and $g^{-2}$ by $1/3$.
+
+The reflection matrix $r$ (`$exchange()` in AIFS, [[0,1],[1,0]] in $\mathbb{R}^2$) represents
+complex conjugation in the projected plane.
+
+| Map | Scale | Role |
+|-----|-------|------|
+| $h_0 = s \cdot r$ | $g^{-1}$ (i.e., $1/\sqrt{3}$) | central reflected copy |
+| $h_1 = s(\mathbf{x}+[0,1])$ | $g^{-2}$ (i.e., $1/3$) | one outer copy |
+| $h_2 = s(\mathbf{x}+[1,0])$ | $g^{-2}$ | one outer copy |
+| $h_3 = s(\mathbf{x}+[-1,0])$ | $g^{-2}$ | one outer copy |
+| $h_4 = s(\mathbf{x}+[0,-1])$ | $g^{-2}$ | one outer copy |
+| $h_5 = s(\mathbf{x}+[-1,1])$ | $g^{-2}$ | one outer copy |
+| $h_6 = s(\mathbf{x}+[1,-1])$ | $g^{-2}$ | one outer copy |
+
+## The Koch Curve Boundary
+
+The boundary of the snowflake consists of three copies of the **Koch curve**, each built
+by the classic four-map IFS:
+
+$$f_1(x) = \frac{x}{3}, \quad f_2(x) = R_{60°}\frac{x}{3} + \frac{1}{3}, \quad f_3(x) = R_{-60°}\frac{x}{3} + \frac{1}{2}, \quad f_4(x) = \frac{x}{3} + \frac{2}{3}$$
+
+with Hausdorff dimension $d = \log(4)/\log(3) \approx 1.2619$.

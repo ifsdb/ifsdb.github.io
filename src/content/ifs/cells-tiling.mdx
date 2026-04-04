@@ -1,0 +1,155 @@
+---
+name: "Cells Tiling"
+description: "The dual cut-and-project tiling of the Shield tiling, obtained by projecting onto the second eigenplane of the 12-fold cyclotomic field."
+cardDescription: "Dual of the Shield tiling via the second CPS projection. Four interleaved fractal tile types with 12-fold symmetry."
+dimension: "2"
+transforms: 22
+tags: [plane, self-similar, aperiodic-tiling, quasicrystal]
+aifs: |
+  @
+  $dim=4
+  $subspace=[s,1]
+  g=1+s
+  s=$companion([1,0,-1,0])
+  r=$exchange()
+  h0=s^11*[-1,0,1,1]
+  h1=r*[0,0,0,0]
+  h2=s^4*[0,0,-1,-1]
+  h3=r*s*[0,1,0,-1]
+  h4=r*[0,0,0,0]
+  h5=s^3*r*[-1,-1,0,1]
+  h6=s^7*[-1,-1,-1,0]
+  h7=s^10*[-1,-1,0,1]
+  h8=s^2*r*[-1,0,1,0]
+  h9=s^10*[0,0,0,0]
+  h10=r*s^6*[0,0,-1,-1]
+  h11=s^5*r*[0,-1,-2,-1]
+  h12=s^3*r*[-1,-1,-1,0]
+  h13=s*[0,0,-1,-1]
+  h14=s^2*r*[-2,-2,0,1]
+  h15=s^2*[0,-1,-2,-1]
+  h16=s^9*[-1,0,1,1]
+  h17=r*s^2*[-1,0,1,1]
+  h18=s^5*[-2,-2,0,1]
+  h19=s^3*[-1,-1,-1,-1]
+  h20=s^11*[0,1,0,-1]
+  h21=s^4*r*[-1,-1,-1,-1]
+  A0=h9^-1*g*A3|h10^-1*g*A3|h11^-1*g*A3|h12^-1*g*A3|h13^-1*g*A3|h14^-1*g*A3|h15^-1*g*A3|h4^-1*g*A2|h5^-1*g*A2|h6^-1*g*A2|h7^-1*g*A2
+  A1=h16^-1*g*A3|h17^-1*g*A3|h18^-1*g*A3|h1^-1*g*A1|h2^-1*g*A1
+  A2=h19^-1*g*A3|h20^-1*g*A3|h21^-1*g*A3|h8^-1*g*A2|h3^-1*g*A1
+  A3=h0^-1*g*A0
+references:
+  - text: "Shield — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/shield/"
+  - text: "Wheel Tiling — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/wheel-tiling/"
+  - text: "Gähler, F. (1988). Crystallography of Dodecagonal Quasicrystals. Springer."
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsA3 = `@
+$dim=4
+$subspace=[s,1]
+g=1+s
+s=$companion([1,0,-1,0])
+r=$exchange()
+h0=s^11*[-1,0,1,1]
+h1=r*[0,0,0,0]
+h2=s^4*[0,0,-1,-1]
+h3=r*s*[0,1,0,-1]
+h4=r*[0,0,0,0]
+h5=s^3*r*[-1,-1,0,1]
+h6=s^7*[-1,-1,-1,0]
+h7=s^10*[-1,-1,0,1]
+h8=s^2*r*[-1,0,1,0]
+h9=s^10*[0,0,0,0]
+h10=r*s^6*[0,0,-1,-1]
+h11=s^5*r*[0,-1,-2,-1]
+h12=s^3*r*[-1,-1,-1,0]
+h13=s*[0,0,-1,-1]
+h14=s^2*r*[-2,-2,0,1]
+h15=s^2*[0,-1,-2,-1]
+h16=s^9*[-1,0,1,1]
+h17=r*s^2*[-1,0,1,1]
+h18=s^5*[-2,-2,0,1]
+h19=s^3*[-1,-1,-1,-1]
+h20=s^11*[0,1,0,-1]
+h21=s^4*r*[-1,-1,-1,-1]
+$root=A3
+A0=h9^-1*g*A3|h10^-1*g*A3|h11^-1*g*A3|h12^-1*g*A3|h13^-1*g*A3|h14^-1*g*A3|h15^-1*g*A3|h4^-1*g*A2|h5^-1*g*A2|h6^-1*g*A2|h7^-1*g*A2
+A1=h16^-1*g*A3|h17^-1*g*A3|h18^-1*g*A3|h1^-1*g*A1|h2^-1*g*A1
+A2=h19^-1*g*A3|h20^-1*g*A3|h21^-1*g*A3|h8^-1*g*A2|h3^-1*g*A1
+A3=h0^-1*g*A0`;
+
+export const aifsA2 = `@
+$dim=4
+$subspace=[s,1]
+g=1+s
+s=$companion([1,0,-1,0])
+r=$exchange()
+h0=s^11*[-1,0,1,1]
+h1=r*[0,0,0,0]
+h2=s^4*[0,0,-1,-1]
+h3=r*s*[0,1,0,-1]
+h4=r*[0,0,0,0]
+h5=s^3*r*[-1,-1,0,1]
+h6=s^7*[-1,-1,-1,0]
+h7=s^10*[-1,-1,0,1]
+h8=s^2*r*[-1,0,1,0]
+h9=s^10*[0,0,0,0]
+h10=r*s^6*[0,0,-1,-1]
+h11=s^5*r*[0,-1,-2,-1]
+h12=s^3*r*[-1,-1,-1,0]
+h13=s*[0,0,-1,-1]
+h14=s^2*r*[-2,-2,0,1]
+h15=s^2*[0,-1,-2,-1]
+h16=s^9*[-1,0,1,1]
+h17=r*s^2*[-1,0,1,1]
+h18=s^5*[-2,-2,0,1]
+h19=s^3*[-1,-1,-1,-1]
+h20=s^11*[0,1,0,-1]
+h21=s^4*r*[-1,-1,-1,-1]
+$root=A2
+A0=h9^-1*g*A3|h10^-1*g*A3|h11^-1*g*A3|h12^-1*g*A3|h13^-1*g*A3|h14^-1*g*A3|h15^-1*g*A3|h4^-1*g*A2|h5^-1*g*A2|h6^-1*g*A2|h7^-1*g*A2
+A1=h16^-1*g*A3|h17^-1*g*A3|h18^-1*g*A3|h1^-1*g*A1|h2^-1*g*A1
+A2=h19^-1*g*A3|h20^-1*g*A3|h21^-1*g*A3|h8^-1*g*A2|h3^-1*g*A1
+A3=h0^-1*g*A0`;
+
+## Overview
+
+The **Cells tiling** is the dual of the [Shield tiling](/ifs/shield-tiling), obtained by
+projecting the same 4D rational space onto the **second eigenplane** (`$subspace=[s,1]`)
+instead of the first. In the cut-and-project scheme, this is equivalent to swapping the
+roles of direct space and internal space.
+
+The tiling shares the **12-fold** rotational symmetry and the same inflation factor
+$|g|^2 = 2+\sqrt{3}$ as the Shield tiling. The algebraic description uses inverse maps:
+$h_k^{-1}g$ instead of $g^{-1}h_k$.
+
+## Dual GIFS Structure
+
+The four attractor types $A_0, A_1, A_2, A_3$ satisfy inverse-map GIFS equations:
+
+$$
+A_0 = h_9^{-1}g(A_3) \cup \cdots \cup h_{15}^{-1}g(A_3) \cup h_4^{-1}g(A_2) \cup h_5^{-1}g(A_2) \cup h_6^{-1}g(A_2) \cup h_7^{-1}g(A_2)
+$$
+
+$$
+A_3 = h_0^{-1}g(A_0)
+$$
+
+The dependency structure is: $A_3 \to A_0 \to A_3$ (cyclic), plus links to $A_1$ and $A_2$.
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="cells-A3" aifs={aifsA3} width={380} height={380} label="Cells tile A3" />
+    <figcaption>Dual tile $A_3$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="cells-A2" aifs={aifsA2} width={380} height={380} label="Cells tile A2" />
+    <figcaption>Dual tile $A_2$</figcaption>
+  </figure>
+</div>

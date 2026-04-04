@@ -39,11 +39,46 @@ const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
       of <em>A<sub>i</sub></em> is less than 1.
     </p>
 
+    <h2>Further Reading</h2>
+    <ul>
+      <li>
+        Mekhontsev, D. (2019).
+        <a href="https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479" target="_blank" rel="noopener">
+          <em>An algebraic framework for finding and analyzing self-affine tiles and fractals</em>
+        </a>.
+        Doctoral thesis, Ernst-Moritz-Arndt-Universität Greifswald.
+        Establishes the algebraic foundations of the IFStile algorithms.
+      </li>
+      <li>
+        <a href="/tools/aifs">AIFS Language Reference</a> —
+        algebraic representation used to define all fractals in this encyclopedia.
+      </li>
+    </ul>
+
     <h2>About This Site</h2>
     <p>
-      This encyclopedia is an open reference for IFS attractors. Visualizations are rendered
-      using <strong>ifstile</strong>, a custom WASM module, directly in the browser — no
-      images are stored on the server. Mathematical formulas are rendered with
+      This encyclopedia is an open reference for IFS attractors.
+    </p>
+    <h3>Live rendering</h3>
+    <p>
+      Every fractal image you see — in the catalog, on each entry page, and on the landing page —
+      is <strong>rendered live in your browser</strong>. There are no pre-generated images stored
+      on the server. Each attractor is computed on demand by
+      <a href="https://github.com/mekhontsev/ifstile" target="_blank" rel="noopener"><strong>ifslib</strong></a>,
+      a WebAssembly module compiled from the IFStile source. The AIFS program embedded in each
+      entry is passed directly to <code>ifslib_init</code> / <code>ifslib_render</code> running
+      inside a Web Worker, and the resulting pixel buffer is drawn onto the canvas — all
+      client-side, with no server involvement.
+    </p>
+    <p>
+      Progressive rendering is used: the canvas first shows a quick low-resolution preview
+      (32 px, 64 px, …) that sharpens up to the full resolution in the background.
+      Clicking any canvas opens the attractor in the full
+      <a href="https://app.ifstile.com" target="_blank" rel="noopener">IFStile web app</a>
+      for interactive exploration.
+    </p>
+    <p>
+      Mathematical formulas are rendered with
       <a href="https://katex.org" target="_blank" rel="noopener">KaTeX</a>.
     </p>
     <p>
