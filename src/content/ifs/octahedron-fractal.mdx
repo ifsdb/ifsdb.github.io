@@ -1,0 +1,45 @@
+---
+name: "Octahedron Fractal"
+description: "A 3D self-similar fractal built from six half-scale copies placed at the six vertices of a regular octahedron, with Hausdorff dimension log₂6 ≈ 2.585."
+cardDescription: "Six half-scale copies at octahedron vertices — Hausdorff dimension ≈ 2.585."
+dimension: "≈ 2.585"
+transforms: 6
+tags: [3d, self-similar]
+aifs: |
+  @
+  $dim=3
+  A=2^-1*([1,0,0]|[0,1,0]|[0,0,1]|[-1,0,0]|[0,-1,0]|[0,0,-1])*A
+references:
+  - text: "Octahedron — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Octahedron"
+---
+
+## Overview
+
+The **octahedron fractal** is a 3D self-similar set constructed by placing six half-scale copies of itself at the six vertices of a regular octahedron. It is analogous to the [Cantor dust](/ifs/cantor-dust) and [Vicsek fractal](/ifs/vicsek-fractal) but in three dimensions with octahedral symmetry.
+
+## Algebraic Structure
+
+The six vertices of the regular octahedron centered at the origin with circumradius $1$ are:
+
+$$
+(\pm 1, 0, 0), \quad (0, \pm 1, 0), \quad (0, 0, \pm 1)
+$$
+
+The six maps are:
+
+$$
+f_i(\mathbf{x}) = \tfrac{1}{2}\mathbf{x} + \tfrac{1}{2}v_i
+$$
+
+The Hausdorff dimension is:
+
+$$
+d = \frac{\log 6}{\log 2} \approx 2.585
+$$
+
+## Properties
+
+- The attractor has **full octahedral symmetry** ($O_h$ point group, order 48).
+- Despite the high symmetry, the attractor is a fractal with non-integer dimension — not a surface or solid.
+- It can be seen as the 3D analog of the six-branch [Vicsek fractal](/ifs/vicsek-fractal).

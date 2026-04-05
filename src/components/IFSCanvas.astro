@@ -27,6 +27,7 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
 
   let _worker: Worker | null = null;
   const _pending = new Map<string, HTMLCanvasElement>();
+  const _done = new Set<string>();
 
   function getWorker(): Worker {
     if (_worker) return _worker;
@@ -52,7 +53,10 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
           bitmap.close();
         });
       } else if (type === 'done') {
-        _pending.delete(id);
+        if (_pending.has(id)) {
+          _pending.delete(id);
+          _done.add(id);
+        }
       } else if (type === 'error') {
         console.error('IFS worker error:', message, '— canvas:', id);
         _pending.delete(id);
@@ -66,15 +70,34 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
     const ifsId = canvas.dataset.ifsId;
     if (!ifsId) return;
 
+    // Mark as in-progress before any await so cancelCanvas can see it.
+    _pending.set(ifsId, canvas);
+
+    // Scale canvas backing store to physical pixels for HiDPI screens.
+    const dpr = window.devicePixelRatio || 1;
+    if (dpr > 1 && !canvas.dataset.dprApplied) {
+      // Read the actual CSS-rendered dimensions (respects max-width, flex, etc.)
+      const rect = canvas.getBoundingClientRect();
+      const cssW = rect.width  || canvas.width;
+      const cssH = rect.height || canvas.height;
+      canvas.style.width  = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+      canvas.width  = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.dataset.dprApplied = '1';
+    }
+
     // Prefer inline AIFS; fall back to fetching the file.
     let aifs = canvas.dataset.aifs ?? '';
     if (!aifs) {
       const resp = await fetch(`/aifs/${ifsId}.aifs`);
-      if (!resp.ok) return;
+      if (!resp.ok) { _pending.delete(ifsId); return; }
       aifs = await resp.text();
     }
 
-    _pending.set(ifsId, canvas);
+    // Check if cancelled while we were awaiting the fetch.
+    if (!_pending.has(ifsId)) return;
+
     getWorker().postMessage({
       id: ifsId,
       aifs,
@@ -82,6 +105,13 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
       height: canvas.height,
       version: __IFSLIB_VERSION__,
     });
+  }
+
+  function cancelCanvas(canvas: HTMLCanvasElement) {
+    const ifsId = canvas.dataset.ifsId;
+    if (!ifsId || !_pending.has(ifsId)) return;
+    _pending.delete(ifsId);
+    getWorker().postMessage({ id: ifsId, type: 'cancel' });
   }
 
   function openInIFStile(canvas: HTMLCanvasElement) {
@@ -92,8 +122,24 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
   }
 
   function initAll() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const canvas = entry.target as HTMLCanvasElement;
+        const ifsId = canvas.dataset.ifsId!;
+        if (entry.isIntersecting) {
+          // Start render only if not already done or in progress.
+          if (!_done.has(ifsId) && !_pending.has(ifsId)) {
+            renderCanvas(canvas).catch(err => console.error('IFS render error:', err));
+          }
+        } else {
+          // Canvas left viewport — cancel any in-progress render.
+          cancelCanvas(canvas);
+        }
+      });
+    }, { rootMargin: '200px' });
+
     document.querySelectorAll<HTMLCanvasElement>('canvas[data-ifs-id]').forEach(c => {
-      renderCanvas(c).catch(err => console.error('IFS render error:', err));
+      observer.observe(c);
       c.addEventListener('click', () => openInIFStile(c));
     });
   }

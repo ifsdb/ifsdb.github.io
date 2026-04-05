@@ -1,0 +1,82 @@
+---
+name: "Chinese Lamp"
+description: "A 3D fractal assembled from five copies of the SnowBall surface — a self-similar fractal surface built from 13 maps at scale 1/3, arranged into a lamp-like shape."
+cardDescription: "Five copies of the SnowBall fractal surface (13 maps, scale 1/3) assembled into a 3D lamp configuration."
+dimension: "≈ 2.334"
+transforms: 13
+tags: [3d, self-similar]
+aifs: |
+  @rotate3d
+  $a=h
+  q=[0,0,1]
+  ang=0
+  k1=1
+  k2=1
+  arad=ang*asin(1)/90
+  sn=k2*sin(arad)
+  cs=k2*cos(arad)
+  qn=(q[0]*q[0]+q[1]*q[1]+q[2]*q[2])^(1/2)
+  x=q[0]/qn
+  y=q[1]/qn
+  z=q[2]/qn
+  a=[(x*x),(x*y),(x*z),(y*x),(y*y),(y*z),(z*x),(z*y),(z*z)]
+  b=[0,z,-y,-z,0,x,y,-x,0]
+  ret=k1*a-(b*sn)-((a-1)*cs)
+
+  @
+  $dim=3
+  $camera=[[-0.1,0.55,-3],[0.5,-0.5,0.62],[0.17,0.74,0.15],30]
+  $root=ChineseLamp
+  ChineseLamp=(1|[1,-1,0]*rotate3d([0,0,1],180)|[0,0,1]*rotate3d([1,0,0],90)|[0,-1,0]*rotate3d([0,0,1],90)|[1,0,0]*rotate3d([0,0,1],-90))*SnowBall
+  SnowBall=([0,0,0]|[1/3,0,0]|[2/3,0,0]|[0,0,1/3]|[2/3,0,1/3]|[0,0,2/3]|[1/3,0,2/3]|[2/3,0,2/3]|[1/3,1/3,1/3]|[1/3,0,1/3]*rotate3d([0,0,1],90)|[2/3,1/3,1/3]*rotate3d([0,0,1],-90)|[1/3,0,1/3]*rotate3d([1,0,0],-90)|[1/3,1/3,2/3]*rotate3d([1,0,0],90))*(1/3)*SnowBall
+references:
+  - text: "Meyer, D. (2002). Quasisymmetric embedding of self-similar surfaces and origami with rational maps. Ann. Acad. Sci. Fenn. Math., 27, 461–484."
+  - text: "IFS Builder 3D (original source)"
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+## Overview
+
+The **Chinese Lamp** is a 3D fractal object built by assembling five translated and rotated copies of the **SnowBall** — a self-similar fractal surface. The construction originates from IFS Builder 3D and is related to the quasisymmetric surface theory of D. Meyer (2002).
+
+## The SnowBall
+
+The base building block is the SnowBall: a self-similar fractal surface defined by **13 affine maps** each scaling by $1/3$. The 13 contraction centers are distributed over the surface of a unit cube — 8 on the $y=0$ face plus 4 rotated edge copies plus 1 interior-facing map:
+
+| Position | Isometry |
+|---|---|
+| $(0,0,0)$, $(1/3,0,0)$, $(2/3,0,0)$ | identity |
+| $(0,0,1/3)$, $(2/3,0,1/3)$ | identity |
+| $(0,0,2/3)$, $(1/3,0,2/3)$, $(2/3,0,2/3)$ | identity |
+| $(1/3,1/3,1/3)$ | identity |
+| $(1/3,0,1/3)$ | rotate 90° around $z$ |
+| $(2/3,1/3,1/3)$ | rotate −90° around $z$ |
+| $(1/3,0,1/3)$ | rotate −90° around $x$ |
+| $(1/3,1/3,2/3)$ | rotate 90° around $x$ |
+
+The SnowBall attractor $S$ satisfies:
+
+$$
+S = \bigcup_{k=0}^{12} \tfrac{1}{3} R_k(S) + t_k
+$$
+
+where each $R_k$ is a rotation and $t_k$ the corresponding translation. Its Hausdorff dimension is:
+
+$$
+d = \frac{\log 13}{\log 3} \approx 2.334
+$$
+
+## The ChineseLamp Assembly
+
+The ChineseLamp is formed by placing 5 copies of SnowBall under different rigid motions:
+
+| Copy | Isometry | Translation |
+|---|---|---|
+| 0 | identity | $[0,0,0]$ |
+| 1 | 180° around $z$ | $[1,-1,0]$ |
+| 2 | 90° around $x$ | $[0,0,1]$ |
+| 3 | 90° around $z$ | $[0,-1,0]$ |
+| 4 | −90° around $z$ | $[1,0,0]$ |
+
+The five copies interlock to form the lamp silhouette.

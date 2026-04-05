@@ -165,6 +165,18 @@ $dim=2                 # dimension of the rational space (required per block)
           </td>
         </tr>
         <tr>
+          <td><code>$camera=…</code></td>
+          <td>
+            Sets the view for a block. Two formats:<br/>
+            <strong>2D:</strong> <code>$camera=[cx, cy, r, angle]</code> — center <code>(cx,cy)</code>,
+            screen radius <code>r</code>, rotation angle in degrees.<br/>
+            <strong>3D:</strong> <code>$camera=[[loc],[target],[up],fov]</code> — camera position,
+            look-at point, up vector, field of view in degrees.<br/>
+            Example 3D: <code>$camera=[[-0.1,0.55,-3],[0.5,-0.5,0.62],[0.17,0.74,0.15],30]</code>.<br/>
+            Supported by both <code>ifslib</code> and IFStile.
+          </td>
+        </tr>
+        <tr>
           <td><code>$a=c</code></td>
           <td>Marks the block as <strong>checked</strong> in IFStile's UI. UI-only — has no effect on <code>ifslib</code>.</td>
         </tr>

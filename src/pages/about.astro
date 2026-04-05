@@ -39,6 +39,28 @@ const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
       of <em>A<sub>i</sub></em> is less than 1.
     </p>
 
+    <h2>Generalized IFS (GIFS)</h2>
+    <p>
+      A <strong>Generalized IFS</strong> (GIFS) defines multiple interleaved attractor sets
+      whose equations refer to each other. Instead of a single equation
+      <em>A = ⋃ f<sub>i</sub>(A)</em>, a GIFS with attractors
+      <em>A</em><sub>1</sub>, …, <em>A<sub>k</sub></em> satisfies a system:
+    </p>
+    <p set:html={"$$A_j = \\bigcup_{i} f_{ij}(A_{\\sigma(i,j)})$$"}></p>
+    <p>
+      where each map <em>f<sub>ij</sub></em> sends one attractor into another according to a
+      dependency graph. Under suitable expansiveness conditions the system has a unique
+      tuple of non-empty compact sets (A<sub>1</sub>, …, A<sub>k</sub>) satisfying all equations
+      simultaneously.
+    </p>
+    <p>
+      GIFS naturally arise in <strong>substitution tilings</strong>: a tiling with multiple
+      prototile types (e.g. the <a href="/ifs/cap">CAP / hat monotile</a> with four metatile
+      types H, T, P, F, or the <a href="/ifs/robinson-triangles">Robinson triangle</a> with two
+      types) can be described as a GIFS where each attractor is the shape of one prototile and
+      the maps encode the substitution rule.
+    </p>
+
     <h2>Further Reading</h2>
     <ul>
       <li>

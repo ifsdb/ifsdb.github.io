@@ -1,0 +1,45 @@
+---
+name: "Menger Sponge"
+description: "A 3D fractal constructed by recursively removing the center cube and face-center cubes from a cube, leaving 20 sub-cubes at each step."
+cardDescription: "3D analog of the Sierpiński carpet — 20-map IFS with Hausdorff dimension ≈ 2.727."
+dimension: "≈ 2.727"
+transforms: 20
+tags: [3d, self-similar]
+aifs: |
+  @
+  $dim=3
+  A=3^-1*([0,0,0]|[0,0,1]|[0,0,2]|[0,1,0]|[0,1,2]|[0,2,0]|[0,2,1]|[0,2,2]|[1,0,0]|[1,0,2]|[1,2,0]|[1,2,2]|[2,0,0]|[2,0,1]|[2,0,2]|[2,1,0]|[2,1,2]|[2,2,0]|[2,2,1]|[2,2,2])*A
+references:
+  - text: "Menger, K. (1926). Allgemeine Räume und Cartesische Räume. Proceedings of the Section of Sciences, 29, 476–482."
+  - text: "Menger sponge — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Menger_sponge"
+---
+
+## Overview
+
+The **Menger sponge** is the 3D analog of the Sierpiński carpet, constructed by Karl Menger in 1926 as an example of a universal curve (a compact, connected, locally connected topological space that contains a topological copy of every curve).
+
+Start with a unit cube. Divide it into 27 sub-cubes in a 3×3×3 grid. Remove the center sub-cube and the 6 face-center sub-cubes — the 7 that share a face center with the original. This leaves 20 sub-cubes. Repeat the procedure for each remaining sub-cube indefinitely.
+
+## Algebraic Structure
+
+The 20 maps are pure scalings by $1/3$ followed by translations to the 20 retained positions in $\{0,1,2\}^3$. The removed positions are the center $(1,1,1)$ and the six face centers $(1,1,0)$, $(1,1,2)$, $(1,0,1)$, $(1,2,1)$, $(0,1,1)$, $(2,1,1)$.
+
+Each map has the form:
+
+$$
+f_{ijk}(\mathbf{x}) = \tfrac{1}{3}\mathbf{x} + \tfrac{1}{3}(i,j,k)
+\quad (i,j,k) \in \{0,1,2\}^3 \setminus \{(1,1,1),\,(1,0,1),\,(1,2,1),\,(0,1,1),\,(2,1,1),\,(1,1,0),\,(1,1,2)\}
+$$
+
+The Hausdorff dimension is:
+
+$$
+d = \frac{\log 20}{\log 3} \approx 2.727
+$$
+
+## Properties
+
+- The sponge has **zero volume** but **infinite surface area**.
+- Every cross-section perpendicular to a main axis is a Sierpiński carpet.
+- The sponge is **topologically one-dimensional** — every loop can be contracted to a point within the sponge — despite its fractal dimension of ≈ 2.727.

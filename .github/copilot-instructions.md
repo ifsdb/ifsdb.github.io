@@ -52,6 +52,7 @@ public/
   ifslib.wasm             # WASM fractal renderer (do not modify)
   ifslib-worker.js        # Web Worker that owns the WASM instance
   favicon.svg
+scratch/                  # Fully gitignored — use for all temporary/scratch files
 ```
 
 ---
@@ -166,6 +167,7 @@ The `aifs` field is an IFStile/ifslib program. The full language is documented i
 $dim=2                 # dimension of rational space (required)
 ...                    # variable definitions and attractor equations
 ```
+- **`#` starts a comment** — everything from `#` to end of line is ignored. End-of-line comments (`x=1 # note`) are valid. The `#` character has no special meaning inside string values or matrix literals.
 - A file can contain any number of blocks separated by `@ID:ParentID` lines.
 - Each block is a GIFS that may define multiple attractor sets.
 - A block **inherits** all definitions from its parent block and can override them.
@@ -231,6 +233,7 @@ Example: `s=$companion([1,-1,1,-1])` defines the companion matrix for the cyclot
 | `$n=name` | Human-readable name for the block, displayed in IFStile's block list. No effect on rendering. |
 | `$subspace=[M, i1, i2, ...]` | Projection from the n-dimensional rational space to the rendering subspace. `M` is a matrix identifier; each index selects one **real Jordan cell** of `M`. A real eigenvalue → 1D cell (contributes 1 rendering dimension); a complex conjugate pair → 2D cell (contributes 2 rendering dimensions). The total rendering dimension equals the sum of the selected cells' dimensions. Indices are 0-based positions in the sequence of eigenvalues with Im(λ) ≥ 0, ordered by **decreasing modulus** (ties broken by decreasing real part). |
 | `$root=name` | Selects which attractor set is shown first in this block. `ifslib` always renders this set; IFStile uses it as the initial selection when the user switches to the block. Not needed if the desired set is already the first one defined in the block. |
+| `$camera=...` | Sets the view for a block. **2D**: `$camera=[cx, cy, r, angle]` — center `(cx,cy)`, screen radius `r`, rotation angle (degrees). **3D**: `$camera=[[loc],[target],[up],fov]` — camera position, look-at point, up vector, field of view in degrees. Example 3D: `$camera=[[-0.1,0.55,-3],[0.5,-0.5,0.62],[0.17,0.74,0.15],30]`. Supported by both `ifslib` and IFStile. |
 | `$a=c` | Marks the block as **checked** in IFStile's UI. UI-only — has no effect on `ifslib`. |
 | `$a=h` | Marks the block as **hidden**. Both `ifslib` and IFStile skip hidden blocks; `ifslib` searches for the first non-hidden block to render. Hidden blocks are still usable as parent blocks (via `@ID:ParentID`) by non-hidden blocks. |
 
@@ -443,24 +446,44 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 
 ### Components
 
-- **`IFSCanvas.astro`** — Astro component. Accepts `id`, `aifs`, `width`, `height`, `label` props. Embeds AIFS as `data-aifs` on the `<canvas>`. The `<script>` block creates a shared `Worker('/ifslib-worker.js')` and posts render requests to it.
+- **`IFSCanvas.astro`** — Astro component. Accepts `id`, `aifs`, `width`, `height`, `label` props. Embeds AIFS as `data-aifs` on the `<canvas>`. The `<script>` block is deduplicated by Astro across all instances on a page — all canvases share one worker and one set of module-level state variables.
 
-- **`public/ifslib-worker.js`** — Web Worker. Owns the singleton WASM instance. Serializes all requests via a promise queue (required because `ifslib` has a single global renderer). For each request renders progressively at sizes `[32, 64, 128, ..., maxDim]`, posting each frame as a transferable `Uint8ClampedArray`.
+- **`public/ifslib-worker.js`** — Web Worker. Compiles `ifslib.wasm` once (cached as `wasmModule`), but instantiates a **fresh WASM instance per render request** (required because `ifslib` has a single global renderer in each instance — concurrent renders need separate instances). Renders progressively at sizes `[32, 64, 128, ..., maxDim]` using round-robin interleaving across all pending canvases.
 
-- **`public/ifslib.wasm`** — Built from [github.com/mekhontsev/ifstile](https://github.com/mekhontsev/ifstile) (`SrcLib/ifslib.cpp`). Pure WASI reactor (no imports). Exports:
-  - `_initialize()` — must be called once after instantiation
-  - `ifslib_init(ptr: i32) → i32` — pass null-terminated AIFS string; returns 1 on success, 0 on failure
-  - `ifslib_render(w: i32, h: i32, quality: f32, thickness: f32) → i32` — returns pointer to RGBA pixel buffer
-  - `malloc(n: i32) → i32`, `free(ptr: i32)`
-  - `memory` — the linear memory
+- **`public/ifslib.wasm`** — Pure WASI reactor. Exports: `_initialize()`, `ifslib_init(ptr) → 0|1`, `ifslib_render(w, h, quality, thickness) → pixelPtr`, `malloc`, `free`, `memory`.
+
+### Main-thread state (`IFSCanvas.astro` script)
+
+```
+_worker   : Worker | null          — singleton worker, created on first use
+_pending  : Map<id, HTMLCanvasElement> — canvases currently being rendered
+_done     : Set<id>                — canvases that finished rendering (never re-rendered)
+```
+
+### Worker state (`ifslib-worker.js`)
+
+```
+wasmModule : WebAssembly.Module | null  — compiled module, cached after first fetch
+pending    : Map<id, {wasm, sizes, sizeIndex, width, height}>  — active render jobs
+```
 
 ### Render flow
 
-1. `IFSCanvas.astro` script calls `getWorker().postMessage({ id, aifs, width, height, version })`.
-2. Worker calls `ifslib_init(aifs)`, then loops over `progressiveSizes(width, height)`.
-3. Each step posts `{ type: 'frame', pixels: Uint8ClampedArray, width: rw, height: rh }`.
-4. Main thread draws via `createImageBitmap` + `ctx.drawImage` scaled to canvas size.
-5. Worker posts `{ type: 'done' }` when all frames are sent.
+1. Canvas enters viewport (IntersectionObserver, rootMargin 200px) → `renderCanvas(canvas)` called.
+2. Guard: skip if `_done.has(id)` or `_pending.has(id)` (already rendering).
+3. `_pending.set(id, canvas)` **immediately** (before any `await`) — makes cancel visible.
+4. HiDPI scaling: read `getBoundingClientRect()` for true CSS size, set `canvas.width/height` to physical pixels, lock `canvas.style.width/height` to CSS size (prevents aspect ratio distortion from CSS `max-width: 100%`).
+5. Post `{ id, aifs, width, height, version }` to worker.
+6. Worker: `await getWasmInstance(version)` → fresh instance → `ifslib_init` → add to `pending` Map → `runTick()`.
+7. `runTick()`: round-robin — finds the lowest `sizeIndex` across all pending, renders one frame per canvas at that step, posts `{ type: 'frame', pixels, width, height }`, yields via `setTimeout(0)`, loops until `pending` is empty.
+8. Main thread `onmessage`: for `frame` — draw only if `_pending.has(id)` (guards against stale frames after cancel). For `done` — move from `_pending` to `_done` **only if `_pending.has(id)`** (prevents marking a cancelled canvas as done).
+
+### Cancel flow (canvas leaves viewport)
+
+1. `cancelCanvas(canvas)`: `_pending.delete(id)` → post `{ id, type: 'cancel' }` to worker.
+2. Worker `onmessage cancel`: `pending.delete(id)` — job is dropped from the round-robin.
+3. **Race (cancel arrives during `await getWasmInstance`)**: the `await` may complete after the cancel. This is safe — the stale render writes to `pending` and runs to completion, but all its `frame`/`done` messages are silently dropped on the main thread (canvas no longer in `_pending`). The canvas stays in neither `_pending` nor `_done`, so it re-renders correctly when it re-enters the viewport.
+4. **Do NOT use a `cancelled` Set** to guard inside the worker — it causes a broken re-render race: a new render request can see its own id in `cancelled` (left by the prior cancel), skip itself, and the canvas stays blank permanently.
 
 ### Cache busting
 
@@ -491,10 +514,12 @@ Header nav order: Home | Catalog | Search | Tools | About
 ## Known Quirks & Gotchas
 
 - **Dev server host**: Astro/Vite on Windows may bind to `[::1]` instead of `127.0.0.1`. The config has `server: { host: '127.0.0.1' }` to fix this.
-- **Content store cache**: After changing `src/content.config.ts` schema, delete `.astro/` to clear the stale data store if entries fail to load. Also delete `.astro/` if a newly-created `.mdx` entry renders with `InvalidContentEntryDataError` (all required fields missing) — this means the cache stored an empty/stale entry for the new file. Symptom: build succeeds but dev-server render fails with schema validation errors for `name`, `description`, `transforms`, `aifs`.
+- **Content store cache**: After changing `src/content.config.ts` schema, delete `.astro/` to clear the stale data store if entries fail to load. Also delete `.astro/` if a newly-created `.mdx` entry renders with `InvalidContentEntryDataError` (all required fields missing) — this means the cache stored an empty/stale entry for the new file. Symptom: build succeeds but dev-server render fails with schema validation errors for `name`, `description`, `transforms`, `aifs`. **Rule: always delete `.astro/` and restart the dev server after adding any new `.mdx` file.** The build (`npx astro build`) is not affected by this cache and can be used to verify pages work correctly.
 - **MDX `export const` in content collections**: Use `export const` (not plain `const`) for variables that are referenced in JSX expressions within MDX content entries (`src/content/ifs/*.mdx`). Plain `const` is NOT accessible inside the compiled `_createMdxContent` function. Also: never delete an `.md` file and add an `.mdx` file with the same slug while the dev server is running — clear `.astro/` cache to avoid a duplicate-ID error.
+- **`#` is a comment in AIFS**: Everything from `#` to end of line is ignored — including inside AIFS blocks fetched from GitHub (e.g. `Quaquaversal.aifs` has `# a^4=1` etc.). Never mistake commented-out lines for actual definitions when reading raw `.aifs` files.
 - **AIFS must have `S=(...)*S`**: The most common error — `ifslib_init` silently returns 0 if the attractor line is missing.
 - **WASM has zero imports**: Instantiate with `WebAssembly.instantiate(buf, {})` — no WASI stubs needed.
-- **Worker queue**: `ifslib` uses a single global `g_renderer`; never send concurrent render requests — the worker serializes them via a promise queue.
+- **Fresh WASM instance per render**: `ifslib` has one global `g_renderer` per instance — the worker creates a new instance for every render request (module is compiled once and cached; re-instantiation is cheap).
+- **Never use a `cancelled` Set in the worker**: It creates a broken re-render race where a new render request sees its own id in `cancelled` (left by a prior cancel), skips itself, and the canvas stays black permanently. Let stale renders complete — they are silently dropped on the main thread (canvas not in `_pending`).
 - **Astro v6 content config location**: Must be `src/content.config.ts`, not `src/content/config.ts`.
 - **`$` inside LaTeX math in Markdown**: Never write `\$companion(...)` or `\$exchange()` inside `$...$` or `$$...$$` — remark-math breaks. Always move AIFS function names outside math delimiters into inline code: e.g. write `the matrix $s$ (defined as \`$companion([...])\` in AIFS)` instead of `$s = \$companion([...])$`.

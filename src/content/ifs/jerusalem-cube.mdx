@@ -1,0 +1,59 @@
+---
+name: "Jerusalem Cube"
+description: "A 3D fractal with the cross-sectional structure of the Jerusalem cross, built from 20 maps at two different scales — 8 corner maps and 12 edge maps."
+cardDescription: "3D extension of the Jerusalem cross — 20 maps at two scales, Hausdorff dimension ≈ 2.53."
+dimension: "≈ 2.53"
+transforms: 20
+tags: [3d, self-similar]
+aifs: |
+  @
+  $dim=3
+  k=2^(1/2)-1
+  t=k+k^2
+  s=1-k^2
+  A=(k|[0,t,0]*k|[t,0,0]*k|[t,t,0]*k|[0,0,t]*k|[0,t,t]*k|[t,0,t]*k|[t,t,t]*k|[k,0,0]*k^2|[k,s,0]*k^2|[0,k,0]*k^2|[s,k,0]*k^2|[k,0,s]*k^2|[k,s,s]*k^2|[0,k,s]*k^2|[s,k,s]*k^2|[0,0,k]*k^2|[0,s,k]*k^2|[s,0,k]*k^2|[s,s,k]*k^2)*A
+references:
+  - text: "Jerusalem cube — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Jerusalem_cube"
+  - text: "Jerusalem cross — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Jerusalem_cross"
+---
+
+## Overview
+
+The **Jerusalem cube** is a 3D fractal whose cross-sections parallel to the coordinate planes are all [Jerusalem crosses](/ifs/jerusalem-cross). It is constructed using 20 maps at two different contraction ratios derived from $k = \sqrt{2} - 1$.
+
+## Algebraic Structure
+
+The key parameter is $k = \sqrt{2} - 1 \approx 0.414$, derived from the diagonal of the unit square. Define:
+
+$$
+t = k + k^2 = (\sqrt{2}-1) + (3 - 2\sqrt{2}) = 2 - \sqrt{2}
+$$
+
+$$
+s = 1 - k^2 = 1 - (3-2\sqrt{2}) = 2\sqrt{2} - 2
+$$
+
+The 20 maps split into two groups:
+
+- **8 corner maps** (scale $k$): placed at the eight corners of the cube at positions in $\{0, t\}^3$.
+- **12 edge maps** (scale $k^2$): placed along the 12 edges of the cube.
+
+The Hausdorff dimension $d$ satisfies the Moran equation:
+
+$$
+8 \cdot k^d + 12 \cdot (k^2)^d = 1
+$$
+
+Letting $u = k^d$ gives $12u^2 + 8u - 1 = 0$, with positive root $u = \tfrac{-2 + \sqrt{7}}{6}$, yielding:
+
+$$
+d = \frac{\log u}{\log k} \approx 2.53
+$$
+
+## Properties
+
+- Every cross-section perpendicular to a coordinate axis is a **Jerusalem cross** pattern.
+- The fractal has the full cubic symmetry group $O_h$ (order 48).
+- Uses **two distinct contraction ratios** ($k$ and $k^2$), making it a non-homogeneous self-similar set.

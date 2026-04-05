@@ -1,0 +1,63 @@
+---
+name: "Tame Twin Dragon"
+description: "A self-similar plane-filling tile with two maps contracting by 1/√2, based on the algebraic integer (1+i√7)/2 in the ring ℤ[(1+√-7)/2]."
+cardDescription: "Two-map self-similar tile based on the Eisenstein-like integer (1+i√7)/2 — the 'tame' twin dragon variant."
+dimension: "2"
+transforms: 2
+tags: [plane, self-similar, tiling]
+aifs: |
+  @
+  $dim=2
+  $subspace=[g,0]
+  g=$companion([2,-1])
+  A=g^-1*([1,0]|[0,0])*A
+references:
+  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
+    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
+---
+
+## Overview
+
+The **tame twin dragon** is a self-similar tile of the plane constructed from two affine maps, both contracting by $1/\sqrt{2}$. Its attractor has **Hausdorff dimension 2** — it tiles the plane with positive area.
+
+The name distinguishes it from the classical [Heighway dragon](/ifs/heighway-dragon) and its variants: the "tame" qualifier indicates the tile has well-behaved (simply connected, no holes) topology.
+
+## Algebraic Structure
+
+The construction is based on the companion matrix $g$ of the polynomial $x^2 - x + 2$:
+
+$$
+g^2 - g + 2 = 0
+$$
+
+The eigenvalue of $g$ in the upper half-plane is:
+
+$$
+\lambda = \frac{1 + i\sqrt{7}}{2}, \qquad |\lambda|^2 = \frac{1 + 7}{4} = 2
+$$
+
+This number lives in the ring $\mathbb{Z}\!\left[\tfrac{1+\sqrt{-7}}{2}\right]$ — the ring of integers of $\mathbb{Q}(\sqrt{-7})$. The norm of $\lambda$ is 2, making it a valid base for a radix number system.
+
+The two IFS maps in AIFS are $h_0 = g^{-1} \cdot [0,0]$ and $h_1 = g^{-1} \cdot [1,0]$, with digit set $\{0, 1\}$. In the eigenvalue basis (rendered via `$subspace=[g,0]`) they become:
+
+$$
+h_0(z) = \frac{z}{\lambda}, \qquad h_1(z) = \frac{z + 1}{\lambda}
+$$
+
+The attractor $A$ is the unique compact set satisfying:
+
+$$
+A = h_0(A) \cup h_1(A) = \frac{1}{\lambda}\bigl(A \cup (A + 1)\bigr)
+$$
+
+The Hausdorff dimension equals exactly 2:
+
+$$
+d = \frac{\log 2}{\log |\lambda|} = \frac{\log 2}{\log \sqrt{2}} = 2
+$$
+
+## Properties
+
+- The tile $A$ **tiles the plane** by translations in the lattice $\mathbb{Z}\!\left[\tfrac{1+\sqrt{-7}}{2}\right]$.
+- Every point $z \in A$ has a unique base-$\lambda$ expansion $z = \sum_{k=1}^{\infty} d_k \lambda^{-k}$ with digits $d_k \in \{0,1\}$.
+- It is a connected, simply-connected region with a fractal boundary.

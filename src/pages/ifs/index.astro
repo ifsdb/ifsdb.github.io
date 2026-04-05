@@ -16,9 +16,11 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
     <div class="catalog-controls">
       <div class="catalog-filters">
         <span>Filter:</span>
-        <button class="tag-btn active" data-tag="">All</button>
-        {allTags.map(tag => (
-          <button class="tag-btn" data-tag={tag}>{tag}</button>
+        <button class="filter-btn" data-tag="">All</button>
+        <button class="filter-btn active" data-tag="plane">2D</button>
+        <button class="filter-btn" data-tag="3d">3D</button>
+        {allTags.filter(t => t !== 'plane' && t !== '3d').map(tag => (
+          <button class="filter-btn" data-tag={tag}>{tag}</button>
         ))}
       </div>
       <div class="catalog-sort">
@@ -61,13 +63,51 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
   const grid = document.getElementById('catalog-grid')!;
   const cards = () => Array.from(grid.querySelectorAll<HTMLElement>('.entry-card'));
 
-  // ── Filtering ──
-  let activeTag = '';
-  document.querySelectorAll<HTMLButtonElement>('.tag-btn').forEach(btn => {
+  // ── Filtering: multi-select toggle, OR logic ──
+  // "All" button clears all other selections.
+  const activeFilters = new Set<string>(['plane']); // default: 2D
+
+  document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      activeTag = btn.dataset.tag ?? '';
-      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      const tag = btn.dataset.tag ?? '';
+      const dimTags = ['plane', '3d'];
+
+      if (tag === '') {
+        // "All" — clear everything
+        activeFilters.clear();
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else {
+        // Remove "All" active state if it was on
+        document.querySelector('.filter-btn[data-tag=""]')?.classList.remove('active');
+
+        if (dimTags.includes(tag)) {
+          // 2D/3D are mutually exclusive: clicking one deactivates the other dim tag
+          if (activeFilters.has(tag)) {
+            activeFilters.delete(tag);
+            btn.classList.remove('active');
+          } else {
+            // Remove the other dim tag first
+            dimTags.forEach(d => {
+              if (d !== tag) {
+                activeFilters.delete(d);
+                document.querySelector(`.filter-btn[data-tag="${d}"]`)?.classList.remove('active');
+              }
+            });
+            activeFilters.add(tag);
+            btn.classList.add('active');
+          }
+        } else {
+          // Other tags: free toggle
+          if (activeFilters.has(tag)) {
+            activeFilters.delete(tag);
+            btn.classList.remove('active');
+          } else {
+            activeFilters.add(tag);
+            btn.classList.add('active');
+          }
+        }
+      }
       applyFilterSort();
     });
   });
@@ -85,8 +125,13 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
     });
     sorted.forEach(card => {
       const tags = card.dataset.tags?.split(',') ?? [];
-      card.style.display = (!activeTag || tags.includes(activeTag)) ? '' : 'none';
+      // Show if no filters active, or card matches ALL active filters (AND logic).
+      const visible = activeFilters.size === 0 || [...activeFilters].every(t => tags.includes(t));
+      card.style.display = visible ? '' : 'none';
       grid.appendChild(card);
     });
   }
+
+  // Apply default filter (2D) on load.
+  applyFilterSort();
 </script>

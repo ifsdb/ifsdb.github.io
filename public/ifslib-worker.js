@@ -28,7 +28,7 @@ function writeCString(wasm, str) {
   return ptr;
 }
 
-// Returns list of render sizes from ~1/8 up to maxDim, then exact target.
+// Returns list of render sizes from 32 up to maxDim.
 function progressiveSizes(width, height) {
   const maxDim = Math.max(width, height);
   const sizes = [];
@@ -41,48 +41,74 @@ function progressiveSizes(width, height) {
   return sizes;
 }
 
-// Single sequential queue — WASM g_renderer is global state, only one render at a time.
-let queue = Promise.resolve();
+// Interleaved rendering: all pending requests advance one size-step at a time,
+// so canvas 1 and canvas 2 both show a 32px preview before either reaches 64px.
+//
+// Each WASM instance is independent (own g_renderer), so we can render one frame
+// from each instance per tick without interference.
 
-self.onmessage = function (e) {
-  const msg = e.data;
-  queue = queue
-    .then(() => handleRequest(msg))
-    .catch(err => {
-      self.postMessage({ id: msg.id, type: 'error', message: String(err) });
-    });
-};
+// id -> { wasm, sizes, sizeIndex, width, height }
+const pending = new Map();
+let tickRunning = false;
 
-async function handleRequest({ id, aifs, width, height, version }) {
-  const wasm = await getWasmInstance(version);
+self.onmessage = async function (e) {
+  const { id, type, aifs, width, height, version } = e.data;
 
-  const ptr = writeCString(wasm, aifs);
-  const ok = wasm.ifslib_init(ptr);
-  wasm.free(ptr);
-
-  if (!ok) {
-    self.postMessage({ id, type: 'error', message: 'ifslib_init failed' });
+  if (type === 'cancel') {
+    pending.delete(id);
     return;
   }
 
-  const maxDim = Math.max(width, height);
-  for (const s of progressiveSizes(width, height)) {
-    const rw = Math.max(1, Math.round(width * s / maxDim));
-    const rh = Math.max(1, Math.round(height * s / maxDim));
-
-    const pixPtr = wasm.ifslib_render(rw, rh, 1.0, 1.0);
-    if (!pixPtr) {
-      self.postMessage({ id, type: 'error', message: 'ifslib_render failed at size ' + s });
+  try {
+    const wasm = await getWasmInstance(version);
+    const ptr = writeCString(wasm, aifs);
+    const ok = wasm.ifslib_init(ptr);
+    wasm.free(ptr);
+    if (!ok) {
+      self.postMessage({ id, type: 'error', message: 'ifslib_init failed' });
       return;
     }
-
-    // slice() copies the data before the next WASM call can overwrite it
-    const pixels = new Uint8ClampedArray(
-      wasm.memory.buffer.slice(pixPtr, pixPtr + rw * rh * 4)
-    );
-    // Transfer the buffer to avoid copying on the message boundary
-    self.postMessage({ id, type: 'frame', pixels, width: rw, height: rh }, [pixels.buffer]);
+    // Overwrite any stale entry for this id (e.g. re-render after cancel).
+    pending.set(id, { wasm, sizes: progressiveSizes(width, height), sizeIndex: 0, width, height });
+    if (!tickRunning) runTick();
+  } catch (err) {
+    self.postMessage({ id, type: 'error', message: String(err) });
   }
+};
 
-  self.postMessage({ id, type: 'done' });
+async function runTick() {
+  tickRunning = true;
+  while (pending.size > 0) {
+    // Find the lowest size-step currently in progress across all pending requests.
+    let minStep = Infinity;
+    for (const req of pending.values()) minStep = Math.min(minStep, req.sizeIndex);
+
+    // Render one frame for every request that is at the lowest step.
+    for (const [id, req] of pending) {
+      if (req.sizeIndex !== minStep) continue;
+      const s = req.sizes[req.sizeIndex];
+      const maxDim = Math.max(req.width, req.height);
+      const rw = Math.max(1, Math.round(req.width  * s / maxDim));
+      const rh = Math.max(1, Math.round(req.height * s / maxDim));
+      const pixPtr = req.wasm.ifslib_render(rw, rh, 1.0, 1.0);
+      if (!pixPtr) {
+        self.postMessage({ id, type: 'error', message: 'ifslib_render failed at size ' + s });
+        pending.delete(id);
+        continue;
+      }
+      const pixels = new Uint8ClampedArray(
+        req.wasm.memory.buffer.slice(pixPtr, pixPtr + rw * rh * 4)
+      );
+      self.postMessage({ id, type: 'frame', pixels, width: rw, height: rh }, [pixels.buffer]);
+      req.sizeIndex++;
+      if (req.sizeIndex >= req.sizes.length) {
+        self.postMessage({ id, type: 'done' });
+        pending.delete(id);
+      }
+    }
+
+    // Yield to the event loop so new onmessage calls can add to pending.
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+  tickRunning = false;
 }

@@ -1,0 +1,47 @@
+---
+name: "Sierpiński Tetrahedron"
+description: "A 3D analog of the Sierpiński triangle built from four self-similar tetrahedra placed at the vertices of a regular tetrahedron, scaled by 1/2."
+cardDescription: "3D analog of the Sierpiński triangle — 4-map IFS with Hausdorff dimension 2."
+dimension: "2"
+transforms: 4
+tags: [3d, self-similar]
+aifs: |
+  @
+  $dim=3
+  A=2^-1*([1,1,1]|[-1,1,-1]|[1,-1,-1]|[-1,-1,1])*A
+references:
+  - text: "Sierpiński tetrahedron — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle#Analogues_in_higher_dimensions"
+---
+
+## Overview
+
+The **Sierpiński tetrahedron** (also called the *tetrix*) is the 3D analog of the Sierpiński triangle. Four self-similar copies of scale $1/2$ are placed at the four vertices of a regular tetrahedron inscribed in the unit cube. Repeating this substitution indefinitely yields a fractal whose Hausdorff dimension equals exactly 2 — it is a 2D surface folded into 3D space.
+
+## Algebraic Structure
+
+The four vertices of the inscribed tetrahedron are:
+
+$$
+v_0 = (1,1,1), \quad v_1 = (-1,1,-1), \quad v_2 = (1,-1,-1), \quad v_3 = (-1,-1,1)
+$$
+
+These are the four vertices of the cube $\{-1,1\}^3$ with an even number of $-1$ coordinates. The four maps are:
+
+$$
+f_i(\mathbf{x}) = \tfrac{1}{2}\mathbf{x} + \tfrac{1}{2}v_i
+$$
+
+The Hausdorff dimension equals:
+
+$$
+d = \frac{\log 4}{\log 2} = 2
+$$
+
+Despite the dimension of 2, the attractor is not a surface — it has no interior and is topologically very different from a 2D manifold.
+
+## Properties
+
+- The total volume is **zero**: at each step the fraction of space occupied decreases by a factor of $4/8 = 1/2$, converging to zero.
+- Its Hausdorff dimension of exactly 2 means it is a measure-zero subset of $\mathbb{R}^3$ with the same metric complexity as a surface.
+- Each of the four self-similar sub-copies is a scaled, translated copy of the whole attractor.
