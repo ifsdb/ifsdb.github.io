@@ -1,0 +1,69 @@
+---
+name: "Antoine's Necklace"
+description: "A wild Cantor set in ℝ³ whose complement is not simply connected, constructed as an IFS of 24 interlinked solid tori."
+cardDescription: "24 interlocked tori iterated into a wild Cantor set — homeomorphic to the standard Cantor set but topologically inequivalent to it."
+dimension: "≈ 1.975"
+transforms: 24
+tags: [3d, self-similar]
+aifs: |
+  @rotx
+  $a=h
+  a=0
+  ret=[1,0,0, 0,cos(a),-sin(a), 0,sin(a),cos(a)]
+
+  @roty
+  $a=h
+  a=0
+  ret=[cos(a),0,-sin(a), 0,1,0, sin(a),0,cos(a)]
+
+  @
+  $n=Antoine's necklace
+  $dim=3
+  pi=2*asin(1)
+  r=rotx(pi/6)
+  s1=[0,1,0]*0.2
+  s2=rotx(pi/12)*[0,1,0]*0.2*rotx(pi/2)*roty(pi/2)
+  S=(1|r|r^2|r^3|r^4|r^5|r^6|r^7|r^8|r^9|r^10|r^11)*(s1|s2)
+  K=S*K
+references:
+  - text: "Antoine, L. (1921). Sur l'homeomorphisme de deux figures et leurs voisinages. J. Math. Pures Appl., 4, 221–325."
+  - text: "Sher, R. B. (1968). Concerning Wild Cantor Sets in E³. Proc. Amer. Math. Soc., 19(5), 1195–1200."
+    url: "https://doi.org/10.2307/2036059"
+  - text: "Željko, M. (2005). Minimal number of tori in geometric self-similar Antoine Cantor sets. JP J. Geom. Topol., 5(2), 239–245."
+  - text: "Antoine's necklace — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Antoine%27s_necklace"
+---
+
+## Overview
+
+**Antoine's necklace** is a subset of $\mathbb{R}^3$ that is homeomorphic to the standard Cantor set, yet whose complement $\mathbb{R}^3 \setminus K$ is not simply connected. It was constructed by Louis Antoine in 1921 as an example showing that the Schoenflies theorem fails in three dimensions.
+
+The construction begins with a solid torus $T \subset \mathbb{R}^3$. Inside $T$ one places a *simple chain* — a finite collection of smaller solid tori $T_1, \ldots, T_k$ ($k > 3$) whose centres lie on the core circle of $T$, such that $T_i$ and $T_j$ are linked if and only if $|i - j| \equiv 1 \pmod{k}$, and otherwise disjoint. The process is then repeated inside each $T_i$, and the necklace $K$ is the intersection over all stages:
+
+$$
+K = \bigcap_{n=0}^{\infty} \bigcup T_{i_1 i_2 \cdots i_n}
+$$
+
+$K$ is a compact, totally disconnected, perfect subset of $\mathbb{R}^3$ — a Cantor set — but any loop linking $T$ cannot be contracted to a point in $\mathbb{R}^3 \setminus K$, unlike the complementary situation for the standard Cantor set in $\mathbb{R}^3$.
+
+## Self-Similar Construction
+
+A necklace is called **self-similar** if there exists an IFS $\{S_1, \ldots, S_k\}$ of contracting similarities such that $S_1(T), \ldots, S_k(T)$ form a simple chain inside $T$ and the attractor satisfies $K = \bigcup_{i=1}^k S_i(K)$.
+
+It is called **regular** if additionally $k$ is even and all maps share the same contraction ratio. Željko (2005) proved that a regular self-similar Antoine necklace requires at least $k = 22$ tori; the smallest known even value satisfying the geometric constraints is $k = 24$.
+
+## This Example
+
+This entry uses $k = 24$ links arranged in two interleaved rings of 12. The 24 maps are grouped as:
+
+$$
+S = \bigl(1 \mid r \mid r^2 \mid \cdots \mid r^{11}\bigr) \cdot (s_1 \mid s_2)
+$$
+
+where $r$ is a rotation by $\pi/6$ and $s_1$, $s_2$ place two tori at each of the 12 rotational positions. Each map contracts by a factor of $0.2$, giving an estimated Hausdorff dimension of:
+
+$$
+d = \frac{\log 24}{\log 5} \approx 1.975
+$$
+
+Different values of $k$ (Sher 1968) yield Antoine necklaces with non-equivalent topological embeddings in $\mathbb{R}^3$ — inequivalence here means there is no self-homeomorphism of $\mathbb{R}^3$ carrying one onto the other.
