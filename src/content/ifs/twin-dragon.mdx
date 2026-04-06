@@ -9,16 +9,15 @@ aifs: |
   @
   $dim=2
   g=[1,-1,1,1]
-  s=[0,-1,1,0]
-  h0=1
-  h1=s^2*[-2,0]
-  A=g^-1*(h0|h1)*A
+  A=g^-1*([-1,0]|[1,0])*A
 references:
   - text: "Davis, C. & Knuth, D. E. (1970). Number representations and dragon curves. Journal of Recreational Mathematics, 3(2–4)."
   - text: "Twin dragon curve — Wikipedia"
     url: "https://en.wikipedia.org/wiki/Dragon_curve#Twindragon"
   - text: "Hinsley, S. R. Self-Similar Tiles — Quadratic Pletals (Gaussian integer Z[i] family)."
     url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
+  - text: "Mekhontsev, D. (2026). The aspect ratio of the Twin Dragon is 1/φ. Zenodo."
+    url: "https://doi.org/10.5281/zenodo.19443672"
 ---
 
 ## Overview
@@ -29,34 +28,44 @@ The Twin Dragon is a **rep-2 tile**: two congruent copies tile a scaled copy of 
 
 ## Algebraic Structure
 
-The IFS is controlled by the polynomial $x^2 - 2x + 2$, whose roots are $1 \pm i$. These are represented algebraically by the matrices:
+The IFS is controlled by the polynomial $x^2 - 2x + 2$, whose roots are $1 \pm i$. The expansion matrix is:
 
-$$g = \begin{pmatrix}1 & -1 \\ 1 & 1\end{pmatrix}, \qquad s = \begin{pmatrix}0 & -1 \\ 1 & 0\end{pmatrix}.$$
+$$
+g = \begin{pmatrix}1 & -1 \\ 1 & 1\end{pmatrix}
+$$
 
 The matrix $g$ represents complex multiplication by $1 + i$: it expands distances by $|1+i| = \sqrt{2}$ and rotates by 45°. Its inverse $g^{-1} = \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix}$ corresponds to multiplication by $\frac{1-i}{2}$.
-
-The matrix $s$ is a 90° rotation, and $s^2 = -I$ (180° rotation).
 
 ## IFS Definition
 
 The Twin Dragon $A$ is the unique non-empty compact set satisfying:
 
-$$A = g^{-1}\!\bigl(h_0(A) \cup h_1(A)\bigr),$$
+$$
+A = g^{-1}\!\bigl(h_0(A) \cup h_1(A)\bigr)
+$$
 
-where:
+where the two maps use symmetric shifts $\pm 1$ along the real axis:
 
-$$h_0(x) = x \quad \text{(identity)}, \qquad h_1(x) = s^2(x + (-2, 0)) = -x + (2, 0).$$
+$$
+h_0(x) = x + (-1,\,0), \qquad h_1(x) = x + (1,\,0)
+$$
 
-Expanding, the two affine maps are:
+Both pre-maps are pure translations. Expanding:
 
-$$f_1(x) = g^{-1} x = \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix} x,$$
+$$
+\begin{aligned}
+f_1(x) &= \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix} x + \begin{pmatrix}-1/2 \\ 1/2\end{pmatrix}, \\
+f_2(x) &= \frac{1}{2}\begin{pmatrix}1 & 1 \\ -1 & 1\end{pmatrix} x + \begin{pmatrix}1/2 \\ -1/2\end{pmatrix}.
+\end{aligned}
+$$
 
-$$f_2(x) = g^{-1}(-x + (2,0)) = \begin{pmatrix}-1/2 & -1/2 \\ 1/2 & -1/2\end{pmatrix} x + \begin{pmatrix}1 \\ -1\end{pmatrix}.$$
+Both maps share the same linear part $g^{-1}$ and differ only in translation. In complex notation:
 
-In complex notation, with $z = x + iy$:
+$$
+f_1(z) = \frac{1-i}{2}(z - 1), \qquad f_2(z) = \frac{1-i}{2}(z + 1)
+$$
 
-$$f_1(z) = \frac{1-i}{2}\,z, \qquad f_2(z) = \frac{-(1+i)}{2}\,z + (1 - i).$$
-
+The attractor is symmetric about the origin (maps are related by $z \mapsto -z$).
 Both maps contract by $\frac{1}{\sqrt{2}}$, giving self-similar dimension $\frac{\log 2}{\log \sqrt{2}} = 2$.
 
 ## Properties
@@ -65,5 +74,26 @@ Both maps contract by $\frac{1}{\sqrt{2}}$, giving self-similar dimension $\frac
 - **Contraction ratios:** both $f_1$ and $f_2$ contract by $1/\sqrt{2}$; Moran equation: $2 \cdot (1/\sqrt{2})^2 = 1$
 - **Tiling:** two Twin Dragons (one original, one rotated 180°) tile a $\sqrt{2}$-scaled copy; four copies tile the plane
 - **Relation to Heighway Dragon:** the Twin Dragon is the union of a Heighway Dragon and its image under $z \mapsto -z + (2, 0)$ (the 180° rotation about the midpoint $(1, 0)$)
-- **Number system:** the Dragon is the set of complex numbers $\sum_{k=0}^{\infty} \varepsilon_k \left(\frac{1-i}{2}\right)^k$ with $\varepsilon_k \in \lbrace 0, 1 \rbrace$, i.e., base $\frac{1-i}{2}$ digit expansions — a direct analogue of binary fractions for the Gaussian integers
+- **Number system:** the Dragon is the set of all $\sum_{k=1}^{\infty} \varepsilon_k \left(\frac{1-i}{2}\right)^k$ with $\varepsilon_k \in \{-1,\,+1\}$ — balanced binary expansions in base $\frac{1-i}{2}$, centered at the origin
 - **Polynomial:** $x^2 - 2x + 2$ with root $1 + i$; $\det(g) = 2$
+
+## Aspect Ratio from Second Moments
+
+The geometric aspect ratio of the Twin Dragon — the ratio of standard deviations along the principal axes of its area distribution — equals exactly $1/\varphi$, where $\varphi = \tfrac{1+\sqrt{5}}{2}$ is the golden ratio. This is surprising: the Twin Dragon is defined purely via the Gaussian integer $1+i$, with no pentagonal or Fibonacci structure in its construction.
+
+The result follows by solving the covariance fixed-point equation for the self-similar measure. Since the similarity dimension equals 2, that measure coincides with Lebesgue area, so $M$ captures the actual shape of the attractor. The matrix $M = \int xx^T\,d\mu$ satisfies $M = A_0 M A_0^T + b_1 b_1^T$, with unique solution:
+
+$$
+M = \frac{1}{5}\begin{pmatrix}2 & -1 \\ -1 & 3\end{pmatrix}
+$$
+
+The eigenvalues are $I_{1,2} = \frac{1 \mp \frac{1}{\sqrt{5}}}{2}$, giving:
+
+$$
+\sqrt{\frac{I_1}{I_2}} = \frac{1}{\varphi} \approx 0.618
+$$
+
+The same constant $\varphi$ also governs the **orientation**: the major axis of the Twin Dragon makes an angle $-\arctan\varphi \approx -58.3°$ with the horizontal, in the direction $(1, -\varphi)$.
+
+For a proof see Mekhontsev (2026).
+
