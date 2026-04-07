@@ -5,15 +5,15 @@ cardDescription: "Two-map self-similar tile based on the Eisenstein-like integer
 dimension: "2"
 transforms: 2
 tags: [plane, self-similar, tiling, algebraic]
+references:
+  - text: "Bandt, C. (1991). Self-similar sets 5. Integer matrices and fractal tilings of ℝⁿ. Proceedings of the American Mathematical Society, 112(2), 549–562."
+    url: "https://doi.org/10.2307/2048992"
 aifs: |
   @
   $dim=2
   $subspace=[g,0]
   g=$companion([2,-1])
   A=g^-1*([1,0]|[0,0])*A
-references:
-  - text: "Mekhontsev, D. (2019). An algebraic framework for finding and analyzing self-affine tiles and fractals."
-    url: "https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479"
 ---
 
 ## Overview
