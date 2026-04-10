@@ -5,9 +5,11 @@ interface Props {
   height?: number;
   label?: string;
   aifs?: string;
+  block?: string;
+  root?: string;
 }
 
-const { id, width = 400, height = 400, label, aifs } = Astro.props;
+const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
 ---
 <div class="ifs-canvas-wrapper">
   <div class="ifs-canvas-frame">
@@ -15,7 +17,9 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
             aria-label={label ?? id}
             title="Open in IFStile"
             style="cursor:pointer"
-            data-aifs={aifs ?? ''}></canvas>
+            data-aifs={aifs ?? ''}
+            data-ifs-block={block ?? ''}
+            data-ifs-root={root ?? ''}></canvas>
     <div class="ifs-open-hint">Open in IFStile ↗</div>
   </div>
 </div>
@@ -60,10 +64,41 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
       } else if (type === 'error') {
         console.error('IFS worker error:', message, '— canvas:', id);
         _pending.delete(id);
+        // Draw the error message directly on the canvas so it's visible without devtools.
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const w = canvas.width, h = canvas.height;
+          ctx.fillStyle = '#1a0008';
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#ff6b6b';
+          const fontSize = Math.max(11, Math.min(14, Math.floor(w / 28)));
+          ctx.font = `${fontSize}px monospace`;
+          ctx.textBaseline = 'top';
+          const maxW = w - 16;
+          // Word-wrap the message into lines
+          const words = ('Error: ' + message).split(' ');
+          const lines: string[] = [];
+          let line = '';
+          for (const word of words) {
+            const test = line ? line + ' ' + word : word;
+            if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = word; }
+            else line = test;
+          }
+          if (line) lines.push(line);
+          const lineH = fontSize * 1.4;
+          const totalH = lines.length * lineH;
+          const startY = Math.max(8, (h - totalH) / 2);
+          lines.forEach((l, i) => ctx.fillText(l, 8, startY + i * lineH, maxW));
+        }
       }
     };
     _worker.onerror = (e) => console.error('IFS worker crashed:', e);
     return _worker;
+  }
+
+  function isInViewport(el: Element): boolean {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
   }
 
   async function renderCanvas(canvas: HTMLCanvasElement): Promise<void> {
@@ -101,9 +136,12 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
     getWorker().postMessage({
       id: ifsId,
       aifs,
+      block: canvas.dataset.ifsBlock ?? '',
+      root: canvas.dataset.ifsRoot ?? '',
       width: canvas.width,
       height: canvas.height,
       version: __IFSLIB_VERSION__,
+      priority: isInViewport(canvas),
     });
   }
 
@@ -122,7 +160,19 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
   }
 
   function initAll() {
-    const observer = new IntersectionObserver((entries) => {
+    // Inner observer (no margin): marks canvases actually visible on screen as priority.
+    const innerObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const canvas = entry.target as HTMLCanvasElement;
+        const ifsId = canvas.dataset.ifsId!;
+        if (_pending.has(ifsId)) {
+          getWorker().postMessage({ id: ifsId, type: 'priority', priority: entry.isIntersecting });
+        }
+      });
+    }, { rootMargin: '0px' });
+
+    // Outer observer (200px margin): starts/cancels renders.
+    const outerObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const canvas = entry.target as HTMLCanvasElement;
         const ifsId = canvas.dataset.ifsId!;
@@ -139,7 +189,8 @@ const { id, width = 400, height = 400, label, aifs } = Astro.props;
     }, { rootMargin: '200px' });
 
     document.querySelectorAll<HTMLCanvasElement>('canvas[data-ifs-id]').forEach(c => {
-      observer.observe(c);
+      outerObserver.observe(c);
+      innerObserver.observe(c);
       c.addEventListener('click', () => openInIFStile(c));
     });
   }

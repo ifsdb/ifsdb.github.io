@@ -50,108 +50,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA3 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s
-s=$companion([1,0,-1,0])
-r=$exchange()
-h0=s^11*[-1,0,1,1]
-h1=s^9*[-1,0,0,0]
-h2=s^4*[0,0,-1,-1]
-h3=s^11*[-1,0,1,0]
-h4=s^5*[0,0,-1,0]
-h5=s^4*[0,0,-1,-1]
-h6=s^11*[-1,0,1,1]
-h7=s^2*[0,1,0,0]
-h8=s^5*[0,0,-1,-1]
-h9=s^2*[0,0,-1,0]
-h10=s^11*[0,1,0,0]
-h11=s^10*[0,1,1,1]
-h12=s^4*[-1,-1,-1,0]
-h13=s^3*[-1,-1,-1,0]
-h14=s^7*[-2,-1,1,2]
-h15=s^2*[0,-1,-2,-1]
-h16=s^9*[-1,0,1,1]
-h17=s*[0,0,-1,-1]
-h18=s^5*[-2,-2,0,1]
-h19=1*[1,1,-1,-2]
-h20=s^5*[-1,-1,0,0]
-h21=s*[1,1,-1,-2]
-$root=A3
-A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
-A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
-A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
-A0=g^-1*h0*A3`;
-
-export const aifsA2 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s
-s=$companion([1,0,-1,0])
-r=$exchange()
-h0=s^11*[-1,0,1,1]
-h1=s^9*[-1,0,0,0]
-h2=s^4*[0,0,-1,-1]
-h3=s^11*[-1,0,1,0]
-h4=s^5*[0,0,-1,0]
-h5=s^4*[0,0,-1,-1]
-h6=s^11*[-1,0,1,1]
-h7=s^2*[0,1,0,0]
-h8=s^5*[0,0,-1,-1]
-h9=s^2*[0,0,-1,0]
-h10=s^11*[0,1,0,0]
-h11=s^10*[0,1,1,1]
-h12=s^4*[-1,-1,-1,0]
-h13=s^3*[-1,-1,-1,0]
-h14=s^7*[-2,-1,1,2]
-h15=s^2*[0,-1,-2,-1]
-h16=s^9*[-1,0,1,1]
-h17=s*[0,0,-1,-1]
-h18=s^5*[-2,-2,0,1]
-h19=1*[1,1,-1,-2]
-h20=s^5*[-1,-1,0,0]
-h21=s*[1,1,-1,-2]
-$root=A2
-A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
-A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
-A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
-A0=g^-1*h0*A3`;
-
-export const aifsA1 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s
-s=$companion([1,0,-1,0])
-r=$exchange()
-h0=s^11*[-1,0,1,1]
-h1=s^9*[-1,0,0,0]
-h2=s^4*[0,0,-1,-1]
-h3=s^11*[-1,0,1,0]
-h4=s^5*[0,0,-1,0]
-h5=s^4*[0,0,-1,-1]
-h6=s^11*[-1,0,1,1]
-h7=s^2*[0,1,0,0]
-h8=s^5*[0,0,-1,-1]
-h9=s^2*[0,0,-1,0]
-h10=s^11*[0,1,0,0]
-h11=s^10*[0,1,1,1]
-h12=s^4*[-1,-1,-1,0]
-h13=s^3*[-1,-1,-1,0]
-h14=s^7*[-2,-1,1,2]
-h15=s^2*[0,-1,-2,-1]
-h16=s^9*[-1,0,1,1]
-h17=s*[0,0,-1,-1]
-h18=s^5*[-2,-2,0,1]
-h19=1*[1,1,-1,-2]
-h20=s^5*[-1,-1,0,0]
-h21=s*[1,1,-1,-2]
-$root=A1
-A3=g^-1*h9*A0|g^-1*h10*A0|g^-1*h11*A0|g^-1*h12*A0|g^-1*h13*A0|g^-1*h14*A0|g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A1|g^-1*h19*A2|g^-1*h20*A2|g^-1*h21*A2
-A2=g^-1*h4*A0|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A2
-A1=g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A2
-A0=g^-1*h0*A3`;
-
 ## Overview
 
 The **Shield tiling** is a classic aperiodic tiling with **12-fold** (dodecagonal) rotational
@@ -196,18 +94,18 @@ $$
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="shield-A3" aifs={aifsA3} width={380} height={380} label="Shield tile A3" />
+    <IFSCanvas id="shield-A3" aifs={props.aifs} root="A3" width={380} height={380} label="Shield tile A3" />
     <figcaption>Tile $A_3$ — large shield prototile</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="shield-A2" aifs={aifsA2} width={380} height={380} label="Shield tile A2" />
+    <IFSCanvas id="shield-A2" aifs={props.aifs} root="A2" width={380} height={380} label="Shield tile A2" />
     <figcaption>Tile $A_2$ — medium prototile</figcaption>
   </figure>
 </div>
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="shield-A1" aifs={aifsA1} width={380} height={380} label="Shield tile A1" />
+    <IFSCanvas id="shield-A1" aifs={props.aifs} root="A1" width={380} height={380} label="Shield tile A1" />
     <figcaption>Tile $A_1$ — small prototile</figcaption>
   </figure>
 </div>

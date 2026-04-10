@@ -51,123 +51,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA0 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s-s^3
-s=$companion([1,0,0,0])
-r=$exchange()
-q0=1*[0,1,0,0]
-q1=1
-q2=s^2*[0,-1,-1,-1]
-q3=s^4*[-1,-1,0,0]
-q4=s^6*[-1,-1,0,1]
-q5=s^2*[0,0,0,-1]
-q6=s^4*[-1,-2,-1,0]
-q7=1*[0,1,1,0]
-q8=s^6*[-1,0,1,1]
-h0=q0
-h1=q4
-h2=q1
-h3=q2
-h4=q6
-h5=q5
-h6=q7
-h7=q8
-h8=q3
-h9=q0
-h10=q1
-h11=q2
-h12=q4
-h13=q5
-h14=q3
-h15=q0
-h16=q1
-h17=q2
-h18=q3
-$root=A0
-A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
-A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
-A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
-
-export const aifsA1 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s-s^3
-s=$companion([1,0,0,0])
-r=$exchange()
-q0=1*[0,1,0,0]
-q1=1
-q2=s^2*[0,-1,-1,-1]
-q3=s^4*[-1,-1,0,0]
-q4=s^6*[-1,-1,0,1]
-q5=s^2*[0,0,0,-1]
-q6=s^4*[-1,-2,-1,0]
-q7=1*[0,1,1,0]
-q8=s^6*[-1,0,1,1]
-h0=q0
-h1=q4
-h2=q1
-h3=q2
-h4=q6
-h5=q5
-h6=q7
-h7=q8
-h8=q3
-h9=q0
-h10=q1
-h11=q2
-h12=q4
-h13=q5
-h14=q3
-h15=q0
-h16=q1
-h17=q2
-h18=q3
-$root=A1
-A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
-A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
-A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
-
-export const aifsA2 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s-s^3
-s=$companion([1,0,0,0])
-r=$exchange()
-q0=1*[0,1,0,0]
-q1=1
-q2=s^2*[0,-1,-1,-1]
-q3=s^4*[-1,-1,0,0]
-q4=s^6*[-1,-1,0,1]
-q5=s^2*[0,0,0,-1]
-q6=s^4*[-1,-2,-1,0]
-q7=1*[0,1,1,0]
-q8=s^6*[-1,0,1,1]
-h0=q0
-h1=q4
-h2=q1
-h3=q2
-h4=q6
-h5=q5
-h6=q7
-h7=q8
-h8=q3
-h9=q0
-h10=q1
-h11=q2
-h12=q4
-h13=q5
-h14=q3
-h15=q0
-h16=q1
-h17=q2
-h18=q3
-$root=A2
-A0=g^-1*h0*A0|g^-1*h1*A1|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A2|g^-1*h6*A2|g^-1*h7*A2|g^-1*h8*A2
-A1=g^-1*h9*A0|g^-1*h10*A1|g^-1*h11*A1|g^-1*h12*A1|g^-1*h13*A2|g^-1*h14*A2
-A2=g^-1*h15*A0|g^-1*h16*A1|g^-1*h17*A1|g^-1*h18*A2`;
-
 ## Overview
 
 The **Labyrinth tiling** is an aperiodic tiling with **8-fold** rotational symmetry,
@@ -205,15 +88,15 @@ $$
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="labyrinth-A0" aifs={aifsA0} width={310} height={310} label="Labyrinth tile A0" />
+    <IFSCanvas id="labyrinth-A0" aifs={props.aifs} root="A0" width={310} height={310} label="Labyrinth tile A0" />
     <figcaption>Tile $A_0$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="labyrinth-A1" aifs={aifsA1} width={310} height={310} label="Labyrinth tile A1" />
+    <IFSCanvas id="labyrinth-A1" aifs={props.aifs} root="A1" width={310} height={310} label="Labyrinth tile A1" />
     <figcaption>Tile $A_1$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="labyrinth-A2" aifs={aifsA2} width={310} height={310} label="Labyrinth tile A2" />
+    <IFSCanvas id="labyrinth-A2" aifs={props.aifs} root="A2" width={310} height={310} label="Labyrinth tile A2" />
     <figcaption>Tile $A_2$</figcaption>
   </figure>
 </div>

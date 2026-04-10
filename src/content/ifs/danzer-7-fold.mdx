@@ -6,7 +6,7 @@ dimension: "2"
 transforms: 14
 tags: [plane, self-similar, aperiodic-tiling, quasicrystal, algebraic]
 aifs: |
-  @
+  @V2
   $dim=6
   $subspace=[s,0]
   g=1+s^2-s^5
@@ -30,6 +30,31 @@ aifs: |
   A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
   A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
   A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2
+
+  @V1
+  $dim=6
+  $subspace=[s,0]
+  g=1+s^2-s^5
+  s=$companion([1,-1,1,-1,1,-1])
+  r=$exchange()
+  h0=s^8*[-1,0,-1,1,-1,1]
+  h1=1*[1,0,1,0,0,-1]
+  h2=1*[1,0,0,0,0,0]
+  h3=s^6*[-1,0,-2,0,-1,1]
+  h4=s^4*[0,-1,0,-1,0,-1]
+  h5=1*[1,0,0,0,0,0]
+  h6=s^5*[0,-1,-1,-1,0,0]
+  h7=s^9*[0,0,-1,0,0,1]
+  h8=s^13*[0,1,0,0,0,1]
+  h9=s^6*[0,-1,-1,0,0,0]
+  h10=s*[1,-1,1,0,1,-1]
+  h11=s^8*[-1,0,-1,1,-1,1]
+  h12=1*[1,0,0,0,0,0]
+  h13=s^4*[0,-1,0,-1,0,-1]
+  $root=A0
+  A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
+  A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
+  A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2
 references:
   - text: "Danzer's 7-fold — Tilings Encyclopedia"
     url: "https://tilings.math.uni-bielefeld.de/substitution/danzers-7-fold/"
@@ -37,106 +62,6 @@ references:
 ---
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
-
-export const aifsV2A0 = `@
-$dim=6
-$subspace=[s,0]
-g=1+s^2-s^5
-s=$companion([1,-1,1,-1,1,-1])
-r=$exchange()
-h0=1*[0,0,0,0,0,0]
-h1=1*[1,0,1,0,0,-1]
-h2=r*s^4*[1,0,0,0,0,0]
-h3=s^6*[-1,0,-2,0,-1,1]
-h4=s^10*[-1,0,0,1,0,1]
-h5=1*[1,0,0,0,0,0]
-h6=s^5*[0,-1,-1,-1,0,0]
-h7=s^9*[0,0,-1,0,0,1]
-h8=s^13*[0,1,0,0,0,1]
-h9=s^6*[0,-1,-1,0,0,0]
-h10=s*[1,-1,1,0,1,-1]
-h11=r*s^4*[0,0,0,0,0,0]
-h12=1*[1,0,0,0,0,0]
-h13=s^4*[0,-1,0,-1,0,-1]
-$root=A0
-A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
-A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
-A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
-
-export const aifsV2A1 = `@
-$dim=6
-$subspace=[s,0]
-g=1+s^2-s^5
-s=$companion([1,-1,1,-1,1,-1])
-r=$exchange()
-h0=1*[0,0,0,0,0,0]
-h1=1*[1,0,1,0,0,-1]
-h2=r*s^4*[1,0,0,0,0,0]
-h3=s^6*[-1,0,-2,0,-1,1]
-h4=s^10*[-1,0,0,1,0,1]
-h5=1*[1,0,0,0,0,0]
-h6=s^5*[0,-1,-1,-1,0,0]
-h7=s^9*[0,0,-1,0,0,1]
-h8=s^13*[0,1,0,0,0,1]
-h9=s^6*[0,-1,-1,0,0,0]
-h10=s*[1,-1,1,0,1,-1]
-h11=r*s^4*[0,0,0,0,0,0]
-h12=1*[1,0,0,0,0,0]
-h13=s^4*[0,-1,0,-1,0,-1]
-$root=A1
-A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
-A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
-A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
-
-export const aifsV2A2 = `@
-$dim=6
-$subspace=[s,0]
-g=1+s^2-s^5
-s=$companion([1,-1,1,-1,1,-1])
-r=$exchange()
-h0=1*[0,0,0,0,0,0]
-h1=1*[1,0,1,0,0,-1]
-h2=r*s^4*[1,0,0,0,0,0]
-h3=s^6*[-1,0,-2,0,-1,1]
-h4=s^10*[-1,0,0,1,0,1]
-h5=1*[1,0,0,0,0,0]
-h6=s^5*[0,-1,-1,-1,0,0]
-h7=s^9*[0,0,-1,0,0,1]
-h8=s^13*[0,1,0,0,0,1]
-h9=s^6*[0,-1,-1,0,0,0]
-h10=s*[1,-1,1,0,1,-1]
-h11=r*s^4*[0,0,0,0,0,0]
-h12=1*[1,0,0,0,0,0]
-h13=s^4*[0,-1,0,-1,0,-1]
-$root=A2
-A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
-A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
-A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
-
-export const aifsV1A0 = `@
-$dim=6
-$subspace=[s,0]
-g=1+s^2-s^5
-s=$companion([1,-1,1,-1,1,-1])
-r=$exchange()
-h0=s^8*[-1,0,-1,1,-1,1]
-h1=1*[1,0,1,0,0,-1]
-h2=1*[1,0,0,0,0,0]
-h3=s^6*[-1,0,-2,0,-1,1]
-h4=s^4*[0,-1,0,-1,0,-1]
-h5=1*[1,0,0,0,0,0]
-h6=s^5*[0,-1,-1,-1,0,0]
-h7=s^9*[0,0,-1,0,0,1]
-h8=s^13*[0,1,0,0,0,1]
-h9=s^6*[0,-1,-1,0,0,0]
-h10=s*[1,-1,1,0,1,-1]
-h11=s^8*[-1,0,-1,1,-1,1]
-h12=1*[1,0,0,0,0,0]
-h13=s^4*[0,-1,0,-1,0,-1]
-$root=A0
-A0=g^-1*h0*A0|g^-1*h1*A0|g^-1*h2*A1|g^-1*h3*A1|g^-1*h4*A2
-A1=g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A1|g^-1*h8*A1|g^-1*h9*A1|g^-1*h10*A2
-A2=g^-1*h11*A0|g^-1*h12*A1|g^-1*h13*A2`;
 
 ## Overview
 
@@ -177,15 +102,15 @@ $$
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="danzer-v2-A0" aifs={aifsV2A0} width={310} height={310} label="Danzer tile A0 (variant 2)" />
+    <IFSCanvas id="danzer-v2-A0" aifs={props.aifs} block="V2" root="A0" width={310} height={310} label="Danzer tile A0 (variant 2)" />
     <figcaption>Variant 2 — tile $A_0$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="danzer-v2-A1" aifs={aifsV2A1} width={310} height={310} label="Danzer tile A1 (variant 2)" />
+    <IFSCanvas id="danzer-v2-A1" aifs={props.aifs} block="V2" root="A1" width={310} height={310} label="Danzer tile A1 (variant 2)" />
     <figcaption>Variant 2 — tile $A_1$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="danzer-v2-A2" aifs={aifsV2A2} width={310} height={310} label="Danzer tile A2 (variant 2)" />
+    <IFSCanvas id="danzer-v2-A2" aifs={props.aifs} block="V2" root="A2" width={310} height={310} label="Danzer tile A2 (variant 2)" />
     <figcaption>Variant 2 — tile $A_2$</figcaption>
   </figure>
 </div>
@@ -197,7 +122,7 @@ the same GIFS dependency structure.
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="danzer-v1-A0" aifs={aifsV1A0} width={380} height={380} label="Danzer tile A0 (variant 1)" />
+    <IFSCanvas id="danzer-v1-A0" aifs={props.aifs} block="V1" root="A0" width={380} height={380} label="Danzer tile A0 (variant 1)" />
     <figcaption>Variant 1 — tile $A_0$</figcaption>
   </figure>
 </div>

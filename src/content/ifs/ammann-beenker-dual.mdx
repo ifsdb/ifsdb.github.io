@@ -37,50 +37,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA = `@
-$dim=4
-$subspace=[s,1]
-s=$companion([1,0,0,0])
-r=$exchange()
-g=s-s^3+1
-h0=s^4*r*[-1,-1,-1,-1]
-h1=s^5*[-1,-1,-1,-1]
-h2=s^3*[0,0,-2,-2]
-h3=s^5*[0,-2,0,0]
-h4=s^3*[1,-1,-1,-1]
-h5=s^4*[-1,-1,-1,-1]
-h6=s^3*r*[-1,-1,-1,-1]
-h7=[1,1,1,-1]
-h8=r*s*[1,1,1,-1]
-h9=s^4*[0,-2,0,0]
-h10=s*r*[-1,-1,1,1]
-h11=r*s*[2,0,2,0]
-$root=A
-A = h0^-1*g*A | h1^-1*g*A | h2^-1*g*A | h5^-1*g*B | h6^-1*g*B | h7^-1*g*B | h8^-1*g*B
-B = h3^-1*g*A | h4^-1*g*A | h9^-1*g*B | h10^-1*g*B | h11^-1*g*B`;
-
-export const aifsB = `@
-$dim=4
-$subspace=[s,1]
-s=$companion([1,0,0,0])
-r=$exchange()
-g=s-s^3+1
-h0=s^4*r*[-1,-1,-1,-1]
-h1=s^5*[-1,-1,-1,-1]
-h2=s^3*[0,0,-2,-2]
-h3=s^5*[0,-2,0,0]
-h4=s^3*[1,-1,-1,-1]
-h5=s^4*[-1,-1,-1,-1]
-h6=s^3*r*[-1,-1,-1,-1]
-h7=[1,1,1,-1]
-h8=r*s*[1,1,1,-1]
-h9=s^4*[0,-2,0,0]
-h10=s*r*[-1,-1,1,1]
-h11=r*s*[2,0,2,0]
-$root=B
-A = h0^-1*g*A | h1^-1*g*A | h2^-1*g*A | h5^-1*g*B | h6^-1*g*B | h7^-1*g*B | h8^-1*g*B
-B = h3^-1*g*A | h4^-1*g*A | h9^-1*g*B | h10^-1*g*B | h11^-1*g*B`;
-
 ## Overview
 
 The **Ammann–Beenker Dual** is obtained from the [Ammann–Beenker tiling](/ifs/ammann-beenker) by
@@ -100,11 +56,11 @@ This reflects the dual GIFS structure where the expansion is applied on the righ
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="ab-dual-A" aifs={aifsA} width={380} height={380} label="Ammann-Beenker dual tile A" />
+    <IFSCanvas id="ab-dual-A" aifs={props.aifs} root="A" width={380} height={380} label="Ammann-Beenker dual tile A" />
     <figcaption>Dual tile $A$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="ab-dual-B" aifs={aifsB} width={380} height={380} label="Ammann-Beenker dual tile B" />
+    <IFSCanvas id="ab-dual-B" aifs={props.aifs} root="B" width={380} height={380} label="Ammann-Beenker dual tile B" />
     <figcaption>Dual tile $B$</figcaption>
   </figure>
 </div>

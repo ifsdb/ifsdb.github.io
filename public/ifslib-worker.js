@@ -1,8 +1,8 @@
 'use strict';
 
-// ifslib_init does not reset WASM global state between calls, so each render
-// request requires a fresh instance. We cache the compiled module so that
-// re-instantiation is cheap (no re-compilation overhead).
+// Each render request requires a fresh WASM instance because ifslib uses
+// a single global renderer per instance. We cache the compiled module so
+// that re-instantiation is cheap (no re-compilation overhead).
 let wasmModule = null;
 
 async function getWasmInstance(version) {
@@ -26,6 +26,19 @@ function writeCString(wasm, str) {
   if (!ptr) throw new Error('malloc returned null');
   new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
   return ptr;
+}
+
+function readCString(wasm, ptr) {
+  if (!ptr) return '';
+  const mem = new Uint8Array(wasm.memory.buffer);
+  let end = ptr;
+  while (mem[end] !== 0) end++;
+  return new TextDecoder().decode(mem.subarray(ptr, end));
+}
+
+function getLastOutput(wasm) {
+  if (typeof wasm.get_last_output !== 'function') return '';
+  return readCString(wasm, wasm.get_last_output());
 }
 
 // Returns list of render sizes from 32 up to maxDim.
@@ -52,24 +65,42 @@ const pending = new Map();
 let tickRunning = false;
 
 self.onmessage = async function (e) {
-  const { id, type, aifs, width, height, version } = e.data;
+  const { id, type, aifs, block, root, width, height, version, priority } = e.data;
 
   if (type === 'cancel') {
     pending.delete(id);
     return;
   }
 
+  if (type === 'priority') {
+    const req = pending.get(id);
+    if (req) req.priority = priority;
+    return;
+  }
+
   try {
     const wasm = await getWasmInstance(version);
     const ptr = writeCString(wasm, aifs);
-    const ok = wasm.ifslib_init(ptr);
+    const ok = wasm.init(ptr);
     wasm.free(ptr);
     if (!ok) {
-      self.postMessage({ id, type: 'error', message: 'ifslib_init failed' });
+      const output = getLastOutput(wasm);
+      self.postMessage({ id, type: 'error', message: 'init failed' + (output ? ': ' + output : '') });
+      return;
+    }
+    // Select specified block (empty = first non-hidden) and root (empty = default).
+    const blkPtr = writeCString(wasm, block ?? '');
+    const rootPtr = writeCString(wasm, root ?? '');
+    const selOk = wasm.ifs_select(blkPtr, rootPtr);
+    wasm.free(blkPtr);
+    wasm.free(rootPtr);
+    if (!selOk) {
+      const output = getLastOutput(wasm);
+      self.postMessage({ id, type: 'error', message: 'ifs_select failed' + (output ? ': ' + output : '') });
       return;
     }
     // Overwrite any stale entry for this id (e.g. re-render after cancel).
-    pending.set(id, { wasm, sizes: progressiveSizes(width, height), sizeIndex: 0, width, height });
+    pending.set(id, { wasm, sizes: progressiveSizes(width, height), sizeIndex: 0, width, height, priority: priority ?? false });
     if (!tickRunning) runTick();
   } catch (err) {
     self.postMessage({ id, type: 'error', message: String(err) });
@@ -79,20 +110,31 @@ self.onmessage = async function (e) {
 async function runTick() {
   tickRunning = true;
   while (pending.size > 0) {
-    // Find the lowest size-step currently in progress across all pending requests.
+    // Priority canvases (visible on screen) advance first.
+    // If any priority canvas is pending, non-priority canvases wait.
+    const hasPriority = [...pending.values()].some(r => r.priority);
+
+    // Find the lowest size-step among the active set (priority-only if any, else all).
     let minStep = Infinity;
-    for (const req of pending.values()) minStep = Math.min(minStep, req.sizeIndex);
+    for (const req of pending.values()) {
+      if (hasPriority && !req.priority) continue;
+      minStep = Math.min(minStep, req.sizeIndex);
+    }
 
     // Render one frame for every request that is at the lowest step.
     for (const [id, req] of pending) {
+      if (hasPriority && !req.priority) continue;
       if (req.sizeIndex !== minStep) continue;
       const s = req.sizes[req.sizeIndex];
       const maxDim = Math.max(req.width, req.height);
       const rw = Math.max(1, Math.round(req.width  * s / maxDim));
       const rh = Math.max(1, Math.round(req.height * s / maxDim));
-      const pixPtr = req.wasm.ifslib_render(rw, rh, 1.0, 1.0);
+      const isFinal = req.sizeIndex === req.sizes.length - 1;
+      const quality = isFinal ? 2.0 : 1.0;
+      const pixPtr = req.wasm.render(rw, rh, quality, 1.0);
       if (!pixPtr) {
-        self.postMessage({ id, type: 'error', message: 'ifslib_render failed at size ' + s });
+        const output = getLastOutput(req.wasm);
+        self.postMessage({ id, type: 'error', message: 'render failed at size ' + s + (output ? ': ' + output : '') });
         pending.delete(id);
         continue;
       }

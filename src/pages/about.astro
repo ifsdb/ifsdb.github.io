@@ -88,7 +88,7 @@ const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
       on the server. Each attractor is computed on demand by
       <a href="https://github.com/mekhontsev/ifstile" target="_blank" rel="noopener"><strong>ifslib</strong></a>,
       a WebAssembly module compiled from the IFStile source. The AIFS program embedded in each
-      entry is passed directly to <code>ifslib_init</code> / <code>ifslib_render</code> running
+      entry is passed directly to <code>ifslib</code> running
       inside a Web Worker, and the resulting pixel buffer is drawn onto the canvas — all
       client-side, with no server involvement.
     </p>

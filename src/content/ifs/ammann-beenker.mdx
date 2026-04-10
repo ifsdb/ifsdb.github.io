@@ -37,50 +37,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA = `@
-$dim=4
-$subspace=[s,0]
-s=$companion([1,0,0,0])
-r=$exchange()
-g=s-s^3+1
-h0=s^4*r*[-1,-1,-1,-1]
-h1=s^5*[-1,-1,-1,-1]
-h2=s^3*[0,0,-2,-2]
-h3=s^5*[0,-2,0,0]
-h4=s^3*[1,-1,-1,-1]
-h5=s^4*[-1,-1,-1,-1]
-h6=s^3*r*[-1,-1,-1,-1]
-h7=[1,1,1,-1]
-h8=r*s*[1,1,1,-1]
-h9=s^4*[0,-2,0,0]
-h10=s*r*[-1,-1,1,1]
-h11=r*s*[2,0,2,0]
-$root=A
-A=g^-1*(h0*A|h1*A|h2*A|h3*B|h4*B)
-B=g^-1*(h5*A|h6*A|h7*A|h8*A|h9*B|h10*B|h11*B)`;
-
-export const aifsB = `@
-$dim=4
-$subspace=[s,0]
-s=$companion([1,0,0,0])
-r=$exchange()
-g=s-s^3+1
-h0=s^4*r*[-1,-1,-1,-1]
-h1=s^5*[-1,-1,-1,-1]
-h2=s^3*[0,0,-2,-2]
-h3=s^5*[0,-2,0,0]
-h4=s^3*[1,-1,-1,-1]
-h5=s^4*[-1,-1,-1,-1]
-h6=s^3*r*[-1,-1,-1,-1]
-h7=[1,1,1,-1]
-h8=r*s*[1,1,1,-1]
-h9=s^4*[0,-2,0,0]
-h10=s*r*[-1,-1,1,1]
-h11=r*s*[2,0,2,0]
-$root=B
-A=g^-1*(h0*A|h1*A|h2*A|h3*B|h4*B)
-B=g^-1*(h5*A|h6*A|h7*A|h8*A|h9*B|h10*B|h11*B)`;
-
 ## Overview
 
 The **Ammann–Beenker tiling** is an aperiodic tiling of the plane with exact **8-fold** (octagonal)
@@ -95,11 +51,11 @@ here as a **Generalized IFS (GIFS)** with two interleaved attractors $A$ (rhombu
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="ammann-beenker-a" aifs={aifsA} width={380} height={380} label="A — rhombus tile" />
+    <IFSCanvas id="ammann-beenker-a" aifs={props.aifs} root="A" width={380} height={380} label="A — rhombus tile" />
     <figcaption>$A$ — rhombus tile</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="ammann-beenker-b" aifs={aifsB} width={380} height={380} label="B — square tile" />
+    <IFSCanvas id="ammann-beenker-b" aifs={props.aifs} root="B" width={380} height={380} label="B — square tile" />
     <figcaption>$B$ — square tile</figcaption>
   </figure>
 </div>

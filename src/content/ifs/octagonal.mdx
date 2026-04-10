@@ -32,46 +32,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA0 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s-s^3
-s=$companion([1,0,0,0])
-r=$exchange()
-h0=1*[0,2,0,0]
-h1=1*[0,0,0,0]
-h2=r*s*[0,0,0,0]
-h3=1*[2,2,0,0]
-h4=1*[2,2,1,0]
-h5=r*s^2*[0,0,0,0]
-h6=s^5*[-2,-2,0,2]
-h7=1*[2,0,0,0]
-h8=s^6*[-1,0,3,2]
-h9=s^2*[1,-2,-3,-2]
-$root=A0
-A0=g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A0|g^-1*h9*A0
-A1=g^-1*h0*A1|g^-1*h1*A0|g^-1*h2*A0`;
-
-export const aifsA1 = `@
-$dim=4
-$subspace=[s,0]
-g=1+s-s^3
-s=$companion([1,0,0,0])
-r=$exchange()
-h0=1*[0,2,0,0]
-h1=1*[0,0,0,0]
-h2=r*s*[0,0,0,0]
-h3=1*[2,2,0,0]
-h4=1*[2,2,1,0]
-h5=r*s^2*[0,0,0,0]
-h6=s^5*[-2,-2,0,2]
-h7=1*[2,0,0,0]
-h8=s^6*[-1,0,3,2]
-h9=s^2*[1,-2,-3,-2]
-$root=A1
-A0=g^-1*h3*A1|g^-1*h4*A1|g^-1*h5*A0|g^-1*h6*A0|g^-1*h7*A0|g^-1*h8*A0|g^-1*h9*A0
-A1=g^-1*h0*A1|g^-1*h1*A0|g^-1*h2*A0`;
-
 ## Overview
 
 The **Octagonal 1225** tiling is an aperiodic 2-prototile tiling with **8-fold** rotational
@@ -99,11 +59,11 @@ $$
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="octagonal-A0" aifs={aifsA0} width={380} height={380} label="Octagonal tile A0" />
+    <IFSCanvas id="octagonal-A0" aifs={props.aifs} root="A0" width={380} height={380} label="Octagonal tile A0" />
     <figcaption>Tile $A_0$</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="octagonal-A1" aifs={aifsA1} width={380} height={380} label="Octagonal tile A1" />
+    <IFSCanvas id="octagonal-A1" aifs={props.aifs} root="A1" width={380} height={380} label="Octagonal tile A1" />
     <figcaption>Tile $A_1$</figcaption>
   </figure>
 </div>

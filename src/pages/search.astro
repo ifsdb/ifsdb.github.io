@@ -31,6 +31,16 @@ const index = entries.map(e => ({
     />
     <div id="search-results" class="catalog-grid"></div>
     <p id="search-empty" style="display:none">No results found.</p>
+    <div id="search-hints">
+      <p class="search-hints-label">Try searching for:</p>
+      <div class="search-hints-list">
+        <button class="search-hint-btn" type="button">barnsley</button>
+        <button class="search-hint-btn" type="button">tiling</button>
+        <button class="search-hint-btn" type="button">3d</button>
+        <button class="search-hint-btn" type="button">classic</button>
+        <button class="search-hint-btn" type="button">quasicrystal</button>
+      </div>
+    </div>
   </main>
 </BaseLayout>
 
@@ -38,6 +48,7 @@ const index = entries.map(e => ({
   const input = document.getElementById('search-input');
   const resultsEl = document.getElementById('search-results');
   const emptyEl = document.getElementById('search-empty');
+  const hintsEl = document.getElementById('search-hints');
 
   function render(items) {
     resultsEl.innerHTML = items.map(e => `
@@ -54,9 +65,17 @@ const index = entries.map(e => ({
     emptyEl.style.display = items.length === 0 ? '' : 'none';
   }
 
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) { resultsEl.innerHTML = ''; emptyEl.style.display = 'none'; return; }
-    render(index.filter(e => e.text.includes(q)));
+  function search(q) {
+    input.value = q;
+    const lower = q.trim().toLowerCase();
+    hintsEl.style.display = 'none';
+    if (!lower) { resultsEl.innerHTML = ''; emptyEl.style.display = 'none'; hintsEl.style.display = ''; return; }
+    render(index.filter(e => e.text.includes(lower)));
+  }
+
+  input.addEventListener('input', () => search(input.value));
+
+  document.querySelectorAll('.search-hint-btn').forEach(btn => {
+    btn.addEventListener('click', () => { search(btn.textContent); input.focus(); });
   });
 </script>

@@ -311,7 +311,7 @@ val    = constArr[1]    # access JS constant
 ```
 S=(f1|f2|f3)*S    # S is the unique compact attractor of the IFS {f1,f2,f3}
 ```
-**Mandatory**: without an attractor equation `ifslib_init` returns 0 and nothing renders.
+**Mandatory**: without an attractor equation `ifs_select` returns 0 and nothing renders.
 
 #### GIFS (Generalized IFS — multiple attractors)
 When the self-similar system defines multiple interleaved attractors, each gets its own equation. The attractor variables appear on both sides:
@@ -450,7 +450,142 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 
 - **`public/ifslib-worker.js`** — Web Worker. Compiles `ifslib.wasm` once (cached as `wasmModule`), but instantiates a **fresh WASM instance per render request** (required because `ifslib` has a single global renderer in each instance — concurrent renders need separate instances). Renders progressively at sizes `[32, 64, 128, ..., maxDim]` using round-robin interleaving across all pending canvases.
 
-- **`public/ifslib.wasm`** — Pure WASI reactor. Exports: `_initialize()`, `ifslib_init(ptr) → 0|1`, `ifslib_render(w, h, quality, thickness) → pixelPtr`, `malloc`, `free`, `memory`.
+- **`public/ifslib.wasm`** — Pure WASI reactor. Exports:
+  - `_initialize()` — must be called once after instantiation
+  - `init(ptr) → 0|1` — parse AIFS source (C string ptr)
+  - `ifs_select(block_ptr, root_ptr) → 0|1` — select block and root attractor (empty → first non-hidden / default)
+  - `render(w, h, quality, thickness) → pixelPtr` — render to RGBA pixel buffer (`width * height * 4` bytes). `quality >= 1`; quality=2 is usually sufficient for good results, computation time grows exponentially with quality. `thickness >= 1` in pixels, use 1 as default. Returns NULL on failure. Pixel data is valid until the next `render` call and must not be freed by the caller.
+  - `information(what_ptr) → 0|1` — compute analytics for the currently selected block; output goes to `get_last_output()`. Values for `what`:
+    - `"Measure"` — Hausdorff dimension, centroid `C`, principal moments `I`, eigenvectors `Q` (aspect ratio can be derived from `I`)
+    - `"Dimension"` — numerical Hausdorff dimension estimate with polynomial equation
+    - `"Evaluation"` — evaluated map matrices (useful for verifying companion matrix expansions)
+    - `"Components"` — variable-to-graph-component mapping. Output: one line per variable, `varName: componentNumber`. Variables named `/^i\d+$/` in a boundary AIFS (output of `custom_ifs`) are intersection pieces; all others are original attractor variables.
+    - `"Subspaces"` — affine subspaces for every attractor
+    - `"Projection"` — projected IFS as graphviz digraph + map definitions
+    - `"Balls"` — approximate bounding ball (center + radius); guaranteed to be at most 3/2 times the minimum enclosing ball radius, not the exact minimum
+    - `"Diameters"` — geometric diameter, diameter endpoints, center of mass, squared radius (slow)
+    - `"NormalMaps"` — normal map indices
+    - `"AST"` — abstract syntax tree of parsed maps
+
+    **Slow operations:** `Dimension`, `Diameters`, `Subspaces` can be slow. All others are fast.
+
+    `information("Dimension")` works in the **rendering Euclidean space**, which is determined by `$subspace` (or `$dim` if no subspace). This means it correctly handles **any ambient dimension**: 2D tiles (boundary dim ∈ (1,2)), 3D fractals (boundary dim ∈ (2,3)), GIFS with multiple attractor types, and algebraic IFS projected via `$subspace` from a higher `$dim`. The dimension is always relative to the actual rendered space, not the rational space.
+
+    **Output format** — one section per graph component:
+    ```
+    Component 0, dim ~= 1.523627086202492
+    dim = 2*log(x)/log(p)
+    p = p0 = 2
+    x^3-x^2-2=0
+    x~=1.695620769559862
+    Component 4, dim ~= 1.523627...
+    ...
+    ```
+    When `p` is a product of complex roots, additional lines appear between `p =` and the polynomial:
+    ```
+    p = p0 = |product of used roots|
+    p0 ~= 5.828...
+    used roots of z^4-...:
+             2.414...
+             2.414...
+    x^2-4*x-4=0
+    ```
+    To extract the polynomial: scan forward from the `dim ~=` line, stop at the next `Component ` line, and pick the first line matching `/^x[^~]/`. The polynomial can be up to ~10 lines after `dim ~=` when complex roots are listed.
+
+  - `custom_ifs(bitmask, lim, max_complexity, max_bits, find_prec) → 0|1` — neighbor graph computation; output goes to `get_last_output()` as a **comment header** followed by a ready-to-use AIFS program. **`bitmask=0`** is a special mode: boundary for every attractor (automatic). Individual bits: 0=intersections between neighbors, 1=connections between neighbors, 2=neighbourhoods, 3=neighbourhood graph, 4=relators (group encoding of neighbor graph), 5=alternative boundary. Typical call: `custom_ifs(1, 2, 4000, 63, 0.0)` for boundary (pairwise intersections). `lim=2` for boundary (pieces of the boundary are exactly pairwise intersections of neighbors), `max_complexity=4000` reasonable, `max_bits=63` default precision, `find_prec=0` for rational arithmetic (exact).
+
+    **Do NOT use `find_prec > 0` (float mode).** Float mode results are unreliable — the boundary AIFS it produces may be incorrect for non-rational IFS. Always use `find_prec=0`. (When float search is intentionally desired, `0.3` is a reasonable value per the source comments.)
+
+    **Tiered `max_complexity`:** some IFS need large budgets: try 8000 → 50000 → 200000. Danzer needs ~50 000, Quaquaversal needs ~200 000.
+
+    **Comment header** (prepended before the AIFS block, parsed with `lastIndexOf(' = ')`):
+    ```
+    #how many intersections were checked = 124
+    #depth reached = 7
+    #how many bits were used = 3
+    #minimum depth where an exact overlap was found (0: OSC) = 0
+    #intersections are fully created = 1
+    #there was a rational overflow = 0
+    #the mode in which the calculations were performed = rational
+    ```
+    Key fields and their meaning:
+    - `how many bits were used`: **0** = rational engine could not engage (IFS has non-exact coefficients such as sin/cos/decimals — `custom_ifs` is inapplicable regardless of `max_complexity`). **> 0** = rational arithmetic ran successfully.
+    - `how many intersections were checked`: **0 with bits > 0** = tiles touch only at isolated points (no shared boundaries — this is a genuine geometric property, e.g. Cantor dust, Sierpiński tetrahedron). **0 with bits = 0** = non-exact IFS (see above).
+    - `minimum depth where an exact overlap was found (0: OSC)`: **0** = OSC holds, boundary dimension result is valid. **non-zero** = OSC violated at that depth (boundary dimension ≥ ambient dim, meaningless).
+    - `intersections are fully created`: 1 = computation complete; 0 = cut short by `max_complexity` — try a larger budget.
+    - Parse with `lastIndexOf(' = ')` to split key from value (the OSC key itself contains ` = ` in older format).
+
+    **Detecting non-exact IFS before calling `custom_ifs`:** IFS defined with trigonometric functions (`sin`, `cos`, `tan`, `asin`, …) or irrational expressions (`2^(1/2)`, etc.) will always return `bits=0`. Pure decimal literals like `0.5` in AIFS are **intentionally** treated as non-exact — this is a deliberate design signal from the author that floating-point arithmetic is desired. If the AIFS was written with decimals and you want exact rational arithmetic, rewrite coefficients as fractions (`1/2`, `1/3`, etc.) — this changes the semantic intent. Check by inspecting `bits` in the header after one call; do not retry with larger `max_complexity` when `bits=0`.
+  - `get_last_output() → charPtr` — console output accumulated since last call (errors and `information` results). Returned pointer is valid until the next ifslib call and must not be freed by the caller.
+  - `malloc`, `free`, `memory`
+
+### Boundary dimension pipeline
+
+The combination of `custom_ifs` → `information("Components")` → `information("Dimension")` computes the Hausdorff dimension of the boundary ∂A of an IFS attractor A.
+
+**Step 1 — compute boundary IFS:**
+```js
+const ok = w.custom_ifs(1, 2, maxComplexity, 63, 0.0);
+const out = rstr(w, w.get_last_output());
+// Strip comment lines to get the boundary AIFS program:
+const boundaryAifs = out.split('\n').filter(l => !l.startsWith('#')).join('\n');
+```
+The boundary AIFS is a GIFS whose attractor variables are the pieces of ∂A.
+
+**Step 2 — identify attractor vs intersection components:**
+Load the boundary AIFS into a fresh instance. Call `information("Components")`. Its output is lines of form `varName: componentNumber`. Variables named `/^i\d+$/` (e.g. `i1`, `i17`, `i103`) are intersection pieces — the actual boundary pieces. All other names (`A`, `B`, `S`, `K`, etc.) are the original attractor variables; their component number is the ambient-attractor component, *not* the boundary.
+
+```js
+// Parse Components output → Set of component numbers that are original attractors
+function findAttractorComps(output) {
+  const comps = new Set();
+  for (const line of output.split('\n')) {
+    const m = line.match(/^(\w+):\s*(\d+)$/);
+    if (m && !/^i\d+$/.test(m[1])) comps.add(parseInt(m[2]));
+  }
+  return comps;
+}
+```
+
+**Step 3 — read dimension, skipping attractor components:**
+Call `information("Dimension")`. Iterate components; skip any whose number is in `attractorComps`. Among the remaining (intersection-piece) components:
+- If all have integer dimension → **polyhedral boundary**: dim=1 means straight-edge pieces (2D tiling), dim=2 means flat-face pieces (3D tiling).
+- If all have dim ≈ 0 → **point contacts only** (tiles touch at isolated points, e.g. Sierpiński tetrahedron, Cantor dust). OSC still holds.
+- If any have fractional dimension → that is dim(∂A). Use the highest fractional-dim component.
+
+**Interpreting the header before processing:**
+| Condition | Meaning |
+|---|---|
+| `bits=0, checked=0` | IFS has non-exact coefficients — `custom_ifs` inapplicable |
+| `bits>0, checked=0, fully_created=1` | Rational ran, only point contacts (dim(∂A) = 0) |
+| `checked>0, osc=0` | OSC holds, boundary dimension valid |
+| `checked>0, osc>0` | OSC violated — result meaningless |
+| `fully_created=0` | Computation cut short — retry with larger `max_complexity` |
+
+**Known boundary dimensions for encyclopedia entries** (rational IFS):
+
+| Entry | dim(∂A) | Polynomial |
+|---|---|---|
+| cap | 1.3684 | x²−4x+1=0 |
+| gosper-island | 1.1292 | x−3=0 |
+| heighway-dragon | 1.5236 | x³−x²−2=0 |
+| jerusalem-cross | 1.0000 | polyhedral (straight edges) |
+| koch-snowflake | 1.2619 | x−4=0 |
+| levy-c-curve | 1.9340 | x¹¹−x¹⁰−x⁹−3x⁸+2x⁷+2x⁶+4x⁵−16x³−8x²−16x+16=0 |
+| menger-sponge | 1.8928 | x−8=0 (3D, boundary ∈ (1,3)) |
+| pentadendrite | 1.0421 | x−3=0 |
+| pentigree | 1.1415 | x−3=0 |
+| pythagoras-tree | 1.9340 | same as levy-c-curve |
+| rauzy-fractal | 1.0934 | x⁷+x⁶+x⁵−3x⁴−3x³−3x²+x+1=0 |
+| shield-tiling | 1.0527 | x−2=0 |
+| sierpinski-carpet | 1.0000 | polyhedral (straight edges) |
+| tame-twin-dragon | 1.2108 | x⁵−x⁴+x³−x²−4=0 |
+| twin-dragon | 1.5236 | x⁵−3x⁴+4x³−4x²+4x−4=0 |
+| ammann-beenker, cells-tiling, danzer-7-fold, golden-trapezoid, labyrinth, octagonal, pinwheel-tiling, quaquaversal-tiling, robinson-triangles, viper | 1.0000 | polyhedral (straight edges) |
+| sierpinski-tetrahedron | 0 | point contacts only |
+| cantor-dust | 0 | point contacts only |
+| antoines-necklace, barnsley-fern, chinese-lamp, jerusalem-cube | n/a | non-exact IFS (`bits=0`) |
+| sierpinski-triangle, vicsek-fractal | n/a | decimal literals in AIFS — author's choice to use float mode; rewrite as `1/2`, `1/3` to enable exact arithmetic |
 
 ### Main-thread state (`IFSCanvas.astro` script)
 
@@ -474,7 +609,7 @@ pending    : Map<id, {wasm, sizes, sizeIndex, width, height}>  — active render
 3. `_pending.set(id, canvas)` **immediately** (before any `await`) — makes cancel visible.
 4. HiDPI scaling: read `getBoundingClientRect()` for true CSS size, set `canvas.width/height` to physical pixels, lock `canvas.style.width/height` to CSS size (prevents aspect ratio distortion from CSS `max-width: 100%`).
 5. Post `{ id, aifs, width, height, version }` to worker.
-6. Worker: `await getWasmInstance(version)` → fresh instance → `ifslib_init` → add to `pending` Map → `runTick()`.
+6. Worker: `await getWasmInstance(version)` → fresh instance → `init` → `ifs_select('','')` → add to `pending` Map → `runTick()`.
 7. `runTick()`: round-robin — finds the lowest `sizeIndex` across all pending, renders one frame per canvas at that step, posts `{ type: 'frame', pixels, width, height }`, yields via `setTimeout(0)`, loops until `pending` is empty.
 8. Main thread `onmessage`: for `frame` — draw only if `_pending.has(id)` (guards against stale frames after cancel). For `done` — move from `_pending` to `_done` **only if `_pending.has(id)`** (prevents marking a cancelled canvas as done).
 
@@ -517,7 +652,7 @@ Header nav order: Home | Catalog | Search | Tools | About
 - **Content store cache**: After changing `src/content.config.ts` schema, delete `.astro/` to clear the stale data store if entries fail to load. Also delete `.astro/` if a newly-created `.mdx` entry renders with `InvalidContentEntryDataError` (all required fields missing) — this means the cache stored an empty/stale entry for the new file. Symptom: build succeeds but dev-server render fails with schema validation errors for `name`, `description`, `transforms`, `aifs`. **Rule: always delete `.astro/` and restart the dev server after adding any new `.mdx` file.** The build (`npx astro build`) is not affected by this cache and can be used to verify pages work correctly.
 - **MDX `export const` in content collections**: Use `export const` (not plain `const`) for variables that are referenced in JSX expressions within MDX content entries (`src/content/ifs/*.mdx`). Plain `const` is NOT accessible inside the compiled `_createMdxContent` function. Also: never delete an `.md` file and add an `.mdx` file with the same slug while the dev server is running — clear `.astro/` cache to avoid a duplicate-ID error.
 - **`#` is a comment in AIFS**: Everything from `#` to end of line is ignored — including inside AIFS blocks fetched from GitHub (e.g. `Quaquaversal.aifs` has `# a^4=1` etc.). Never mistake commented-out lines for actual definitions when reading raw `.aifs` files.
-- **AIFS must have `S=(...)*S`**: The most common error — `ifslib_init` silently returns 0 if the attractor line is missing.
+- **AIFS must have `S=(...)*S`**: The most common error — `init` succeeds but `ifs_select` fails with "No valid root reference found" if the attractor line is missing. Call `get_last_output()` after any failure to retrieve the error message.
 - **WASM has zero imports**: Instantiate with `WebAssembly.instantiate(buf, {})` — no WASI stubs needed.
 - **Fresh WASM instance per render**: `ifslib` has one global `g_renderer` per instance — the worker creates a new instance for every render request (module is compiled once and cached; re-instantiation is cheap).
 - **Never use a `cancelled` Set in the worker**: It creates a broken re-render race where a new render request sees its own id in `cancelled` (left by a prior cancel), skips itself, and the canvas stays black permanently. Let stale renders complete — they are silently dropped on the main thread (canvas not in `_pending`).

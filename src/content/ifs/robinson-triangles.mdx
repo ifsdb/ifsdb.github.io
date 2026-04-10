@@ -29,36 +29,6 @@ references:
 
 import IFSCanvas from '../../components/IFSCanvas.astro';
 
-export const aifsA1 = `@
-$dim=4
-$subspace=[s,0]
-s=$companion([1,-1,1,-1])
-r=$exchange()
-g=s-s^4
-h1=s^4*[-1,0,-1,0]
-h2=s^2*r*[-1,0,0,0]
-h3=s^9
-h4=s^6*r*[0,-1,0,-1]
-h5=s^3*[1,-1,0,-1]
-$root=A1
-A1=g^-1*(h1*A1|h2*A1|h3*A2)
-A2=g^-1*(h4*A1|h5*A2)`;
-
-export const aifsA2 = `@
-$dim=4
-$subspace=[s,0]
-s=$companion([1,-1,1,-1])
-r=$exchange()
-g=s-s^4
-h1=s^4*[-1,0,-1,0]
-h2=s^2*r*[-1,0,0,0]
-h3=s^9
-h4=s^6*r*[0,-1,0,-1]
-h5=s^3*[1,-1,0,-1]
-$root=A2
-A1=g^-1*(h1*A1|h2*A1|h3*A2)
-A2=g^-1*(h4*A1|h5*A2)`;
-
 ## Overview
 
 The **Robinson triangles** are a pair of isosceles triangles — the acute triangle $A_1$
@@ -71,11 +41,11 @@ This entry uses a **Generalized IFS (GIFS)** with two interleaved attractors.
 
 <div class="canvas-row">
   <figure>
-    <IFSCanvas id="robinson-a1" aifs={aifsA1} width={380} height={380} label="A1 — acute triangle (36-72-72)" />
+    <IFSCanvas id="robinson-a1" aifs={props.aifs} root="A1" width={380} height={380} label="A1 — acute triangle (36-72-72)" />
     <figcaption>$A_1$ — acute triangle (36°–72°–72°)</figcaption>
   </figure>
   <figure>
-    <IFSCanvas id="robinson-a2" aifs={aifsA2} width={380} height={380} label="A2 — obtuse triangle (36-36-108)" />
+    <IFSCanvas id="robinson-a2" aifs={props.aifs} root="A2" width={380} height={380} label="A2 — obtuse triangle (36-36-108)" />
     <figcaption>$A_2$ — obtuse triangle (36°–36°–108°)</figcaption>
   </figure>
 </div>
