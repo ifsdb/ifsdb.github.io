@@ -18,7 +18,7 @@ export default defineConfig({
   },
   vite: {
     define: {
-      __IFSLIB_VERSION__: JSON.stringify('1.0.1'),
+      __IFSLIB_VERSION__: JSON.stringify('1.0.2'),
     },
   },
 });

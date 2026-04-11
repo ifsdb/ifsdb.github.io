@@ -454,6 +454,11 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
   - `_initialize()` — must be called once after instantiation
   - `init(ptr) → 0|1` — parse AIFS source (C string ptr)
   - `ifs_select(block_ptr, root_ptr) → 0|1` — select block and root attractor (empty → first non-hidden / default)
+  - `set_camera(params_ptr, num_params) → 0|1` — override the camera/viewport for subsequent `render()` calls. Must be called after `ifs_select()`. Two layouts selected by `num_params`:
+    - **2D** (`num_params=4`): `[cx, cy, r, angle_deg]` — viewport center, inscribed-circle radius, rotation angle in degrees.
+    - **3D** (`num_params=10`): `[loc.x, loc.y, loc.z, ref.x, ref.y, ref.z, up.x, up.y, up.z, fov_deg]` — camera location, look-at point, up vector, field of view in degrees.
+    - **Reset** (`num_params=0`): resets to automatic camera (fit to attractor on next `render()` call). `params_ptr` is ignored.
+    - Returns 0 if no block is selected or `num_params` is not 0, 4, or 10. `params_ptr` points to a `double[]` array in WASM memory. When not called, `$camera` from the AIFS block is used.
   - `render(w, h, quality, thickness) → pixelPtr` — render to RGBA pixel buffer (`width * height * 4` bytes). `quality >= 1`; quality=2 is usually sufficient for good results, computation time grows exponentially with quality. `thickness >= 1` in pixels, use 1 as default. Returns NULL on failure. Pixel data is valid until the next `render` call and must not be freed by the caller.
   - `information(what_ptr) → 0|1` — compute analytics for the currently selected block; output goes to `get_last_output()`. Values for `what`:
     - `"Measure"` — Hausdorff dimension, centroid `C`, principal moments `I`, eigenvectors `Q` (aspect ratio can be derived from `I`). All attractor sets are printed, including dim=0 fixed points (which have `I=0` and no `inv` field).

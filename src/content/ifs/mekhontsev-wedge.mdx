@@ -1,0 +1,73 @@
+---
+name: "Mekhontsev Wedge"
+description: "A non-trivial self-similar convex polyhedron: a 3D rep-8-tile with V=6, F=5, E=9, discovered by Dmitry Mekhontsev using IFStile."
+cardDescription: "Non-trivial 3D convex rep-tile — 8 maps, scale 1/2."
+dimension: "3"
+transforms: 8
+boundaryDimension: "2 (polyhedral)"
+tags: [3d, self-similar, rep-tile, algebraic]
+aifs: |
+  @
+  $n=Wedge
+  $dim=3
+  a=-1
+  b=[0,-1,0,1,0,0,0,0,1]
+  c=[1,0,0,0,0,-1,0,1,0]
+  h0=1
+  h1=[1,1,1]
+  h2=b*a*c^2*[-4,-4,0]
+  h3=b*c*b^3*a*[0,-4,-4]
+  h4=b^3*a*c^3*[0,0,-4]
+  h5=c^2*a*[-4,0,0]
+  h6=b*[0,-4,0]
+  h7=b^3*c*[-4,0,-4]
+  A=2^-1*(h0|h1|h2|h3|h4|h5|h6|h7)*A
+references:
+  - text: "Mekhontsev, D. (2026). A non-trivial self-similar convex polyhedron. Tiling Facebook Group."
+    url: "https://www.facebook.com/groups/tiling/posts/2303995106690688/"
+  - text: "Pegg, E. (2026). The Mekhontsev wedge: A 3D rep-tile. Wolfram Community."
+    url: "https://community.wolfram.com/groups/-/m/t/3615445"
+---
+
+## Overview
+
+The **Mekhontsev Wedge** is a convex polyhedron discovered by Dmitry Mekhontsev using IFStile, first published in the Tiling Facebook group in 2026 and subsequently featured by Ed Pegg on Wolfram Community. It is a non-trivial self-similar convex polyhedron: a **rep-8-tile** in which eight half-scale congruent copies tile the original shape exactly.
+
+The polyhedron has:
+
+- **V = 6** vertices  
+- **F = 5** faces (two triangles and three quadrilaterals)  
+- **E = 9** edges  
+
+satisfying Euler's formula $V - E + F = 6 - 9 + 5 = 2$.
+
+It is topologically equivalent to a triangular prism. A cube is a trivial convex rep-8-tile (8 half-scale cubes fill a cube), but the Wedge is the first example with a non-cuboid shape.
+
+## Geometry
+
+The six vertices, in a coordinate system where the full shape spans $[0,2] \times [0,2] \times [0,1]$, are:
+
+$$
+v_0 = (0,0,0), \quad v_1 = (2,0,0), \quad v_2 = (2,2,0),
+$$
+
+$$
+v_3 = (1,1,1), \quad v_4 = (2,1,1), \quad v_5 = (2,2,1).
+$$
+
+The shape has a right-angle corner at the origin and tapers toward $v_3 = (1,1,1)$. As a convex polyhedron its boundary consists of five flat polygonal faces, so the boundary has Hausdorff dimension exactly 2.
+
+## Self-Similarity
+
+In the AIFS encoding the scalar $a = -1$ is negation, and
+
+$$
+b = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix}, \qquad
+c = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{pmatrix}
+$$
+
+are 90° rotations around the $z$- and $x$-axes respectively. The eight maps $h_0, \ldots, h_7$ compose these rotations with translations to orient and place the eight half-scale sub-wedges. The contraction factor is $\tfrac{1}{2}$, so the Hausdorff dimension of the (solid) attractor is:
+
+$$
+d = \frac{\log 8}{\log 2} = 3.
+$$

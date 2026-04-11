@@ -65,7 +65,7 @@ const pending = new Map();
 let tickRunning = false;
 
 self.onmessage = async function (e) {
-  const { id, type, aifs, block, root, width, height, version, priority, startSizeIndex } = e.data;
+  const { id, type, aifs, block, root, camera, width, height, version, priority, startSizeIndex } = e.data;
 
   if (type === 'cancel') {
     pending.delete(id);
@@ -98,6 +98,22 @@ self.onmessage = async function (e) {
       const output = getLastOutput(wasm);
       self.postMessage({ id, type: 'error', message: 'ifs_select failed' + (output ? ': ' + output : '') });
       return;
+    }
+    // Apply camera override if provided (requires ifslib with set_camera export).
+    if (camera && Array.isArray(camera) && (camera.length === 4 || camera.length === 10)) {
+      if (typeof wasm.set_camera === 'function') {
+        const camPtr = wasm.malloc(camera.length * 8);
+        const dv = new DataView(wasm.memory.buffer);
+        for (let i = 0; i < camera.length; i++) dv.setFloat64(camPtr + i * 8, camera[i], true);
+        const camOk = wasm.set_camera(camPtr, camera.length);
+        wasm.free(camPtr);
+        if (!camOk) {
+          const output = getLastOutput(wasm);
+          self.postMessage({ id, type: 'error', message: 'set_camera failed' + (output ? ': ' + output : '') });
+          return;
+        }
+      }
+      // If set_camera is not exported by this ifslib build, silently skip — renders with auto-fit camera.
     }
     // Overwrite any stale entry for this id (e.g. re-render after cancel).
     const sizes = progressiveSizes(width, height);

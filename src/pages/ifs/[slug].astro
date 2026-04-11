@@ -22,13 +22,15 @@ const { name, description, dimension, boundaryDimension, aifs, references } = en
 const currentTags = entry.data.tags ?? [];
 
 const allEntries = await getCollection('ifs');
+// Require at least 2 shared tags, unless the current entry has only 1 tag.
+const minCommon = currentTags.length <= 1 ? 1 : 2;
 const similar = allEntries
   .filter(e => e.id !== entry.id)
   .map(e => ({
     entry: e,
     common: (e.data.tags ?? []).filter(t => currentTags.includes(t)).length,
   }))
-  .filter(({ common }) => common > 0)
+  .filter(({ common }) => common >= minCommon)
   .sort((a, b) => b.common - a.common)
   .slice(0, 3)
   .map(({ entry: e }) => e);

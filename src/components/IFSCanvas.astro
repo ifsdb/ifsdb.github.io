@@ -8,9 +8,10 @@ interface Props {
   block?: string;
   root?: string;
   analytics?: string;  // e.g. 'Projection' — requests information() after render
+  camera?: number[];  // override $camera: 2D=[cx,cy,r,angle] or 3D=[lx,ly,lz,rx,ry,rz,ux,uy,uz,fov]; omit for auto-fit
 }
 
-const { id, width = 400, height = 400, label, aifs, block, root, analytics } = Astro.props;
+const { id, width = 400, height = 400, label, aifs, block, root, analytics, camera } = Astro.props;
 ---
 <div class="ifs-canvas-wrapper">
   <div class="ifs-canvas-frame">
@@ -21,7 +22,8 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics } = A
             data-aifs={aifs ?? ''}
             data-ifs-block={block ?? ''}
             data-ifs-root={root ?? ''}
-            data-ifs-analytics={analytics ?? ''}></canvas>
+            data-ifs-analytics={analytics ?? ''}
+            data-ifs-camera={camera ? JSON.stringify(camera) : ''}></canvas>
     <div class="ifs-open-hint">Open in IFStile ↗</div>
   </div>
   {analytics && <div class="ifs-analytics-panel" data-analytics-for={id}></div>}
@@ -44,7 +46,7 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics } = A
 
   function getAnalyticsWorker(): Worker {
     if (_analyticsWorker) return _analyticsWorker;
-    _analyticsWorker = new Worker('/ifslib-analytics-worker.js');
+    _analyticsWorker = new Worker('/ifslib-analytics-worker.js?v=' + __IFSLIB_VERSION__);
     _analyticsWorker.onmessage = (e: MessageEvent) => {
       const { id, type, request, data: result, message } = e.data as {
         id: string; type: string; request: string; data?: string; message?: string;
@@ -212,7 +214,7 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics } = A
 
   function getWorker(): Worker {
     if (_worker) return _worker;
-    _worker = new Worker('/ifslib-worker.js');
+    _worker = new Worker('/ifslib-worker.js?v=' + __IFSLIB_VERSION__);
     _worker.onmessage = (e: MessageEvent) => {
       const { id, type, pixels, width, height, sizeIndex, message } = e.data;
       const canvas = _pending.get(id);
@@ -312,11 +314,15 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics } = A
     // Check if cancelled while we were awaiting the fetch.
     if (!_pending.has(ifsId)) return;
 
+    const cameraRaw = canvas.dataset.ifsCamera;
+    const camera = cameraRaw ? (JSON.parse(cameraRaw) as number[]) : null;
+
     getWorker().postMessage({
       id: ifsId,
       aifs,
       block: canvas.dataset.ifsBlock ?? '',
       root: canvas.dataset.ifsRoot ?? '',
+      camera,
       width: canvas.width,
       height: canvas.height,
       version: __IFSLIB_VERSION__,

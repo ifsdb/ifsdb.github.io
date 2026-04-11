@@ -30,39 +30,61 @@ const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
 
     <h2>Affine Form</h2>
     <p>
-      The most common IFS mappings are <strong>affine contractions</strong> of the form:
+      IFS mappings can in principle be any contractions — including nonlinear ones such as
+      Möbius transformations, polynomial maps, or trigonometric functions. However, the
+      most widely studied and computationally tractable case is <strong>affine contractions</strong>
+      of the form:
     </p>
     <p set:html={affineFormula}></p>
     <p>
       where <em>A<sub>i</sub></em> is a 2×2 (or n×n) matrix and <strong>b</strong><sub>i</sub>
       is a translation vector. The contractivity condition requires that the spectral radius
       of <em>A<sub>i</sub></em> is less than 1.
+      All entries in this encyclopedia use affine (or projective-algebraic) maps.
     </p>
 
-    <h2>Generalized IFS (GIFS)</h2>
+    <h2>Graph-Directed IFS (GIFS)</h2>
     <p>
-      A <strong>Generalized IFS</strong> (GIFS) defines multiple interleaved attractor sets
-      whose equations refer to each other. Instead of a single equation
-      <em>A = ⋃ f<sub>i</sub>(A)</em>, a GIFS with attractors
+      A <strong>Graph-Directed IFS</strong> (GDIFS, introduced by Mauldin &amp; Williams 1988,
+      also called GIFS in the IFStile literature) generalises the single-attractor case to
+      a system of multiple interleaved attractor sets whose equations refer to each other.
+      Instead of a single equation
+      <em>A = ⋃ f<sub>i</sub>(A)</em>, a GDIFS with attractors
       <em>A</em><sub>1</sub>, …, <em>A<sub>k</sub></em> satisfies a system:
     </p>
     <p set:html={"$$A_j = \\bigcup_{i} f_{ij}(A_{\\sigma(i,j)})$$"}></p>
     <p>
       where each map <em>f<sub>ij</sub></em> sends one attractor into another according to a
-      dependency graph. Under suitable expansiveness conditions the system has a unique
-      tuple of non-empty compact sets (A<sub>1</sub>, …, A<sub>k</sub>) satisfying all equations
-      simultaneously.
+      directed graph (the <em>dependency graph</em>). Under suitable expansiveness conditions
+      the system has a unique tuple of non-empty compact sets
+      (A<sub>1</sub>, …, A<sub>k</sub>) satisfying all equations simultaneously.
     </p>
     <p>
-      GIFS naturally arise in <strong>substitution tilings</strong>: a tiling with multiple
+      GDIFS naturally arise in <strong>substitution tilings</strong>: a tiling with multiple
       prototile types (e.g. the <a href="/ifs/cap">CAP / hat monotile</a> with four metatile
       types H, T, P, F, or the <a href="/ifs/robinson-triangles">Robinson triangle</a> with two
-      types) can be described as a GIFS where each attractor is the shape of one prototile and
+      types) can be described as a GDIFS where each attractor is the shape of one prototile and
       the maps encode the substitution rule.
     </p>
 
     <h2>Further Reading</h2>
     <ul>
+      <li>
+        <a href="https://tilings.math.uni-bielefeld.de/" target="_blank" rel="noopener">Tilings Encyclopedia</a> —
+        comprehensive reference for substitution tilings: inflation factors, Hausdorff dimensions, and bibliographic sources.
+      </li>
+      <li>
+        <a href="https://larryriddle.agnesscott.org/ifs/ifs.htm" target="_blank" rel="noopener">Larry Riddle's Classic IFS</a> —
+        geometrically described IFS attractors with matrix forms, L-systems, and similarity dimensions.
+      </li>
+      <li>
+        <a href="https://www.facebook.com/groups/tiling" target="_blank" rel="noopener">Tiling Facebook Group</a> —
+        active community discussing tilings, self-similar sets, and IFS fractals; original discovery posts and informal results often appear here first.
+      </li>
+      <li>
+        <a href="/tools/aifs">AIFS Language Reference</a> —
+        algebraic representation used to define all fractals in this encyclopedia.
+      </li>
       <li>
         Mekhontsev, D. (2019).
         <a href="https://epub.ub.uni-greifswald.de/frontdoor/index/index/docId/2479" target="_blank" rel="noopener">
@@ -70,10 +92,6 @@ const affineFormula = "$$f_i(\\mathbf{x}) = A_i \\mathbf{x} + \\mathbf{b}_i$$";
         </a>.
         Doctoral thesis, Ernst-Moritz-Arndt-Universität Greifswald.
         Establishes the algebraic foundations of the IFStile algorithms.
-      </li>
-      <li>
-        <a href="/tools/aifs">AIFS Language Reference</a> —
-        algebraic representation used to define all fractals in this encyclopedia.
       </li>
     </ul>
 
