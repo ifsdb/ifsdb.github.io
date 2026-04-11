@@ -6,10 +6,11 @@ interface Props {
   description?: string;
   name: string;
   dimension?: string;
+  boundaryDimension?: string;
   slug?: string;
 }
 
-const { title, description, name, dimension, slug } = Astro.props;
+const { title, description, name, dimension, boundaryDimension, slug } = Astro.props;
 const githubUrl = slug
   ? `https://github.com/ifsdb/ifsdb.github.io/blob/main/src/content/ifs/${slug}.md`
   : null;
@@ -24,6 +25,12 @@ const githubUrl = slug
       <div class="meta-block">
         <span>Fractal dimension:</span>
         <strong>{dimension}</strong>
+      </div>
+    )}
+    {boundaryDimension && (
+      <div class="meta-block">
+        <span>Boundary dimension:</span>
+        <strong>{boundaryDimension}</strong>
       </div>
     )}
     <slot />

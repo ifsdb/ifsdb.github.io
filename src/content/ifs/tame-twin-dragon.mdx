@@ -4,6 +4,7 @@ description: "A self-similar plane-filling tile with two maps contracting by 1/�
 cardDescription: "Two-map self-similar tile based on the Eisenstein-like integer (1+i√7)/2 — the 'tame' twin dragon variant."
 dimension: "2"
 transforms: 2
+boundaryDimension: "≈ 1.2108"
 tags: [plane, self-similar, tiling, algebraic]
 references:
   - text: "Bandt, C. (1991). Self-similar sets 5. Integer matrices and fractal tilings of ℝⁿ. Proceedings of the American Mathematical Society, 112(2), 549–562."
@@ -63,3 +64,17 @@ $$
 - The tile $A$ **tiles the plane** by translations in the lattice $\mathbb{Z}\!\left[\tfrac{1+\sqrt{-7}}{2}\right]$.
 - Every point $z \in A$ has a unique base-$\lambda$ expansion $z = \sum_{k=1}^{\infty} d_k \lambda^{-k}$ with digits $d_k \in \{0,1\}$.
 - It is a connected, simply-connected region with a fractal boundary.
+
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log\lambda}{\log 2} \approx 1.2108,
+$$
+
+where $\lambda$ is the unique positive real root of $\lambda^3 - \lambda - 2 = 0$,\, $\lambda \approx 1.5214$.
+
+The full characteristic polynomial of the boundary substitution is $x^5-x^4+x^3-x^2-4$,
+which factors over $\mathbb{Q}$ as $(x^3-x-2)(x^2-x+2)$. The second factor contributes only
+complex roots, so the minimal polynomial governing $\dim_H(\partial A)$ is $\lambda^3-\lambda-2=0$.

@@ -4,6 +4,7 @@ description: "A self-similar dendrite with pentagonal symmetry, discovered by Mc
 cardDescription: "Six-map IFS with 5-fold symmetry, expressed in a 4D rational space via the cyclotomic polynomial."
 dimension: "2log(6)/log(6+√5) ≈ 1.700"
 transforms: 6
+boundaryDimension: "≈ 1.0421"
 tags: [plane, self-similar, dendrite, pentagonal, algebraic, classic]
 aifs: |
   @
@@ -69,6 +70,18 @@ where each $h_i$ is an affine map in $\mathbb{Q}^4$:
 - **Topology**: dendrite (tree-like, connected, no interior)
 - **Intersection structure**: pieces meet at single points or along Jordan curves
   of dimension $\dfrac{2\log 3}{\log(6+\sqrt{5})} \approx 1.042$
+
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log 3}{\log(6+\sqrt{5})} \approx 1.0421.
+$$
+
+Here $p = 6+\sqrt{5}$ is the squared norm of the expansion $g$ on the projected plane, and
+$\lambda = 3$ is the eigenvalue of the boundary substitution (the boundary pieces triple under
+one application of $g$). The value $p = 6+\sqrt{5}$ is the larger root of $p^2-12p+31=0$.
 
 ## Complementary Attractor
 

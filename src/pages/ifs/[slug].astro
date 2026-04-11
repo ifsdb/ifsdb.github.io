@@ -18,7 +18,7 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { name, description, dimension, aifs, references } = entry.data;
+const { name, description, dimension, boundaryDimension, aifs, references } = entry.data;
 const currentTags = entry.data.tags ?? [];
 
 const allEntries = await getCollection('ifs');
@@ -38,15 +38,16 @@ const similar = allEntries
   description={description}
   name={name}
   dimension={dimension}
+  boundaryDimension={boundaryDimension}
   slug={entry.id}
 >
   <h2>Visualization</h2>
-  <IFSCanvas id={entry.id} width={500} height={500} label={name} aifs={aifs} />
+  <IFSCanvas id={entry.id} width={500} height={500} label={name} aifs={aifs} analytics="Projection" />
 
   <details class="aifs-details">
     <summary>AIFS program</summary>
     <div class="aifs-code-block">
-      <pre><code>{aifs}</code></pre>
+      <pre><code data-lang="aifs">{aifs}</code></pre>
       <button class="copy-aifs-btn" data-aifs={aifs}>Copy</button>
     </div>
   </details>

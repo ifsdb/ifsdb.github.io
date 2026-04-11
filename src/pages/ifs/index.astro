@@ -28,6 +28,7 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
         <select id="sort-select">
           <option value="name">Name</option>
           <option value="dimension">Dimension</option>
+          <option value="boundary">Boundary dim</option>
           <option value="transforms">Transforms</option>
         </select>
       </div>
@@ -39,6 +40,7 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
              data-tags={(entry.data.tags ?? []).join(',')}
              data-name={entry.data.name}
              data-dimension={entry.data.dimension ?? ''}
+             data-boundary={entry.data.boundaryDimension ?? ''}
              data-transforms={entry.data.transforms}>
           <h3><a href={`/ifs/${entry.id}`}>{entry.data.name}</a></h3>
           <p>{entry.data.cardDescription ?? entry.data.description}</p>
@@ -121,6 +123,15 @@ const allTags = [...new Set(entries.flatMap(e => e.data.tags ?? []))].sort();
       if (sortBy === 'name') return a.dataset.name!.localeCompare(b.dataset.name!);
       if (sortBy === 'transforms') return Number(a.dataset.transforms) - Number(b.dataset.transforms);
       if (sortBy === 'dimension') return (a.dataset.dimension ?? '').localeCompare(b.dataset.dimension ?? '');
+      if (sortBy === 'boundary') {
+        const parse = (s: string) => { const m = s.match(/[\d.]+/); return m ? parseFloat(m[0]) : NaN; };
+        const av = parse(a.dataset.boundary ?? '');
+        const bv = parse(b.dataset.boundary ?? '');
+        if (isNaN(av) && isNaN(bv)) return a.dataset.name!.localeCompare(b.dataset.name!);
+        if (isNaN(av)) return 1;
+        if (isNaN(bv)) return -1;
+        return av - bv;
+      }
       return 0;
     });
     sorted.forEach(card => {

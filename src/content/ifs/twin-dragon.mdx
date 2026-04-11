@@ -4,7 +4,8 @@ description: "The Twin Dragon is a 2D self-similar fractal formed by two copies 
 cardDescription: "Two interlocking Heighway Dragon copies form a solid 2D tile. Controlled by the polynomial x²−2x+2."
 dimension: "2"
 transforms: 2
-tags: [plane, self-similar, tiling]
+boundaryDimension: "≈ 1.5236"
+tags: [plane, self-similar, tiling, algebraic]
 aifs: |
   @
   $dim=2
@@ -96,4 +97,17 @@ $$
 The same constant $\varphi$ also governs the **orientation**: the major axis of the Twin Dragon makes an angle $-\arctan\varphi \approx -58.3°$ with the horizontal, in the direction $(1, -\varphi)$.
 
 For a proof see Mekhontsev (2026).
+
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log\lambda}{\log 2} \approx 1.5236,
+$$
+
+where $\lambda$ is the unique positive real root of $\lambda^3 - \lambda^2 - 2 = 0$,\, $\lambda \approx 1.6956$.
+
+The boundary dimension is the same as that of the [Heighway Dragon](/ifs/heighway-dragon), since both
+IFS share the same neighbour graph over the Gaussian integer lattice $\mathbb{Z}[i]$.
 

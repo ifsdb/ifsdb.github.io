@@ -4,6 +4,7 @@ description: "The Lévy C curve is a self-similar fractal defined by two affine 
 cardDescription: "Two maps, each a 45° rotation scaled by 1/√2. The attractor tiles the plane and resembles the letter C at each scale."
 dimension: "2"
 transforms: 2
+boundaryDimension: "≈ 1.9340"
 tags: [plane, curve, self-similar, tiling, algebraic]
 aifs: |
   @
@@ -49,13 +50,26 @@ an integer input vector producing an exact rational output with no floating-poin
 - **Number of transforms:** 2
 - **Self-similarity:** Each half of the curve is a scaled rotated copy of the whole
 
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log\lambda}{\log 2} \approx 1.934,
+$$
+
+where $\lambda \approx 1.955$ is the real root of a degree-9 algebraic equation:
+
+$$
+\lambda^9 - 3\lambda^8 + 3\lambda^7 - 3\lambda^6 + 2\lambda^5 + 4\lambda^4 - 8\lambda^3 + 8\lambda^2 - 16\lambda + 8 = 0.
+$$
+
 ## Related
 
-All four of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
+All three of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
 
 | IFS | Second map rotation | Translation |
 |-----|--------------------|--------------|
 | Lévy C Curve | $-45°$ (`g^-1`) | $(0,0)$ and $(\tfrac{1}{2},\tfrac{1}{2})$ |
-| [Pythagoras Tree](/ifs/pythagoras-tree) | $-45°$ (`g^-1`) | $(0,1)$ and $(\tfrac{1}{2},\tfrac{3}{2})$ |
 | [Heighway Dragon](/ifs/heighway-dragon) | $+135°$ (`s^2*g^-1`) | $(0,0)$ and $(1,0)$ |
 | [Twin Dragon](/ifs/twin-dragon) | $-135°$ (`s^3*g^-1`) | $(0,0)$ and $(1,0)$ |

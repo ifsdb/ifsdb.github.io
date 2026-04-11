@@ -4,6 +4,7 @@ description: "A 3D fractal constructed by recursively removing the center cube a
 cardDescription: "3D analog of the Sierpiński carpet — 20-map IFS with Hausdorff dimension ≈ 2.727."
 dimension: "≈ 2.727"
 transforms: 20
+boundaryDimension: "≈ 1.8928"
 tags: [3d, self-similar, algebraic]
 aifs: |
   @
@@ -43,3 +44,19 @@ $$
 - The sponge has **zero volume** but **infinite surface area**.
 - Every cross-section perpendicular to a main axis is a Sierpiński carpet.
 - The sponge is **topologically one-dimensional** — every loop can be contracted to a point within the sponge — despite its fractal dimension of ≈ 2.727.
+
+## Boundary Dimension
+
+The boundary $\partial A$ (the surface of the sponge) has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{\log 8}{\log 3} = \frac{3\log 2}{\log 3} \approx 1.893.
+$$
+
+At each scale step, the surface is divided into $8$ self-similar pieces each scaled by $1/3$,
+giving the Moran equation $8 \cdot (1/3)^d = 1$.
+
+Each axis-aligned face of the sponge is a **Sierpiński carpet** lying in a flat Euclidean plane:
+the face-center sub-cubes are exactly the ones removed at every scale, so the outer surface
+consists of six planar cross-sections — each a 2D Sierpiński carpet with its own fractal structure
+and $\dim_H = \log 8 / \log 3 \approx 1.893$. The faces are flat but not straight-edged polygons.

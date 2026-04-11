@@ -51,5 +51,36 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://ifsdb.gi
       src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
       crossorigin="anonymous"
       onload="renderMathInElement(document.body, {delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+    <script>
+      // AIFS syntax highlighter
+      // Token types: dir(@), cmt(#), blt($companion…), spe($dim…), mac(&), fun(sin…), num, att(Uppercase)
+      (function () {
+        function esc(s) {
+          return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+        // Groups (1-indexed): @@dir | @dir | #cmt | $builtin | $special | &macro | fn | num | Attractor
+        const RE = /(@@[^\n]*)|(^@[^\n]*)|([ \t]*#[^\n]*)|(\$(?:companion|exchange|charpoly|numden|real|integer|number|semigroup|vector|init|new)\b)|(\$[a-zA-Z_][a-zA-Z0-9_]*)|(&[a-zA-Z_][a-zA-Z0-9_]*)|(\b(?:sin|cos|tan|asin|acos|atan|exp|log|floor|ceil|arg|if)\b)|([0-9]+(?:\.[0-9]+)?)|([A-Z][a-zA-Z0-9_]*)/gm;
+        const CLS = ['h-dir','h-dir','h-cmt','h-blt','h-spe','h-mac','h-fun','h-num','h-att'];
+
+        function highlight(src) {
+          let out = '', last = 0;
+          RE.lastIndex = 0;
+          let m;
+          while ((m = RE.exec(src)) !== null) {
+            if (m.index > last) out += esc(src.slice(last, m.index));
+            const g = m.slice(1).findIndex(x => x !== undefined);
+            const cls = CLS[g];
+            out += cls ? `<span class="aifs-${cls}">${esc(m[0])}</span>` : esc(m[0]);
+            last = m.index + m[0].length;
+          }
+          if (last < src.length) out += esc(src.slice(last));
+          return out;
+        }
+
+        document.querySelectorAll('code[data-lang="aifs"]').forEach(function (el) {
+          el.innerHTML = highlight(el.textContent || '');
+        });
+      })();
+    </script>
   </body>
 </html>

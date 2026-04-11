@@ -4,7 +4,8 @@ description: "An aperiodic tiling with 8-fold rotational symmetry and three frac
 cardDescription: "Three interleaved fractal tile types with 8-fold symmetry and silver-ratio inflation."
 dimension: "2"
 transforms: 19
-tags: [plane, self-similar, aperiodic-tiling, quasicrystal, algebraic]
+boundaryDimension: "1 (curved)"
+tags: [plane, self-similar, tiling, aperiodic-tiling, quasicrystal, algebraic, gifs]
 aifs: |
   @
   $dim=4
@@ -100,3 +101,14 @@ $$
     <figcaption>Tile $A_2$</figcaption>
   </figure>
 </div>
+
+## Boundary Dimension
+
+The tile boundaries have Hausdorff dimension $1$, but the boundary curves are **not straight** —
+they are infinite-sided polygons. Each boundary piece between two neighbouring tiles is a
+self-similar curve that spans the full 2D plane (it cannot be contained in any line), yet
+its dimension equals $1$ exactly.
+
+This distinguishes the Labyrinth from polyhedral tilings such as the
+[Ammann–Beenker](/ifs/ammann-beenker), where tile boundaries are finite unions of straight
+line segments. Both have $\dim_H(\partial A) = 1$, but the Labyrinth boundaries are curved.

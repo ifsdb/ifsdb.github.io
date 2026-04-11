@@ -1,0 +1,110 @@
+---
+name: "Ammann A3 Tiling"
+description: "A GIFS of three prototile types generating the Ammann A3 aperiodic tiling, one of Robert Ammann's original aperiodic sets, with golden-ratio inflation factor φ."
+cardDescription: "Three interleaved tile attractors (A, B, C) forming the Ammann A3 aperiodic quasicrystal tiling. Uses a 4D rational form over ℚ(√5)."
+dimension: "2 (solid tiles)"
+transforms: 9
+tags: [plane, tiling, aperiodic-tiling, quasicrystal, algebraic, gifs]
+boundaryDimension: "1 (polyhedral)"
+aifs: |
+  @
+  $dim=4
+  $subspace=[x,0]
+  x=$companion([1,0,3,0])
+  s=x^3+2*x
+  g=s*x
+  h0=s*[0,0,0,1]
+  h1=1*[0,0,1,0]
+  h2=s*[0,0,0,0]
+  h3=1*[0,0,0,0]
+  h4=s^2*[0,0,0,0]
+  h5=s*[0,0,0,0]
+  h6=1*[0,0,0,0]
+  h7=s^3*[0,-1,0,0]
+  h8=s^2*[0,0,0,0]
+  A=g^-1*(h0*A|h1*C)
+  B=g^-1*(h2*A|h3*A|h4*B)
+  C=g^-1*(h5*A|h6*A|h7*A|h8*B)
+references:
+  - text: "Grünbaum, B. & Shephard, G. C. (1987). Tilings and Patterns. W. H. Freeman."
+  - text: "Ammann A3 — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/ammann-a3/"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+## Overview
+
+The **Ammann A3 tiling** is an aperiodic tiling of the plane discovered by Robert Ammann around
+1977 and first published in Grünbaum & Shephard (1987), where it was named A3 in the series
+Ammann A1–A5. The tiling uses **three prototile types** and a self-similar substitution rule
+governed by the **golden ratio** $\varphi = \tfrac{1+\sqrt{5}}{2}$ as the inflation factor.
+
+The tiling is a Euclidean windowed (cut-and-project) tiling with finite rotational symmetry,
+and falls in the same golden-ratio family as the Penrose tilings.
+
+## The Three Tile Types
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="ammann-a3-a" aifs={props.aifs} root="A" width={300} height={300} label="Tile A" />
+    <figcaption>Tile $A$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="ammann-a3-b" aifs={props.aifs} root="B" width={300} height={300} label="Tile B" />
+    <figcaption>Tile $B$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="ammann-a3-c" aifs={props.aifs} root="C" width={300} height={300} label="Tile C" />
+    <figcaption>Tile $C$</figcaption>
+  </figure>
+</div>
+
+## Substitution Rules
+
+Each prototile decomposes into smaller copies of the three types under inflation by $g$
+(scaling by $\varphi$ in the rendering plane):
+
+$$
+g \cdot A = h_0(A) \cup h_1(C)
+$$
+
+$$
+g \cdot B = h_2(A) \cup h_3(A) \cup h_4(B)
+$$
+
+$$
+g \cdot C = h_5(A) \cup h_6(A) \cup h_7(A) \cup h_8(B)
+$$
+
+The substitution matrix (column $j$ = counts of each tile type in the decomposition of tile $j$) is:
+
+$$
+M = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 1 & 1 \\ 1 & 0 & 0 \end{pmatrix}
+$$
+
+The Perron–Frobenius eigenvalue of $M$ is $\varphi^2$, consistent with areas scaling by $\varphi^2$
+under the inflation.
+
+## Algebraic Structure
+
+The tiling lives in the ring $\mathbb{Z}[\varphi]^2 \cong \mathbb{Z}[x]/(x^4 + 3x^2 + 1)$.
+The companion matrix $x$ (defined as `$companion([1,0,3,0])` in AIFS) satisfies
+
+$$
+x^4 + 3x^2 + 1 = 0.
+$$
+
+This polynomial factors over $\mathbb{Q}(\sqrt{5})$ as $(x^2 + \varphi^2)(x^2 + \varphi^{-2})$,
+giving eigenvalues $\pm i\varphi$ (modulus $\varphi$) and $\pm i/\varphi$ (modulus $1/\varphi$).
+The directive `$subspace=[x,0]` selects the eigenplane of $\pm i\varphi$ as the 2D rendering space.
+
+The auxiliary variable $s = x^3 + 2x$ evaluates to $-i$ on the eigenvalue $i\varphi$, so $s$
+acts as a 90° rotation in the rendering plane. The expansion matrix
+
+$$
+g = s \cdot x
+$$
+
+has eigenvalue $g(i\varphi) = (-i)(i\varphi) = \varphi$, confirming that each inflation step
+scales the tiles by $\varphi$.

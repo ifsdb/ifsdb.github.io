@@ -4,6 +4,7 @@ description: "The Heighway dragon is a fractal curve obtained by repeatedly fold
 cardDescription: "Two maps each rotating by 45° or −135°, producing a dragon-shaped curve that tiles the plane in groups of four."
 dimension: "2"
 transforms: 2
+boundaryDimension: "≈ 1.5236"
 tags: [plane, curve, tiling, algebraic, classic]
 aifs: |
   @
@@ -63,6 +64,22 @@ $$a_{2^k(2m+1)} = \begin{cases} R & \text{if } k \text{ is even} \\ L & \text{if
 
 This *regular paper folding sequence* encodes the entire structure of the dragon curve.
 
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log\lambda}{\log 2} \approx 1.5236,
+$$
+
+where $\lambda$ is the unique positive real root of $\lambda^3 - \lambda^2 - 2 = 0$,\, $\lambda \approx 1.6956$.
+
+The neighbour graph of the dragon has a unique boundary component whose spectral
+radius satisfies the same cubic — giving the Moran equation $\lambda^2 = 2^d$
+and hence $d = 2\log\lambda/\log 2$.
+This dimension coincides with that of the [Twin Dragon](/ifs/twin-dragon) boundary,
+since both IFS share the same neighbour graph structure over $\mathbb{Z}[i]$.
+
 ## Related
 
 All four of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
@@ -70,6 +87,5 @@ All four of the following IFS share the same algebraic skeleton — two maps con
 | IFS | Second map rotation | Translation |
 |-----|--------------------|--------------|
 | [Lévy C Curve](/ifs/levy-c-curve) | $-45°$ (`g^-1`) | $(0,0)$ and $(\tfrac{1}{2},\tfrac{1}{2})$ |
-| [Pythagoras Tree](/ifs/pythagoras-tree) | $-45°$ (`g^-1`) | $(0,1)$ and $(\tfrac{1}{2},\tfrac{3}{2})$ |
 | Heighway Dragon | $+135°$ (`s^2*g^-1`) | $(0,0)$ and $(1,0)$ |
 | [Twin Dragon](/ifs/twin-dragon) | $-135°$ (`s^3*g^-1`) | $(0,0)$ and $(1,0)$ |

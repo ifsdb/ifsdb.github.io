@@ -8,6 +8,7 @@ const ifs = defineCollection({
     description: z.string(),
     cardDescription: z.string().optional(),
     dimension: z.string().optional(),
+    boundaryDimension: z.string().optional(),
     transforms: z.number().int().positive(),
     tags: z.array(z.string()).default([]),
     aifs: z.string(),

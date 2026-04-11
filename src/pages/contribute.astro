@@ -1,0 +1,324 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Contributing — IFS Encyclopedia"
+  description="How to add a new IFS entry to the encyclopedia: file format, frontmatter fields, AIFS programs, and submission steps."
+>
+  <main class="contribute-page">
+    <h1>Contributing a New Entry</h1>
+
+    <p>
+      Each entry in the encyclopedia is a single <code>.mdx</code> file in
+      <code>src/content/ifs/</code>. To add a new fractal, fork the
+      <a href="https://github.com/ifsdb/ifsdb.github.io" target="_blank" rel="noopener">repository</a>,
+      create the file, and open a pull request.
+    </p>
+
+    <h2>1. Choose a slug</h2>
+    <p>
+      The filename (without <code>.mdx</code>) becomes the URL path: <code>/ifs/your-slug</code>.
+      Use lowercase letters, digits, and hyphens only. Examples: <code>gosper-island</code>,
+      <code>twin-dragon</code>, <code>ammann-beenker</code>.
+    </p>
+
+    <h2>2. Frontmatter fields</h2>
+    <p>Every entry starts with a YAML frontmatter block between <code>---</code> delimiters.</p>
+
+    <h3>Required fields</h3>
+    <table class="field-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>string</td><td>Human-readable display name. Shown in the catalog, page title, and search results.</td></tr>
+        <tr><td><code>description</code></td><td>string</td><td>One sentence. Used in <code>&lt;meta description&gt;</code> and the search index.</td></tr>
+        <tr><td><code>transforms</code></td><td>integer</td><td>Number of affine maps in the IFS (positive integer).</td></tr>
+        <tr><td><code>tags</code></td><td>array</td><td>See the tag list below. At minimum include a dimension tag (<code>plane</code> or <code>3d</code>).</td></tr>
+        <tr><td><code>aifs</code></td><td>literal block string</td><td>AIFS program that renders the fractal. See §3 below.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional fields</h3>
+    <table class="field-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>cardDescription</code></td><td>string</td><td>Short text shown on the catalog card. Falls back to <code>description</code> if omitted.</td></tr>
+        <tr><td><code>dimension</code></td><td>string</td><td>Hausdorff dimension as a display string, e.g. <code>"log(3)/log(2) ≈ 1.585"</code> or <code>"2"</code>.</td></tr>
+        <tr><td><code>boundaryDimension</code></td><td>string</td><td>Hausdorff dimension of the boundary ∂A, e.g. <code>"≈ 1.5236"</code>, <code>"1 (polyhedral)"</code>, or <code>"0 (point contacts)"</code>.</td></tr>
+        <tr><td><code>references</code></td><td>array</td><td>List of <code>&#123;text, url?&#125;</code> objects. Include original papers, Wikipedia, and Tilings Encyclopedia links where available.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Complete frontmatter example</h3>
+    <pre><code>{`---
+name: "Gosper Island"
+description: "Self-similar 2D fractal tile associated with the polynomial x²−5x+7."
+cardDescription: "Seven self-similar maps with hexagonal algebra."
+dimension: "2"
+transforms: 7
+boundaryDimension: "≈ 1.1292"
+tags: [plane, self-similar, tiling, algebraic]
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=[0,-1,1,1]
+  g=[3,1,-1,2]
+  h0=s^2*[1,0]
+  h1=s^5*[0,-1]
+  h2=s^2*[-1,0]
+  h3=1
+  h4=[0,-1]
+  h5=s^2*[0,-1]
+  h6=s*[1,0]
+  A=g^-1*(h0|h1|h2|h3|h4|h5|h6)*A
+references:
+  - text: "Mandelbrot, B. B. (1982). The Fractal Geometry of Nature."
+  - text: "Gosper island — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Gosper_island"
+---`}</code></pre>
+
+    <h2>3. Writing the AIFS program</h2>
+    <p>
+      The <code>aifs</code> field contains an <strong>AIFS program</strong> — the language used
+      by <a href="https://app.ifstile.com" target="_blank" rel="noopener">IFStile</a> and the
+      in-browser renderer. Use a YAML literal block scalar (the <code>|</code> character after
+      the field name), then indent the program by two spaces.
+    </p>
+
+    <h3>Minimal 2D IFS (Sierpiński triangle)</h3>
+    <pre><code data-lang="aifs">{`aifs: |
+  @
+  $dim=2
+  f1=[0.5,0,0,0.5]
+  f2=[0.5,0]*[0.5,0,0,0.5]
+  f3=[0.25,0.5]*[0.5,0,0,0.5]
+  S=(f1|f2|f3)*S`}</code></pre>
+    <ul>
+      <li><code>@</code> — starts an anonymous block.</li>
+      <li><code>$dim=2</code> — 2D rational space (required).</li>
+      <li><code>[tx,ty]*[a,b,c,d]</code> — affine map: matrix <code>[[a,b],[c,d]]</code> then translation <code>[tx,ty]</code>.</li>
+      <li><code>S=(f1|f2|f3)*S</code> — attractor equation (mandatory; without it nothing renders).</li>
+    </ul>
+
+    <h3>Algebraic IFS via companion matrix (Heighway dragon)</h3>
+    <pre><code data-lang="aifs">{`aifs: |
+  @
+  $dim=2
+  s=$companion([1,0])   # s satisfies s²+1=0, i.e. s ↔ i
+  g=s+1                 # expansion: 1+i
+  A=(s*g^-1|[1,0]*s^2*g^-1)*A`}</code></pre>
+    <p>
+      <code>$companion([a0,a1,...,an-1])</code> builds the companion matrix for
+      <em>x<sup>n</sup> + a<sub>n−1</sub>x<sup>n−1</sup> + … + a<sub>0</sub></em>.
+      Use <code>$subspace=[s,0]</code> to project onto the first eigenplane of <code>s</code>
+      when the IFS lives in a higher-dimensional rational space.
+    </p>
+
+    <h3>GIFS — multiple tile types (Robinson triangles)</h3>
+    <p>
+      When the tiling has several prototile shapes, each gets its own attractor variable and
+      equation. Add the <code>gifs</code> tag.
+    </p>
+    <pre><code data-lang="aifs">{`aifs: |
+  @
+  $dim=4
+  $subspace=[s,0]
+  s=$companion([1,0,0,0])    # 8th cyclotomic, s↔e^(iπ/4)
+  ...
+  A1=g^-1*(h0*A1|h1*A2)
+  A2=g^-1*(h2*A1|h3*A2|h4*A2)`}</code></pre>
+    <p>
+      To render a specific attractor set, add <code>$root=A1</code> inside the block,
+      or pass a <code>root</code> prop to <code>&lt;IFSCanvas&gt;</code>.
+    </p>
+
+    <h3>Verify in IFStile</h3>
+    <p>
+      Paste the AIFS program into <a href="https://app.ifstile.com" target="_blank" rel="noopener">app.ifstile.com</a>
+      before submitting. The attractor should render without errors. Common mistakes:
+    </p>
+    <ul>
+      <li>Missing attractor equation — <code>init</code> succeeds but nothing is drawn.</li>
+      <li>Expansion instead of contraction — swap <code>g^-1*h*A</code> and <code>h^-1*g*A</code> forms.</li>
+      <li><code>#</code> starts a comment — everything after it on the line is ignored.</li>
+    </ul>
+
+    <h2>4. Tags</h2>
+    <p>Use tags from the table below. Combine freely; order does not matter.</p>
+    <table class="field-table">
+      <thead><tr><th>Tag</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>plane</code></td><td>Lives in 2D (Euclidean plane). Mutually exclusive with <code>3d</code>.</td></tr>
+        <tr><td><code>3d</code></td><td>Three-dimensional fractal.</td></tr>
+        <tr><td><code>self-similar</code></td><td>The standard IFS attractor equation <em>A = ⋃ fᵢ(A)</em>.</td></tr>
+        <tr><td><code>gifs</code></td><td>Generalized IFS — multiple interleaved attractor sets (e.g. GIFS tilings).</td></tr>
+        <tr><td><code>tiling</code></td><td>The attractor tiles the plane (or space) by copies of itself.</td></tr>
+        <tr><td><code>rep-tile</code></td><td>The tile is a rep-tile: it can be dissected into smaller similar copies.</td></tr>
+        <tr><td><code>curve</code></td><td>The attractor is a fractal curve (1D Hausdorff, plane-filling or not).</td></tr>
+        <tr><td><code>algebraic</code></td><td>Defined via a companion matrix or arithmetic in an algebraic number field.</td></tr>
+        <tr><td><code>aperiodic-tiling</code></td><td>The tiling is aperiodic (no translational periodicity).</td></tr>
+        <tr><td><code>quasicrystal</code></td><td>Has long-range quasicrystalline order (5-, 7-, 8-, 10-, 12-fold symmetry).</td></tr>
+        <tr><td><code>limit-periodic</code></td><td>Limit-periodic tiling (chair, sphinx, etc.).</td></tr>
+        <tr><td><code>p-adic</code></td><td>Related to p-adic structure or hierarchical substitution.</td></tr>
+        <tr><td><code>pentagonal</code></td><td>5-fold symmetry (pentadendrite, pentigree, Robinson triangles …).</td></tr>
+        <tr><td><code>hexagonal</code></td><td>6-fold symmetry (sphinx, Koch snowflake …).</td></tr>
+        <tr><td><code>dendrite</code></td><td>Fractal dendrite (star-shaped, tree-like boundary).</td></tr>
+        <tr><td><code>classic</code></td><td>Historically well-known entry found in most fractal textbooks.</td></tr>
+        <tr><td><code>probabilistic</code></td><td>Random IFS (maps chosen with probabilities, e.g. Barnsley fern).</td></tr>
+        <tr><td><code>naturalistic</code></td><td>Resembles a natural object (plant, landscape, …).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Writing the Markdown body</h2>
+    <p>After the closing <code>---</code>, write freely in Markdown. A typical structure:</p>
+    <ol>
+      <li><strong>Overview</strong> — one paragraph describing what the fractal is and why it is interesting.</li>
+      <li><strong>Definition</strong> — the maps in matrix/vector form using LaTeX math.</li>
+      <li><strong>Properties</strong> — dimension, symmetry, algebraic structure.</li>
+      <li><strong>Boundary Dimension</strong> (optional) — if you computed it.</li>
+      <li><strong>References</strong> — the <code>references</code> frontmatter field is rendered automatically at the bottom.</li>
+    </ol>
+
+    <h3>Math syntax</h3>
+    <ul>
+      <li>Inline math: <code>$f(x) = Ax + b$</code></li>
+      <li>Display math: put <code>$$</code> alone on its own line, never at the end of a content line.</li>
+      <li>Separate adjacent display blocks with a blank line.</li>
+    </ul>
+
+    <h3>Canvas (fractal preview)</h3>
+    <p>
+      For a single attractor the canvas is rendered automatically from the <code>aifs</code>
+      frontmatter field — nothing extra needed.
+    </p>
+
+    <h3>Multiple variants on one page (family / gallery)</h3>
+    <p>
+      If your entry showcases a <em>family</em> of related fractals (like the Square Family),
+      put each variant in its own <code>export const</code> AIFS string in the MDX body,
+      then place as many <code>&lt;IFSCanvas&gt;</code> elements as you need.
+      The <code>aifs</code> frontmatter field should hold the most representative or canonical
+      variant — it is used for the catalog card thumbnail.
+    </p>
+    <pre><code>{`import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsVariantA = \`@
+$dim=2
+...
+A=...\`;
+
+export const aifsVariantB = \`@
+$dim=2
+...
+A=...\`;
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="my-slug-a" aifs={aifsVariantA} width={280} height={280} label="Variant A" />
+    <figcaption>Variant A</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="my-slug-b" aifs={aifsVariantB} width={280} height={280} label="Variant B" />
+    <figcaption>Variant B</figcaption>
+  </figure>
+</div>`}</code></pre>
+    <ul>
+      <li>Always use <code>export const</code>, not plain <code>const</code> — plain variables are not accessible inside the compiled MDX content.</li>
+      <li>Each canvas <code>id</code> must be unique across the page (use <code>slug-suffix</code> style).</li>
+      <li>Group canvases in <code>&lt;div class="canvas-row"&gt;</code> for horizontal layout; three canvases fit comfortably with <code>width={280}</code>.</li>
+    </ul>
+
+    <h3>GIFS — multiple tile types in one AIFS</h3>
+    <p>
+      When a <em>single</em> AIFS program has multiple interleaved attractor sets (e.g. two
+      triangle types in Robinson triangles), render each with a separate canvas pointing at the
+      same AIFS string but a different <code>root</code>:
+    </p>
+    <pre><code>{`import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const myAifs = \`@
+$dim=4
+...
+A1=g^-1*(h0*A1|h1*A2)
+A2=g^-1*(h2*A1|h3*A2)\`;
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="my-slug-a1" aifs={myAifs} root="A1" width={380} height={380} label="Tile A1" />
+    <figcaption>Tile $A_1$</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="my-slug-a2" aifs={myAifs} root="A2" width={380} height={380} label="Tile A2" />
+    <figcaption>Tile $A_2$</figcaption>
+  </figure>
+</div>`}</code></pre>
+
+    <h2>6. Submit a pull request</h2>
+    <ol>
+      <li>Fork <a href="https://github.com/ifsdb/ifsdb.github.io" target="_blank" rel="noopener">github.com/ifsdb/ifsdb.github.io</a>.</li>
+      <li>Create a branch: <code>git checkout -b add/your-slug</code>.</li>
+      <li>Add your file at <code>src/content/ifs/your-slug.mdx</code>.</li>
+      <li>Open a pull request with a short description of the entry.</li>
+    </ol>
+    <p>
+      Once the PR is merged, the main repository's CI builds and deploys the site automatically.
+      No local setup is required.
+    </p>
+    <p>
+      To verify your file builds without errors before opening a PR, install
+      <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 18+</a> and run:
+    </p>
+    <pre><code>{`npm install\nnpx astro build`}</code></pre>
+    <p>
+      For a live preview with hot reload, use <code>npx astro dev</code> instead — the dev
+      server opens at <code>http://127.0.0.1:4321</code>. See the
+      <a href="https://docs.astro.build/en/install-and-setup/" target="_blank" rel="noopener">Astro installation guide</a>
+      for full details.
+    </p>
+    <p>
+      If you are unsure about the AIFS program or the mathematical details, open an issue
+      first and we can help refine it before the full PR.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .contribute-page {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .contribute-page h2 {
+    margin-top: 2.2rem;
+    border-bottom: 1px solid var(--color-border, #e0e0e0);
+    padding-bottom: 0.3rem;
+  }
+
+  .contribute-page h3 {
+    margin-top: 1.4rem;
+  }
+
+  .field-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 0.8rem 0 1.2rem;
+  }
+
+  .field-table th,
+  .field-table td {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--color-border, #e0e0e0);
+    vertical-align: top;
+  }
+
+  .field-table th {
+    background: var(--color-code-bg, #f6f8fa);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .field-table td:first-child {
+    white-space: nowrap;
+  }
+</style>

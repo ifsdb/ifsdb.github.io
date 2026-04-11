@@ -4,7 +4,8 @@ description: "A self-similar substitution tiling built from four metatile types 
 cardDescription: "Canonical Aperiodic Prototile — substitution tiling underlying the hat monotile. Four GIFS attractor types, 30-fold algebraic symmetry."
 dimension: "2"
 transforms: 22
-tags: [plane, self-similar, aperiodic-tiling, quasicrystal, algebraic]
+boundaryDimension: "≈ 1.3684"
+tags: [plane, self-similar, tiling, aperiodic-tiling, quasicrystal, algebraic, gifs]
 aifs: |
   @
   $dim=8
@@ -112,3 +113,20 @@ $$
     <figcaption>Metatile $F$ — fat</figcaption>
   </figure>
 </div>
+
+## Boundary Dimension
+
+The boundary $\partial H$ of the H-metatile has Hausdorff dimension
+
+$$
+\dim_H(\partial H) = \frac{\log(2+\sqrt{3})}{2\log\varphi} \approx 1.3684,
+$$
+
+where $\varphi = \tfrac{1+\sqrt{5}}{2}$ is the golden ratio. The formula can also be written as
+
+$$
+\dim_H(\partial H) = \frac{2\log\lambda}{\log p}, \quad \lambda^2 - 4\lambda + 1 = 0,\; p = \varphi^4 = \tfrac{7+3\sqrt{5}}{2},
+$$
+
+where $\lambda = 2+\sqrt{3} \approx 3.732$ is the dominant eigenvalue of the boundary substitution
+and $p = \varphi^4 \approx 6.854$ is the squared norm of the expansion $g$.

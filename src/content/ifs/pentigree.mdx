@@ -4,6 +4,7 @@ description: "A self-similar curve with pentagonal symmetry discovered by Willia
 cardDescription: "Six-map IFS with 5-fold symmetry over the cyclotomic field Q(ζ₁₀), with contraction ratio 1/φ² where φ is the golden ratio."
 dimension: "log(6)/log(φ²) ≈ 1.862"
 transforms: 6
+boundaryDimension: "≈ 1.1415"
 tags: [plane, curve, self-similar, pentagonal, algebraic, classic]
 aifs: |
   @
@@ -85,9 +86,18 @@ without overlap to form a set with exact 5-fold rotational symmetry, sometimes c
 "second form of McWorter's pentigree" (Edgar, 1990). This packing mirrors how five
 equilateral triangles meet at a vertex of a regular pentagon.
 
-## Related
+## Boundary Dimension
 
-The [McWorter's Pentadendrite](/ifs/pentadendrite) lives in the same field $\mathbb{Q}(\zeta_{10})$
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log 3}{\log\varphi^4} = \frac{\log 9}{4\log\varphi} \approx 1.142,
+$$
+
+where $\varphi = (1+\sqrt{5})/2$ is the golden ratio and $\varphi^4 = (7+3\sqrt{5})/2 \approx 6.854$
+is the expansion factor of the IFS. The value $\varphi^4$ satisfies $p^2 - 7p + 1 = 0$.
+
+## Related lives in the same field $\mathbb{Q}(\zeta_{10})$
 with the same companion matrix $s$, but uses a different expansion $g = 3 - s + s^2 - s^3$,
 giving a different contraction ratio and a dendrite (tree-like) rather than curve-like attractor.
 Both are in the same algebraic family of pentagonal IFS discovered by McWorter.

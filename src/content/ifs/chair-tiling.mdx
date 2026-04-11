@@ -1,0 +1,115 @@
+---
+name: "Chair Tiling"
+description: "A nonperiodic substitution tiling built from an L-shaped rep-4 tile (L-tromino). The tiling is limit-periodic and can be obtained by cut-and-project with a 2-adic internal space."
+cardDescription: "L-shaped rep-4 tile (L-tromino) generating a nonperiodic limit-periodic tiling with 2-adic cut-and-project structure."
+dimension: "2 (solid tile)"
+transforms: 4
+tags: [plane, self-similar, tiling, rep-tile, limit-periodic, p-adic]
+boundaryDimension: "1 (polyhedral)"
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=$companion([1,0])
+  r=$companion([-1,0])
+  h0=1
+  h1=1*[1,-1]
+  h2=s^3*[1,-1]
+  h3=s*[1,-1]
+  A=2^-1*(h0|h1|h2|h3)*A
+references:
+  - text: "Robinson Jr., E. A. (1999). On the table and the chair. Indagationes Mathematicae, 10(4): 581–599."
+    url: "https://doi.org/10.1016/S0019-3577(00)87911-2"
+  - text: "Baake, M., Moody, R. V. & Schlottmann, M. (1998). Limit-(quasi)periodic point sets as quasicrystals with p-adic internal spaces. Journal of Physics A, 31(27): 5755–5766."
+    url: "https://arxiv.org/abs/math-ph/9901008"
+  - text: "Goodman-Strauss, C. (1999). A small aperiodic set of planar tiles. European J. Combinatorics, 20(5): 375–384."
+    url: "https://doi.org/10.1006/eujc.1998.0281"
+  - text: "Barge, M., Diamond, B., Hunton, J. & Sadun, L. (2010). Cohomology of substitution tiling spaces. Ergodic Theory and Dynamical Systems, 30(6): 1607–1627."
+    url: "https://arxiv.org/abs/0811.2507"
+  - text: "Chair tiling — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Chair_tiling"
+  - text: "Chair — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/chair/"
+---
+
+## The Chair (L-Tromino)
+
+The **chair** tile — also called the **L-tromino** or **L-tile** — is an L-shaped polyomino
+consisting of three unit squares, obtained by removing one corner square from a 2×2 block.
+It is one of the two distinct trominoes.
+
+The chair is a **rep-4 tile**: four half-size copies tile a full chair exactly, all without
+mirror reflections. The four copies are arranged as one copy in the original orientation
+at the top-left corner, and three copies (rotated 0°, 90°, and 270°) fitted around the
+inner corner of the L.
+
+## IFS on the Square Lattice
+
+The chair lives on the **Gaussian integer lattice** $\mathbb{Z}[i]$.
+In the AIFS program:
+
+- `s` = $i$ (companion matrix of $x^2 + 1 = 0$, 90° rotation)
+- `s^3` = $-i$ (270° rotation)
+
+The four contraction maps (each scaling by $\tfrac{1}{2}$) are:
+
+| Map | Translation | Rotation |
+|-----|-------------|----------|
+| $h_0$ | $(0, 0)$ | 0° (identity) |
+| $h_1$ | $(1, -1)$ | 0° (direct) |
+| $h_2$ | $(1, -1)$ | 270° |
+| $h_3$ | $(1, -1)$ | 90° |
+
+The attractor equation is:
+
+$$
+A = \tfrac{1}{2}\bigl(h_0(A) \cup h_1(A) \cup h_2(A) \cup h_3(A)\bigr).
+$$
+
+## Chair Tilings: Nonperiodic but Not Aperiodic
+
+Iterating the substitution rule produces **chair tilings** of the plane. These tilings are
+**nonperiodic** (no translational symmetry), yet the chair tile itself is **not aperiodic**:
+it is possible to tile the plane periodically with L-trominoes as well, so the chair tile does
+not *force* nonperiodicity on its own.
+
+The tilings exhibit a striking near-periodicity: the vertex set of any chair tiling spans a
+perfect square lattice. Furthermore, the tiling can be decomposed into a countable family of
+**periodic sublattices** $L_1, L_2, L_3, \ldots$, where $L_i$ is fully periodic with period
+vectors of length $2 \times 2^i$. This property is called **limit-periodicity** (Baake,
+Moody & Schlottmann 1998).
+
+## p-adic Cut-and-Project Structure
+
+The limit-periodic structure of the chair tiling has a precise algebraic interpretation.
+The tiling can be obtained by a **cut-and-project scheme** with a **p-adic internal space**:
+
+$$
+\text{internal space} = \mathbb{Q}_2 \times \mathbb{Q}_2,
+$$
+
+where $\mathbb{Q}_2$ is the field of 2-adic numbers. This connects the chair tiling to the
+broader theory of **model sets** (mathematical quasicrystals). As a consequence, the
+diffraction spectrum of the chair tiling is **pure point** — all peaks are Bragg peaks.
+
+The vertex point set of the chair tiling can be described as
+
+$$
+\Lambda = \{x \in \mathbb{Z}^2 \mid \text{2-adic valuation condition on } x\},
+$$
+
+making precise the sense in which the tiling is "2-adic periodic."
+
+## Matching Rules and Aperiodic Enforcements
+
+Although the undecorated chair tile does not force nonperiodicity, decorated versions do.
+Goodman-Strauss (1999) showed that the **trilobite** and **cross** tiles — obtained by
+adding simple geometric decorations to chair-related shapes — form a small **aperiodic set**
+that forces exactly the chair-tiling substitution structure. This is one of the simplest
+known aperiodic tile sets.
+
+## Cohomology
+
+The topological invariants of the chair tiling space have been computed: Barge et al. (2010)
+calculated the **Čech cohomology** of the tiling space, confirming the limit-periodic structure
+through algebraic topology.

@@ -1,0 +1,109 @@
+---
+name: "Sphinx"
+description: "A rep-4 hexiamond tile: four half-size sphinx pieces (some mirror-flipped) assemble into a full sphinx. The associated nonperiodic tiling is limit-periodic and pure-point diffractive."
+cardDescription: "Rep-4 hexiamond tile. Its nonperiodic tiling is limit-periodic and pure-point diffractive via cut-and-project over a p-adic internal space."
+dimension: "2 (solid tile)"
+transforms: 4
+tags: [plane, self-similar, tiling, rep-tile, hexagonal, limit-periodic]
+boundaryDimension: "1 (polyhedral)"
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=$companion([1,-1])
+  r=$companion([-1,0])
+  h0=r*s^5
+  h1=r*s^2*[0,-1]
+  h2=r*s^5*[2,-1]
+  h3=s^4*[0,-2]
+  A=2^-1*(h0|h1|h2|h3)*A
+references:
+  - text: "Godrèche, C. (1989). The sphinx: a limit-periodic tiling of the plane. Journal of Physics A, 22(24): L1163–L1166."
+    url: "https://doi.org/10.1088/0305-4470/22/24/006"
+  - text: "Lee, J.-Y. & Moody, R. V. (2001). Lattice substitution systems and model sets. Discrete & Computational Geometry, 25(2): 173–201."
+    url: "https://doi.org/10.1007/s004540010083"
+  - text: "Niţică, V. (2003). Rep-tiles revisited. MASS selecta, AMS, pp. 205–217."
+  - text: "Huber, G. et al. (2024). Entropy and chirality in sphinx tilings. Physical Review Research, 6: 013227."
+    url: "https://doi.org/10.1103/PhysRevResearch.6.013227"
+  - text: "Sphinx tiling — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Sphinx_tiling"
+  - text: "Sphinx — Tilings Encyclopedia"
+    url: "https://tilings.math.uni-bielefeld.de/substitution/sphinx/"
+  - text: "Sphinx — MathWorld"
+    url: "https://mathworld.wolfram.com/Sphinx.html"
+---
+
+## What is the Sphinx?
+
+The **sphinx** is a **hexiamond** — a shape made from six equilateral triangles joined edge-to-edge.
+Among the twelve distinct hexiamonds it is the only one whose outline resembles the profile of
+a crouching sphinx, giving the tile its name. The sphinx is a **concave pentagon** with five
+sides of equal length (two triangle-edge lengths each) and internal angles of 60°, 60°, 240°,
+60°, 60°, 240°.
+
+The sphinx is a **rep-4 tile**: four half-size copies tile a full sphinx exactly.
+Three of the copies are mirror images of the original (reflected), and one is a direct
+copy rotated by 180°.
+
+Because the sphinx is **chiral** (it is not mirror-symmetric), two versions occur in every
+sphinx tiling: a right-handed sphinx (R) and its left-handed mirror image (L). A right-handed
+sphinx decomposes into three L-copies and one R-copy. A left-handed sphinx decomposes
+into three R-copies and one L-copy. This is encoded in the IFS by the three maps
+$h_0, h_1, h_2$ (which include the reflection $r$) and the single direct-rotation map $h_3$.
+
+The sphinx is also **rep-$n^2$** for every positive integer $n$: $n^2$ half-scale copies
+tile the original. In particular it is rep-9 (nine copies at scale 1/3), and this
+self-similar subdivision uses only direct copies (no mirror images required).
+
+## IFS on the Hexagonal Lattice
+
+The sphinx lives on the **triangular (Eisenstein) lattice** $\mathbb{Z}[\omega]$,
+where $\omega = e^{i\pi/3}$ is a primitive 6th root of unity. In the AIFS program:
+
+- `s` = $\omega$ (companion matrix of $x^2 - x + 1 = 0$, 60° rotation)
+- `r` = reflection (companion matrix of $x^2 - 1 = 0$, i.e. the exchange matrix)
+- `s^3` = $\omega^3 = -I$ (180° rotation)
+- `s^4` = $\omega^4$ (240° rotation)
+
+The four contraction maps (each scaling by $\tfrac{1}{2}$) are:
+
+| Map | Linear part | Type |
+|-----|-------------|------|
+| $h_0$ | $r \cdot s^3$ | reflection + 180° (chirality-reversing) |
+| $h_1$ | $r$ | reflection (chirality-reversing) |
+| $h_2$ | $r \cdot s^3$ | reflection + 180° (chirality-reversing) |
+| $h_3$ | $s^4$ | 240° rotation (chirality-preserving) |
+
+The attractor equation is:
+
+$$
+A = \tfrac{1}{2}\bigl(h_0(A) \cup h_1(A) \cup h_2(A) \cup h_3(A)\bigr).
+$$
+
+## Sphinx Tilings: Limit-Periodicity
+
+The sphinx rep-tile generates a family of nonperiodic **sphinx tilings** of the plane by iterating
+the substitution rule. These tilings possess a remarkable structural property first described
+by Godrèche (1989) and rigorously established by Lee & Moody (2001):
+
+**The sphinx tiling is limit-periodic.** The tile set can be partitioned into a countably infinite
+collection of periodic sublattices $L_1, L_2, L_3, \ldots$, where $L_i$ has period vectors of
+length $2 \times 2^i$. This is analogous to the **chair tiling** on the square lattice.
+
+Because it is limit-periodic, the sphinx tiling can be obtained by a **cut-and-project** method
+with a **p-adic internal space**, and its diffraction spectrum is **pure point** (all Bragg peaks,
+no diffuse background) — a property shared with quasicrystals.
+
+## Frame Tilings and Entropy
+
+A sphinx-shaped frame of **order $n$** (defined by the number of unit triangles at the tail)
+can also be tiled by sphinx tiles in non-recursive ways. The number of distinct tilings grows
+exponentially:
+
+$$
+N(n) \sim e^{c n^2}, \qquad c \approx 0.425.
+$$
+
+This exponential growth (Huber et al. 2024) reflects the entropy of the tiling ensemble and
+is related to the chirality structure: each sphinx placed inside a frame may be either
+left-handed or right-handed, subject to the constraint that the pieces fit together.

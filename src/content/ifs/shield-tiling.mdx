@@ -4,7 +4,8 @@ description: "An aperiodic tiling with exact 12-fold rotational symmetry, discov
 cardDescription: "Four interleaved tile types with 12-fold symmetry and dodecagonal inflation. MLD-equivalent to the Socolar tiling."
 dimension: "2"
 transforms: 22
-tags: [plane, self-similar, aperiodic-tiling, quasicrystal, algebraic]
+boundaryDimension: "≈ 1.0527"
+tags: [plane, self-similar, tiling, aperiodic-tiling, quasicrystal, algebraic, gifs]
 aifs: |
   @
   $dim=4
@@ -76,6 +77,17 @@ $$
 
 which at the eigenvalue $s_0 = e^{i\pi/6}$ evaluates to $1 + e^{i\pi/6}$,
 giving area inflation factor $|g|^2 = 2 + \sqrt{3}$.
+
+## Boundary Dimension
+
+The area inflation factor $|g|^2 = 2+\sqrt{3}$ (established above) appears directly in the
+boundary dimension formula. Each prototile boundary has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log 2}{\log(2+\sqrt{3})} \approx 1.053.
+$$
+
+The value $p = 2+\sqrt{3}$ satisfies $p^2 - 4p + 1 = 0$.
 
 The GIFS has **four tile types** $A_0, A_1, A_2, A_3$ with the cyclic dependency
 $A_0 \to A_3 \to (A_0, A_1, A_2)$:

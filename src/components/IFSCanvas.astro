@@ -7,9 +7,10 @@ interface Props {
   aifs?: string;
   block?: string;
   root?: string;
+  analytics?: string;  // e.g. 'Projection' — requests information() after render
 }
 
-const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
+const { id, width = 400, height = 400, label, aifs, block, root, analytics } = Astro.props;
 ---
 <div class="ifs-canvas-wrapper">
   <div class="ifs-canvas-frame">
@@ -19,9 +20,11 @@ const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
             style="cursor:pointer"
             data-aifs={aifs ?? ''}
             data-ifs-block={block ?? ''}
-            data-ifs-root={root ?? ''}></canvas>
+            data-ifs-root={root ?? ''}
+            data-ifs-analytics={analytics ?? ''}></canvas>
     <div class="ifs-open-hint">Open in IFStile ↗</div>
   </div>
+  {analytics && <div class="ifs-analytics-panel" data-analytics-for={id}></div>}
 </div>
 
 <script>
@@ -32,23 +35,198 @@ const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
   let _worker: Worker | null = null;
   const _pending = new Map<string, HTMLCanvasElement>();
   const _done = new Set<string>();
+  // Tracks the next sizeIndex to resume from after a cancel.
+  const _progress = new Map<string, number>();
+
+  // ── Analytics worker (second worker for information() queries) ──
+  let _analyticsWorker: Worker | null = null;
+  const _analyticsTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  function getAnalyticsWorker(): Worker {
+    if (_analyticsWorker) return _analyticsWorker;
+    _analyticsWorker = new Worker('/ifslib-analytics-worker.js');
+    _analyticsWorker.onmessage = (e: MessageEvent) => {
+      const { id, type, request, data: result, message } = e.data as {
+        id: string; type: string; request: string; data?: string; message?: string;
+      };
+      const timer = _analyticsTimers.get(id);
+      if (timer !== undefined) { clearTimeout(timer); _analyticsTimers.delete(id); }
+      const canvas = document.querySelector<HTMLCanvasElement>(`canvas[data-ifs-id="${CSS.escape(id)}"]`);
+      canvas?.closest('.ifs-canvas-frame')?.classList.remove('analytics-running');
+      const panel = document.querySelector<HTMLElement>(`[data-analytics-for="${CSS.escape(id)}"]`);
+      if (!panel) return;
+      if (type === 'result' && result != null) {
+        if (request === 'Projection') panel.innerHTML = buildProjectionHTML(result, id);
+        else panel.innerHTML = `<pre class="ifs-proj-raw">${escHtml(result)}</pre>`;
+      } else {
+        panel.innerHTML = `<div class="analytics-error">Analytics error: ${escHtml(message ?? '')}</div>`;
+      }
+    };
+    _analyticsWorker.onerror = () => {
+      // Clean up all pending timers on crash
+      for (const [pid, timer] of _analyticsTimers) {
+        clearTimeout(timer);
+        const canvas = document.querySelector<HTMLCanvasElement>(`canvas[data-ifs-id="${CSS.escape(pid)}"]`);
+        canvas?.closest('.ifs-canvas-frame')?.classList.remove('analytics-running');
+        const panel = document.querySelector<HTMLElement>(`[data-analytics-for="${CSS.escape(pid)}"]`);
+        if (panel) panel.innerHTML = '<div class="analytics-error">Analytics worker crashed</div>';
+      }
+      _analyticsTimers.clear();
+      _analyticsWorker = null;
+    };
+    return _analyticsWorker;
+  }
+
+  function startAnalytics(canvas: HTMLCanvasElement): void {
+    const id = canvas.dataset.ifsId!;
+    const request = canvas.dataset.ifsAnalytics!;
+    if (!request || _analyticsTimers.has(id)) return;
+    canvas.closest('.ifs-canvas-frame')?.classList.add('analytics-running');
+    const timer = setTimeout(() => {
+      _analyticsTimers.delete(id);
+      _analyticsWorker?.terminate();
+      _analyticsWorker = null;
+      const c = document.querySelector<HTMLCanvasElement>(`canvas[data-ifs-id="${CSS.escape(id)}"]`);
+      c?.closest('.ifs-canvas-frame')?.classList.remove('analytics-running');
+      const panel = document.querySelector<HTMLElement>(`[data-analytics-for="${CSS.escape(id)}"]`);
+      if (panel) panel.innerHTML = '<div class="analytics-error">Analytics timed out</div>';
+    }, 15000);
+    _analyticsTimers.set(id, timer);
+    getAnalyticsWorker().postMessage({
+      id,
+      aifs: canvas.dataset.aifs ?? '',
+      block: canvas.dataset.ifsBlock ?? '',
+      root: canvas.dataset.ifsRoot ?? '',
+      request,
+      version: __IFSLIB_VERSION__,
+    });
+  }
+
+  // ── Projection output parser → HTML ──
+
+  function escHtml(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function buildProjectionHTML(text: string, id: string): string {
+    // Parse attractor name → node index  (e.g. "A1=@v0")
+    const nodeLabels = new Map<number, string>();
+    for (const m of text.matchAll(/^(\w+)=@v(\d+)/mg)) {
+      nodeLabels.set(Number(m[2]), m[1]);
+    }
+
+    // Parse "digraph g { 0->1 [label = 2] ... }"
+    const rawEdges: { from: number; to: number; mapIdx: number }[] = [];
+    const gBlock = text.match(/digraph g \{([^}]+)\}/s);
+    if (gBlock) {
+      for (const m of gBlock[1].matchAll(/(\d+)->(\d+)\s*\[label\s*=\s*(\d+)\]/g)) {
+        rawEdges.push({ from: Number(m[1]), to: Number(m[2]), mapIdx: Number(m[3]) });
+      }
+    }
+
+    // Group multi-edges by (from, to)
+    const edgeGroups = new Map<string, { from: number; to: number; maps: number[] }>();
+    for (const e of rawEdges) {
+      const key = `${e.from}_${e.to}`;
+      if (!edgeGroups.has(key)) edgeGroups.set(key, { from: e.from, to: e.to, maps: [] });
+      edgeGroups.get(key)!.maps.push(e.mapIdx);
+    }
+
+    const nodeCount = nodeLabels.size || 1;
+    const markerId = `arr-${id.replace(/[^a-z0-9]/gi, '-')}`;
+    const W = 240, H = 160, cx = W / 2, cy = H / 2;
+    const R = nodeCount <= 1 ? 0 : Math.min(65, 45 + nodeCount * 8);
+    const NR = 19;
+
+    // Circular node positions (single node = center)
+    const npos: { x: number; y: number }[] = [];
+    for (let i = 0; i < nodeCount; i++) {
+      const a = nodeCount === 1 ? 0 : (2 * Math.PI * i / nodeCount) - Math.PI / 2;
+      npos.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) });
+    }
+
+    const paths: string[] = [];
+    const f1 = (n: number) => n.toFixed(1);
+
+    for (const [, eg] of edgeGroups) {
+      const { from, to, maps } = eg;
+      const label = maps.map(m => `m${m}`).join(', ');
+      const p0 = npos[from] ?? npos[0];
+      const p1 = npos[to] ?? npos[0];
+
+      if (from === to) {
+        // Self-loop arc at top of node
+        const lx = p0.x - NR * 0.85, rx = p0.x + NR * 0.85;
+        const topY = p0.y - NR - 26;
+        paths.push(`<path d="M${f1(lx)},${f1(p0.y - NR + 2)} C${f1(lx)},${f1(topY)} ${f1(rx)},${f1(topY)} ${f1(rx)},${f1(p0.y - NR + 2)}" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#${markerId})"/>`);
+        paths.push(`<text x="${f1(p0.x)}" y="${f1(topY - 5)}" class="ifs-glab" text-anchor="middle">${escHtml(label)}</text>`);
+      } else {
+        const dx = p1.x - p0.x, dy = p1.y - p0.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const ux = dx / len, uy = dy / len;
+        const hasReverse = edgeGroups.has(`${to}_${from}`);
+        const perp = hasReverse ? 20 : 0;
+        const sx = p0.x + ux * (NR + 2), sy = p0.y + uy * (NR + 2);
+        const ex = p1.x - ux * (NR + 6), ey = p1.y - uy * (NR + 6);
+        const mx = (sx + ex) / 2 - uy * perp, my = (sy + ey) / 2 + ux * perp;
+        paths.push(`<path d="M${f1(sx)},${f1(sy)} Q${f1(mx)},${f1(my)} ${f1(ex)},${f1(ey)}" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#${markerId})"/>`);
+        const tx = (sx + 2 * mx + ex) / 4 - uy * 12, ty = (sy + 2 * my + ey) / 4 + ux * 12 - 6;
+        paths.push(`<text x="${f1(tx)}" y="${f1(ty)}" class="ifs-glab" text-anchor="middle">${escHtml(label)}</text>`);
+      }
+    }
+
+    const nodes: string[] = [];
+    for (let i = 0; i < nodeCount; i++) {
+      const { x, y } = npos[i];
+      nodes.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${NR}" class="ifs-gnode"/>`);
+      nodes.push(`<text x="${f1(x)}" y="${f1(y + 5)}" class="ifs-gnodelbl" text-anchor="middle">${escHtml(nodeLabels.get(i) ?? `v${i}`)}</text>`);
+    }
+
+    const hasSelfLoops = [...edgeGroups.values()].some(eg => eg.from === eg.to);
+    const topPad = hasSelfLoops ? 38 : 8;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${-topPad} ${W} ${H + topPad}" class="ifs-proj-graph">
+  <defs>
+    <marker id="${markerId}" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <polygon points="0 0, 7 3.5, 0 7" fill="currentColor"/>
+    </marker>
+  </defs>
+  ${paths.join('\n  ')}
+  ${nodes.join('\n  ')}
+</svg>`;
+
+    // Map definitions: everything from the first @m line to end of output
+    const mStart = text.indexOf('\n@m');
+    const mapsText = mStart >= 0 ? text.slice(mStart + 1).trimEnd() : '';
+    // Prepend attractor→node mapping lines for context
+    const nodeMapLines = [...nodeLabels.entries()].map(([ni, name]) => `${name}=@v${ni}`).join('\n');
+    const defsText = nodeMapLines + (mapsText ? '\n\n' + mapsText : '');
+
+    return `<details class="ifs-analytics-details">
+  <summary>Projected form</summary>
+  <div class="ifs-proj-content">
+    <div class="ifs-proj-graph-wrap">${svg}</div>
+    <pre class="ifs-proj-maps"><code>${escHtml(defsText)}</code></pre>
+  </div>
+</details>`;
+  }
 
   function getWorker(): Worker {
     if (_worker) return _worker;
     _worker = new Worker('/ifslib-worker.js');
     _worker.onmessage = (e: MessageEvent) => {
-      const { id, type, pixels, width, height, message } = e.data;
+      const { id, type, pixels, width, height, sizeIndex, message } = e.data;
       const canvas = _pending.get(id);
       if (!canvas) return;
 
       if (type === 'frame') {
+        _progress.set(id, (sizeIndex as number) + 1);
         const arr = new Uint8ClampedArray((pixels as Uint8ClampedArray).buffer as ArrayBuffer);
         const imgData = new ImageData(arr, width, height);
         createImageBitmap(imgData).then(bitmap => {
+          if (!_pending.has(id)) { bitmap.close(); return; }
           const ctx = canvas.getContext('2d')!;
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Nearest-neighbour while upscaling, smooth at final resolution
-          ctx.imageSmoothingEnabled = width < canvas.width;
+          ctx.imageSmoothingEnabled = true;
           // ifslib uses Y-up coordinates; flip vertically to match canvas Y-down
           ctx.save();
           ctx.scale(1, -1);
@@ -57,13 +235,14 @@ const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
           bitmap.close();
         });
       } else if (type === 'done') {
-        if (_pending.has(id)) {
-          _pending.delete(id);
-          _done.add(id);
-        }
+        _pending.delete(id);
+        _done.add(id);
+        _progress.delete(id);
       } else if (type === 'error') {
         console.error('IFS worker error:', message, '— canvas:', id);
         _pending.delete(id);
+        _done.add(id);
+        _progress.delete(id);
         // Draw the error message directly on the canvas so it's visible without devtools.
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -142,7 +321,11 @@ const { id, width = 400, height = 400, label, aifs, block, root } = Astro.props;
       height: canvas.height,
       version: __IFSLIB_VERSION__,
       priority: isInViewport(canvas),
+      startSizeIndex: _progress.get(ifsId) ?? 0,
     });
+
+    // Start analytics in parallel — no need to wait for render to finish.
+    if (canvas.dataset.ifsAnalytics) startAnalytics(canvas);
   }
 
   function cancelCanvas(canvas: HTMLCanvasElement) {

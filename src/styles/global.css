@@ -13,6 +13,16 @@
   --color-card-bg: #ffffff;
   --color-header-bg: #1a1a2e;
   --color-header-text: #e8e8ff;
+
+  /* AIFS syntax highlight */
+  --aifs-dir: #7c3aed;
+  --aifs-cmt: #6a9955;
+  --aifs-blt: #0891b2;
+  --aifs-spe: #0151d6;
+  --aifs-mac: #b45309;
+  --aifs-fun: #0891b2;
+  --aifs-num: #098658;
+  --aifs-att: #a31515;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +36,16 @@
     --color-card-bg: #1e1e34;
     --color-header-bg: #0a0a18;
     --color-header-text: #e8e8ff;
+
+    /* AIFS syntax highlight */
+    --aifs-dir: #c792ea;
+    --aifs-cmt: #6a9955;
+    --aifs-blt: #56b6c2;
+    --aifs-spe: #61afef;
+    --aifs-mac: #e5c07b;
+    --aifs-fun: #56b6c2;
+    --aifs-num: #b5cea8;
+    --aifs-att: #f97583;
   }
 }
 
@@ -39,6 +59,16 @@
   --color-card-bg: #1e1e34;
   --color-header-bg: #0a0a18;
   --color-header-text: #e8e8ff;
+
+  /* AIFS syntax highlight */
+  --aifs-dir: #c792ea;
+  --aifs-cmt: #6a9955;
+  --aifs-blt: #56b6c2;
+  --aifs-spe: #61afef;
+  --aifs-mac: #e5c07b;
+  --aifs-fun: #56b6c2;
+  --aifs-num: #b5cea8;
+  --aifs-att: #f97583;
 }
 
 /* ===== Reset ===== */
@@ -120,6 +150,55 @@ h1 { font-size: 2rem; margin-bottom: 0.5rem; }
 h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; }
 h3 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
 p  { margin-bottom: 1rem; }
+
+/* ===== Code & Pre ===== */
+pre {
+  background: var(--color-code-bg, #f6f8fa);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  margin: 1rem 0 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) pre {
+    background: #161b22;
+    border-color: #30363d;
+  }
+}
+
+[data-theme="dark"] pre {
+  background: #161b22;
+  border-color: #30363d;
+}
+
+code {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--color-code-bg, #f0f2f5);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) code {
+    background: #21262d;
+  }
+}
+
+[data-theme="dark"] code {
+  background: #21262d;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
 
 /* ===== Tables ===== */
 table {
@@ -459,6 +538,26 @@ footer {
 }
 
 /* ===== Search hints (empty state) ===== */
+#search-input {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  font-size: 1rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#search-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
 #search-hints {
   margin-top: 2.5rem;
   text-align: center;
@@ -586,6 +685,16 @@ footer {
   background: rgba(255,255,255,0.1);
 }
 
+/* ===== AIFS Syntax Highlighting ===== */
+.aifs-h-dir { color: var(--aifs-dir); }
+.aifs-h-cmt { color: var(--aifs-cmt); font-style: italic; }
+.aifs-h-blt { color: var(--aifs-blt); }
+.aifs-h-spe { color: var(--aifs-spe); }
+.aifs-h-mac { color: var(--aifs-mac); }
+.aifs-h-fun { color: var(--aifs-fun); }
+.aifs-h-num { color: var(--aifs-num); }
+.aifs-h-att { color: var(--aifs-att); font-weight: 600; }
+
 /* ===== AIFS details block ===== */
 .aifs-details {
   margin: 1.5rem 0;
@@ -639,6 +748,134 @@ footer {
 .copy-aifs-btn:hover {
   color: var(--color-accent);
   border-color: var(--color-accent);
+}
+
+/* ===== Analytics worker: spinner badge ===== */
+@keyframes ifs-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ifs-canvas-frame.analytics-running::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-text-muted);
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: ifs-spin 0.75s linear infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ===== Analytics panel: projected 2D form ===== */
+.ifs-analytics-panel {
+  width: 100%;
+}
+
+.ifs-analytics-details {
+  margin-top: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ifs-analytics-details > summary {
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ifs-analytics-details > summary::before {
+  content: '▶';
+  font-size: 0.6em;
+  transition: transform 0.15s;
+}
+
+.ifs-analytics-details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.ifs-analytics-details > summary:hover {
+  color: var(--color-text);
+}
+
+.ifs-proj-content {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.ifs-proj-graph-wrap {
+  flex-shrink: 0;
+}
+
+.ifs-proj-graph {
+  width: 200px;
+  height: auto;
+  color: var(--color-text);
+  display: block;
+}
+
+.ifs-gnode {
+  fill: var(--color-bg);
+  stroke: var(--color-border);
+  stroke-width: 1.5px;
+}
+
+.ifs-gnodelbl {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  fill: var(--color-text);
+  pointer-events: none;
+}
+
+.ifs-glab {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  fill: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.ifs-proj-maps {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-text);
+}
+
+.ifs-proj-raw {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+}
+
+.analytics-error {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  padding: 0.4rem 0.75rem;
+  font-style: italic;
 }
 
 /* ===== Responsive ===== */

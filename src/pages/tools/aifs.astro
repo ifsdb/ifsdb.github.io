@@ -20,7 +20,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </p>
 
     <h2>File Structure</h2>
-    <pre><code>@@import other.aifs    # optional: include another .aifs file
+    <pre><code data-lang="aifs">@@import other.aifs    # optional: include another .aifs file
 
 @ID:ParentID           # start of a block; ID and ParentID are optional
 # comment
@@ -88,7 +88,7 @@ $dim=2                 # dimension of the rational space (required per block)
 
     <h2>Affine Maps</h2>
     <p>The standard 2D affine map form is:</p>
-    <pre><code>f=[tx,ty]*[a,b,c,d]   # f(x) = [[a,b],[c,d]]·x + [tx,ty]
+    <pre><code data-lang="aifs">f=[tx,ty]*[a,b,c,d]   # f(x) = [[a,b],[c,d]]·x + [tx,ty]
 [tx,ty]               # pure translation by [tx,ty]
 [0.5,0,0,0.5]         # pure scaling by 0.5 (no translation)</code></pre>
 
@@ -223,7 +223,7 @@ $dim=2                 # dimension of the rational space (required per block)
       </tbody>
     </table>
     <p><strong>Auto-generation syntax</strong> — a single array can contain any number of generator segments interleaved with static elements:</p>
-    <pre><code>[static..., $, termCond, genExpr, static..., $, termCond, genExpr, static...]</code></pre>
+    <pre><code data-lang="aifs">[static..., $, termCond, genExpr, static..., $, termCond, genExpr, static...]</code></pre>
     <ul>
       <li>Static elements before, between, and after generator segments are appended as-is.</li>
       <li><code>$</code> — marks start of a generator segment; <code>$</code> is shorthand for <code>$(0)</code> — a reference to the <strong>current array being built</strong></li>
@@ -248,7 +248,7 @@ $dim=2                 # dimension of the rational space (required per block)
 
     <h2>Block Functions</h2>
     <p>Any block (<code>@name</code>) can be used as a reusable function:</p>
-    <pre><code>@funcName
+    <pre><code data-lang="aifs">@funcName
 param1 = defaultVal    # parameter with default value
 param2 = defaultVal
 ret = expr             # return value
@@ -282,7 +282,7 @@ val    = constArr[1]    # access JS constant</code></pre>
 
     <h2>Attractor Equations</h2>
     <h3>Ordinary IFS</h3>
-    <pre><code>S=(f1|f2|f3)*S    # S is the unique compact attractor of &#123;f1,f2,f3&#125;</code></pre>
+    <pre><code data-lang="aifs">S=(f1|f2|f3)*S    # S is the unique compact attractor of &#123;f1,f2,f3&#125;</code></pre>
     <p>
       <strong>The attractor equation is mandatory.</strong>
       Without it the library returns an error and nothing renders.
@@ -293,7 +293,7 @@ val    = constArr[1]    # access JS constant</code></pre>
       When a self-similar system defines two or more interleaved attractors,
       each gets its own equation. Attractor variables appear on both sides:
     </p>
-    <pre><code>A1=g^-1*(h1*A1|h2*A1|h3*A2)
+    <pre><code data-lang="aifs">A1=g^-1*(h1*A1|h2*A1|h3*A2)
 A2=g^-1*(h4*A1|h5*A2)</code></pre>
     <p>
       Here <code>h*A</code> denotes the image of attractor set <code>A</code> under map <code>h</code>.
@@ -325,7 +325,7 @@ A2=g^-1*(h4*A1|h5*A2)</code></pre>
     <h2>Complete Examples</h2>
 
     <h3>Sierpiński Triangle — simple 2D IFS</h3>
-    <pre><code>@
+    <pre><code data-lang="aifs">@
 $dim=2
 f1=[0.5,0,0,0.5]
 f2=[0.5,0]*[0.5,0,0,0.5]
@@ -334,7 +334,7 @@ S=(f1|f2|f3)*S</code></pre>
     <p>See: <a href="/ifs/sierpinski-triangle">Sierpiński Triangle</a></p>
 
     <h3>Rauzy Fractal — 3D rational form with companion matrix</h3>
-    <pre><code>@
+    <pre><code data-lang="aifs">@
 $dim=3
 $subspace=[g,0]
 g=$companion([-1,1,1])   # companion for x³+x²+x-1 (tribonacci)
@@ -342,7 +342,7 @@ A=(g^-1|g^-2*[0,1,0]|g^-3*[0,1,1])*A</code></pre>
     <p>See: <a href="/ifs/rauzy-fractal">Rauzy Fractal</a></p>
 
     <h3>Robinson Triangles — GIFS with 4D rational form</h3>
-    <pre><code>@
+    <pre><code data-lang="aifs">@
 $dim=4
 $subspace=[s,0]
 s=$companion([1,-1,1,-1])   # 10th cyclotomic polynomial

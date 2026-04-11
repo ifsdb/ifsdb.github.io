@@ -1,0 +1,243 @@
+---
+name: "Square Family"
+description: "A family of rep-4 self-similar tiles: each tile is composed of exactly four half-size copies of itself. Named shapes include Square, Trapeze, Triangle, Chair, L-tile, Sphinx, and more."
+cardDescription: "Eleven named rep-4 tiles on the square and triangular lattices: Square, Trapeze, Triangle, Chair, L, Sphinx, and others."
+dimension: "2 (solid tiles)"
+transforms: 4
+tags: [plane, self-similar, tiling, algebraic]
+boundaryDimension: "1 (polyhedral)"
+aifs: |
+  @
+  $dim=2
+  $subspace=[s,0]
+  s=$companion([1,0])
+  r=$companion([-1,0])
+  h0=1
+  h1=1*[1,0]
+  h2=1*[0,1]
+  h3=1*[1,1]
+  A=2^-1*(h0|h1|h2|h3)*A
+references:
+  - text: "Mekhontsev, D. (2019). IFStile — software for self-affine tilings. Github: mekhontsev/ifstile."
+    url: "https://github.com/mekhontsev/ifstile"
+  - text: "Hinsley, S. R. Self-Similar Tiles."
+    url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
+---
+
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsSquare = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=1
+h1=1*[1,0]
+h2=1*[0,1]
+h3=1*[1,1]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTrapeze = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,-1])
+r=$companion([-1,0])
+h0=1
+h1=s^4*[0,1]
+h2=s^2*[0,1]
+h3=s^3*[0,1]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTrapeze2 = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,-1])
+r=$companion([-1,0])
+h0=1
+h1=s^2*r*[-1,0]
+h2=s*r*[-1,0]
+h3=s^2*[-1,0]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTrapeze3 = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=1
+h1=1*[-1,-1]
+h2=s*r*[-1,-1]
+h3=s*[-1,-1]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTriangle = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,-1])
+r=$companion([-1,0])
+h0=s^5
+h1=s^2*[0,1]
+h2=s^2*[1,-1]
+h3=s^2*[-1,0]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTriangle2 = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=1
+h1=1*[1,1]
+h2=r*s*[1,-1]
+h3=s*r*[-2,0]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsTriangle3 = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,-1])
+r=$companion([-1,0])
+h0=s^2*r
+h1=s*r*[0,1]
+h2=s^4*[0,-2]
+h3=1*[2,0]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsFlag = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=s*[0,-1]
+h1=r*s*[2,3]
+h2=r*s^2*[0,-1]
+h3=r*s*[2,0]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsChair = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=1
+h1=1*[1,-1]
+h2=s^3*[1,-1]
+h3=s*[1,-1]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsL = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,0])
+r=$companion([-1,0])
+h0=s*r
+h1=s^3*[1,2]
+h2=s*[-1,-1]
+h3=r*s*[0,1]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+export const aifsSphinx = `@
+$dim=2
+$subspace=[s,0]
+s=$companion([1,-1])
+r=$companion([-1,0])
+h0=r*s^5
+h1=r*s^2*[0,-1]
+h2=r*s^5*[2,-1]
+h3=s^4*[0,-2]
+A=2^-1*(h0|h1|h2|h3)*A`;
+
+## Overview
+
+The **square family** is a collection of **rep-4 tiles**: each tile is the attractor of an IFS
+of exactly **four maps**, each contracting by $\tfrac{1}{2}$. Because $4 \times \bigl(\tfrac{1}{2}\bigr)^2 = 1$,
+every tile in this family has positive Lebesgue measure (Hausdorff dimension exactly 2) and tiles the plane.
+
+The family splits into two lattice types:
+
+- **G4 tiles** — built on the **square lattice** $\mathbb{Z}[i]$ (Gaussian integers), using 90° rotations. The rotation matrix $s$ satisfies $s^2 = -I$ (companion of $x^2 + 1$); $r$ with $r^2 = I$ is a reflection.
+- **G6 tiles** — built on the **triangular lattice** $\mathbb{Z}[\omega]$ (Eisenstein integers, $\omega = e^{i\pi/3}$), using 60° rotations. Here $s$ satisfies $s^2 - s + 1 = 0$ (companion of $x^2 - x + 1$).
+
+In both cases the expansion factor is $g = 2$ (scaling by 2 each step).
+
+## Tile Gallery
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="sqfam-square" aifs={aifsSquare} width={280} height={280} label="Square" />
+    <figcaption>Square (G4)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-trapeze" aifs={aifsTrapeze} width={280} height={280} label="Trapeze" />
+    <figcaption>Trapeze (G6)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-trapeze2" aifs={aifsTrapeze2} width={280} height={280} label="Trapeze 2" />
+    <figcaption>Trapeze 2 (G6)</figcaption>
+  </figure>
+</div>
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="sqfam-trapeze3" aifs={aifsTrapeze3} width={280} height={280} label="Trapeze 3" />
+    <figcaption>Trapeze 3 (G4)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-triangle" aifs={aifsTriangle} width={280} height={280} label="Triangle" />
+    <figcaption>Triangle (G6)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-triangle2" aifs={aifsTriangle2} width={280} height={280} label="Triangle 2" />
+    <figcaption>Triangle 2 (G4)</figcaption>
+  </figure>
+</div>
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="sqfam-triangle3" aifs={aifsTriangle3} width={280} height={280} label="Triangle 3" />
+    <figcaption>Triangle 3 (G6)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-flag" aifs={aifsFlag} width={280} height={280} label="Flag" />
+    <figcaption>Flag (G4)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-chair" aifs={aifsChair} width={280} height={280} label="Chair" />
+    <figcaption>Chair (G4)</figcaption>
+  </figure>
+</div>
+
+<div class="canvas-row">
+  <figure>
+    <IFSCanvas id="sqfam-l" aifs={aifsL} width={280} height={280} label="L" />
+    <figcaption>L (G4)</figcaption>
+  </figure>
+  <figure>
+    <IFSCanvas id="sqfam-sphinx" aifs={aifsSphinx} width={280} height={280} label="Sphinx" />
+    <figcaption>Sphinx (G6)</figcaption>
+  </figure>
+</div>
+
+## IFS Structure
+
+Each tile satisfies the fixed-point equation
+
+$$
+A = 2^{-1} \bigl(h_0(A) \cup h_1(A) \cup h_2(A) \cup h_3(A)\bigr),
+$$
+
+where the four maps $h_k$ are affine contractions of the form $h_k(x) = R_k \cdot x + t_k$,
+with $R_k \in \{I,\, s,\, s^2,\, s^3,\, r,\, sr,\, s^2r,\, s^3r\}$ a symmetry of the lattice
+and $t_k$ a lattice vector.
+
+## Notable Members
+
+The **[Chair](/ifs/chair-tiling)** and **[Sphinx](/ifs/sphinx)** have their own dedicated pages
+with detailed mathematical background:
+
+- **[Chair](/ifs/chair-tiling)** (G4) — L-tromino rep-tile; limit-periodic tiling with a
+  2-adic cut-and-project structure ($\mathbb{Q}_2 \times \mathbb{Q}_2$ internal space);
+  pure-point diffraction spectrum.
+- **[Sphinx](/ifs/sphinx)** (G6) — hexiamond (6 equilateral triangles) rep-tile; chiral tile
+  appearing in left- and right-handed versions; limit-periodic and pure-point diffractive;
+  the number of sphinx-frame tilings of order $n$ grows as $e^{0.425\, n^2}$.

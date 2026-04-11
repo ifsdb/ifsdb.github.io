@@ -4,6 +4,7 @@ description: "A self-similar plane tile associated with the tribonacci constant,
 cardDescription: "Tribonacci-based tile: 3 contractions in a 3D rational space projected to the plane."
 dimension: "2 (tile with fractal boundary)"
 transforms: 3
+boundaryDimension: "≈ 1.0934"
 tags: [plane, self-similar, algebraic, aperiodic-tiling, classic]
 aifs: |
   @
@@ -67,5 +68,22 @@ $|\lambda|^{-1} \approx 0.738$, $|\lambda|^{-2} \approx 0.545$, and $|\lambda|^{
 
 - **Dimension**: 2 (positive area; the Rauzy fractal is a 2D tile)
 - **Tiling**: tiles $\mathbb{R}^2$ by translates of the integer lattice $\mathbb{Z}^2$ projected to the plane
-- **Boundary dimension**: between 1 and 2 (fractal boundary)
+- **Boundary dimension**: $\approx 1.093$; satisfies $\dim_H(\partial A) = 2\log\lambda/\log\tau$, where $\tau$ is the tribonacci constant and $\lambda$ is the real root of $\lambda^4-2\lambda-1=0$
 - **Symmetry**: 3-fold symmetry related to the three letters of the tribonacci alphabet
+
+## Boundary Dimension
+
+The boundary $\partial A$ has Hausdorff dimension
+
+$$
+\dim_H(\partial A) = \frac{2\log\lambda}{\log\tau} \approx 1.0934,
+$$
+
+where $\tau \approx 1.8393$ is the tribonacci constant (real root of $\tau^3-\tau^2-\tau-1=0$)
+and $\lambda \approx 1.3953$ is the real root of
+
+$$
+\lambda^4 - 2\lambda - 1 = 0.
+$$
+
+Here $\tau = p$ is the squared norm of the expansion $g$ acting on the 2D projection plane.

@@ -1,0 +1,351 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const codeInstantiate = `const resp = await fetch('ifslib.wasm');
+const buf  = await resp.arrayBuffer();
+const { instance } = await WebAssembly.instantiate(buf, {});  // no imports needed
+const wasm = instance.exports;
+wasm._initialize();  // must call once after instantiation`;
+
+const codeModuleCache = `const mod = await WebAssembly.compile(buf);  // compile once, cache
+// later:
+const { exports: wasm } = await WebAssembly.instantiate(mod, {});
+wasm._initialize();`;
+
+const codeHelpers = `function writeCString(wasm, str) {
+  const bytes = new TextEncoder().encode(str + '\\0');
+  const ptr = wasm.malloc(bytes.length);
+  new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
+  return ptr;              // caller must free()
+}
+
+function readCString(wasm, ptr) {
+  if (!ptr) return '';
+  const mem = new Uint8Array(wasm.memory.buffer);
+  let end = ptr;
+  while (mem[end] !== 0) end++;
+  return new TextDecoder().decode(mem.subarray(ptr, end));
+}`;
+
+const codeMinimal = `const aifs = \`@
+$dim=2
+f1=[0.5,0,0,0.5]
+f2=[0.5,0]*[0.5,0,0,0.5]
+f3=[0.25,0.5]*[0.5,0,0,0.5]
+S=(f1|f2|f3)*S\`;
+
+const resp = await fetch('ifslib.wasm');
+const { instance } = await WebAssembly.instantiate(await resp.arrayBuffer(), {});
+const wasm = instance.exports;
+wasm._initialize();
+
+// write AIFS source into WASM memory
+const bytes = new TextEncoder().encode(aifs + '\\0');
+const ptr = wasm.malloc(bytes.length);
+new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
+
+if (!wasm.init(ptr)) throw new Error(readCString(wasm, wasm.get_last_output()));
+wasm.free(ptr);
+
+const emptyPtr = writeCString(wasm, '');
+if (!wasm.ifs_select(emptyPtr, emptyPtr)) throw new Error('ifs_select failed');
+wasm.free(emptyPtr);
+
+const W = 256, H = 256;
+const pixPtr = wasm.render(W, H, 2, 1);  // quality=2, thickness=1
+if (!pixPtr) throw new Error('render failed');
+
+const rgba = new Uint8ClampedArray(wasm.memory.buffer, pixPtr, W * H * 4);
+const canvas = document.querySelector('canvas');
+canvas.width = W; canvas.height = H;
+canvas.getContext('2d').putImageData(new ImageData(rgba, W, H), 0, 0);`;
+
+const codeNode = `import { readFile } from 'node:fs/promises';
+
+const buf = await readFile('ifslib.wasm');
+const { instance } = await WebAssembly.instantiate(buf, {});
+const wasm = instance.exports;
+wasm._initialize();
+// ... same API as browser`;
+---
+<BaseLayout
+  title="ifslib — WebAssembly IFS Library"
+  description="Developer documentation for ifslib.wasm: a zero-dependency WebAssembly library for parsing, rendering, and analyzing IFS, GIFS, and algebraic fractals defined in the AIFS language."
+>
+  <main>
+    <nav class="breadcrumb"><a href="/tools">← Tools</a></nav>
+    <h1>ifslib</h1>
+
+    <p>
+      <strong>ifslib</strong> is a standalone <strong>WebAssembly</strong> library for parsing,
+      rendering, and analyzing fractals described in the <a href="/tools/aifs">AIFS language</a>.
+      It powers every fractal canvas on this site and provides a full analytics API:
+      Hausdorff dimension, neighbor graph, boundary IFS generation, subspace decomposition, and more.
+      Embed it in any web page, Node.js script, or WASM-capable environment —
+      <strong>no dependencies, no bundler required</strong>.
+    </p>
+
+    <h2>Mathematical Capabilities</h2>
+    <p>Beyond rendering, ifslib implements several non-trivial algorithms from IFS theory:</p>
+
+    <h3>Hausdorff dimension</h3>
+    <p>
+      <code>information("Dimension")</code> computes the Hausdorff dimension of the attractor
+      using the substitution matrix of the IFS graph. For a self-similar IFS satisfying the
+      open set condition (OSC), the dimension <var>d</var> is the solution to the Moran equation
+      ∑ r<sub>i</sub><sup>d</sup> = 1. For more general (non-conformal, GIFS) systems, ifslib
+      builds the substitution matrix, finds its spectral radius λ with respect to the expansion
+      factor <var>p</var>, and returns <var>d = log λ / log p</var>. The output also includes the
+      minimal polynomial of λ.
+    </p>
+
+    <h3>Geometric measure</h3>
+    <p>
+      <code>information("Measure")</code> computes the natural self-similar measure on the
+      attractor and from it extracts: the centroid <var>C</var>, the principal inertia tensor
+      <var>I</var>, and the eigenvectors <var>Q</var>. Together these give the aspect ratio and
+      natural orientation of the attractor — useful for canonical placement in illustrations.
+      Fixed points (dimension-0 components) are also listed.
+    </p>
+
+    <h3>Affine subspace structure</h3>
+    <p>
+      <code>information("Subspaces")</code> computes, for each attractor set, the minimal affine
+      subspace (or union thereof) that contains it. Output is a set of spanning points per piece.
+      This determines whether boundary pieces are truly straight (contained in a hyperplane of
+      dimension lower than the ambient space) — a key step in verifying that a tiling is
+      polyhedral.
+    </p>
+
+    <h3>Neighbor intersection graph and OSC</h3>
+    <p>
+      <code>calc_neighbor_graph()</code> computes the complete self-similar neighbor graph of the
+      IFS: for each pair of tiles that share a boundary, it finds the conjugacy map between them
+      using exact rational arithmetic. As a side-product it verifies the
+      <strong>open set condition (OSC)</strong>: if any two tiles overlap in a set of positive
+      measure, the algorithm detects this and reports the depth at which OSC is violated.
+      The computation is exact for IFS with rational (integer or fractional) coefficients.
+    </p>
+
+    <h3>Boundary IFS and boundary dimension</h3>
+    <p>
+      <code>custom_ifs(0, 2)</code> uses the neighbor graph to construct a new IFS — the
+      <strong>boundary IFS</strong> — whose attractor is exactly the boundary ∂<var>A</var> of
+      the original tile. Each boundary piece corresponds to the intersection of two neighboring
+      copies of the tile. Loading this boundary IFS back into ifslib and running
+      <code>information("Dimension")</code> on it yields <strong>dim<sub>H</sub>(∂<var>A</var>)</strong>
+      — the Hausdorff dimension of the tile boundary. This pipeline is the method used to
+      compute all boundary dimensions listed in the encyclopedia.
+    </p>
+
+    <h3>Higher-order intersections and the disk-like criterion</h3>
+    <p>
+      Passing <code>lim ≥ 3</code> to <code>custom_ifs</code> extends the construction to
+      higher-order intersections: triples, quadruples, … of simultaneously neighboring tiles.
+      The <code>j*</code> variables in the output IFS are the attractors of these higher-order
+      intersection pieces.
+    </p>
+    <p>
+      This gives access to a classical topological criterion:
+    </p>
+    <blockquote>
+      A connected 2D IFS tile <var>A</var> is <strong>disk-like</strong> (homeomorphic to a
+      closed disk) if and only if the intersection of any three mutually neighboring tiles
+      consists of at most one point.
+    </blockquote>
+    <p>
+      In practice: run <code>custom_ifs(0, 3)</code>, load the resulting AIFS, and call
+      <code>information("Dimension")</code> on it. If every <code>j*</code> component has
+      dimension 0 (point contacts), the tile is disk-like. If any <code>j*</code> component has
+      positive dimension, the triple intersection is a curve or area, and the tile is not
+      simply-connected.
+    </p>
+
+    <h2>Download</h2>
+    <p>
+      The WASM binary is served alongside this site and is part of the open-source repository:
+    </p>
+    <ul>
+      <li>
+        <a href="https://github.com/ifsdb/ifsdb.github.io/blob/main/public/ifslib.wasm"
+           target="_blank" rel="noopener">
+          <strong>ifslib.wasm</strong>
+        </a>
+        — download raw from GitHub
+      </li>
+      <li>
+        <a href="https://github.com/ifsdb/ifsdb.github.io/blob/main/public/ifslib-worker.js"
+           target="_blank" rel="noopener">
+          <strong>ifslib-worker.js</strong>
+        </a>
+        — reference Web Worker implementation (progressive + multi-canvas)
+      </li>
+    </ul>
+
+    <h2>Instantiation</h2>
+    <p>
+      ifslib is a <strong>WASI reactor</strong> with <strong>zero imports</strong>.
+      Pass an empty imports object and call <code>_initialize()</code> once:
+    </p>
+    <pre><code set:text={codeInstantiate} /></pre>
+    <p>
+      For repeated renders, compile the module once and instantiate a fresh copy per render
+      (ifslib has a single global renderer per instance):
+    </p>
+    <pre><code set:text={codeModuleCache} /></pre>
+
+    <h2>API Reference</h2>
+
+    <h3>Memory helpers</h3>
+    <p>
+      ifslib uses a C string ABI. Use <code>malloc</code> / <code>free</code> from the
+      exports, and the <code>memory</code> export to read/write bytes:
+    </p>
+    <pre><code set:text={codeHelpers} /></pre>
+
+    <h3>Core rendering pipeline</h3>
+    <table>
+      <thead><tr><th>Export</th><th>Signature</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>_initialize()</code></td>
+          <td><code>() → void</code></td>
+          <td>Must be called once after instantiation. Initialises the global renderer.</td>
+        </tr>
+        <tr>
+          <td><code>init(ptr)</code></td>
+          <td><code>(i32) → i32</code></td>
+          <td>Parse an AIFS source string (C string pointer). Returns 1 on success, 0 on parse error. Error text via <code>get_last_output()</code>.</td>
+        </tr>
+        <tr>
+          <td><code>ifs_select(block, root)</code></td>
+          <td><code>(i32, i32) → i32</code></td>
+          <td>Select a block and root attractor set by name (C strings). Pass empty strings (<code>""</code>) for defaults (first non-hidden block / first set). Null pointers are not accepted. Returns 1 on success.</td>
+        </tr>
+        <tr>
+          <td><code>render(w, h, quality, thickness)</code></td>
+          <td><code>(i32, i32, i32, i32) → i32</code></td>
+          <td>
+            Render to an RGBA pixel buffer of <code>w×h×4</code> bytes.
+            Returns a pointer to the buffer (valid until the next <code>render</code> call), or 0 on failure.
+            <code>quality ≥ 1</code> (2 is usually sufficient); <code>thickness ≥ 1</code> pixels.
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_last_output()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Returns a pointer to accumulated console output since the last call. Valid until the next ifslib call.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Analytics</h3>
+    <table>
+      <thead><tr><th>Export</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>information(what)</code></td>
+          <td>
+            Compute analytics for the selected block. <code>what</code> is a C string.
+            Output goes to <code>get_last_output()</code>.
+            Values: <code>"Measure"</code>, <code>"Dimension"</code>, <code>"Subspaces"</code>,
+            <code>"Projection"</code>, <code>"Balls"</code>, <code>"Evaluation"</code>,
+            <code>"Components"</code>, <code>"AST"</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>calc_neighbor_graph(iresPtr, settingsPtr)</code></td>
+          <td>
+            Compute the neighbor intersection graph (needed for boundary dimension and
+            boundary IFS generation). Must be called after <code>ifs_select</code>.
+            Writes an <a href="/tools/aifs#calc-neighbor-graph">inter_result struct</a> (20 bytes) to <code>iresPtr</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>custom_ifs(bitmask, lim)</code></td>
+          <td>
+            Generate derived AIFS output from the computed neighbor graph.
+            <code>bitmask=0, lim=2</code> generates the boundary IFS for every attractor.
+            Output goes to <code>get_last_output()</code>.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Minimal Example</h2>
+    <p>Render a 256×256 Sierpiński triangle and draw it onto a <code>&lt;canvas&gt;</code>:</p>
+    <pre><code set:text={codeMinimal} /></pre>
+    <p class="note">
+      <strong>Note:</strong> pass empty C strings (<code>""</code>) for the block and root
+      arguments of <code>ifs_select</code> to use defaults (first non-hidden block / first set).
+      Null pointers are not accepted.
+    </p>
+
+    <h2>Using in a Web Worker</h2>
+    <p>
+      For non-blocking rendering (required for large canvases), run ifslib inside a
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API"
+         target="_blank" rel="noopener">Web Worker</a>.
+      The reference implementation used by this site supports:
+    </p>
+    <ul>
+      <li>Progressive rendering (32 → 64 → … → final size) with early preview</li>
+      <li>Multiple canvases rendered concurrently in round-robin</li>
+      <li>Cancel support (leaves viewport → stops rendering)</li>
+      <li>Module caching (compiled once, re-instantiated cheap per render)</li>
+    </ul>
+    <p>
+      See
+      <a href="https://github.com/ifsdb/ifsdb.github.io/blob/main/public/ifslib-worker.js"
+         target="_blank" rel="noopener">ifslib-worker.js</a>
+      for the full implementation.
+    </p>
+
+    <h2>Using in Node.js</h2>
+    <pre><code set:text={codeNode} /></pre>
+    <p>
+      Tested on Node.js 18+. No WASI polyfills needed — the binary has no
+      external imports.
+    </p>
+
+    <h2>Embedding on Your Own Site</h2>
+    <ol>
+      <li>
+        Copy <code>ifslib.wasm</code> (and optionally <code>ifslib-worker.js</code>)
+        into your <code>public/</code> (or static assets) directory.
+      </li>
+      <li>
+        Serve the WASM file with the correct MIME type: <code>application/wasm</code>.
+        Most static hosts (GitHub Pages, Netlify, Vercel, Cloudflare Pages) do this automatically.
+      </li>
+      <li>
+        ifslib does <em>not</em> use <code>SharedArrayBuffer</code> and has no
+        cross-origin isolation requirements. No special response headers are needed.
+      </li>
+    </ol>
+
+    <h2>License</h2>
+    <p>
+      <code>ifslib.wasm</code> is the computational core of the
+      <a href="https://github.com/mekhontsev/ifstile" target="_blank" rel="noopener">IFStile</a>
+      project, created by
+      <a href="https://github.com/mekhontsev" target="_blank" rel="noopener">Dmitry Mekhontsev</a>
+      and distributed under the
+      <strong><a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" rel="noopener">GNU Lesser General Public License v3 (LGPL-3.0)</a></strong>.
+      This means you can embed it in projects under any license (open-source or proprietary)
+      without affecting your code, as long as modifications to <code>ifslib</code> itself
+      remain open-source.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .note {
+    background: var(--color-surface);
+    border-left: 3px solid var(--color-accent);
+    padding: 0.6rem 1rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.9rem;
+    margin: -0.5rem 0 1rem;
+  }
+</style>
