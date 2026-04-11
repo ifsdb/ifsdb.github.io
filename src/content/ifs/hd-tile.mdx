@@ -22,7 +22,21 @@ aifs: |
   A=3^-1*(1|h1|h2|h3|h4|h5|h6|h7|h8)*A
 ---
 
+import IFSCanvas from '../../components/IFSCanvas.astro';
 
+export const aifsHD = `@
+\$n=HD Tile
+\$dim=2
+r=[0,1,1,0]
+h1=-1*[-1,0]
+h2=-1*[-2,-1]
+h3=-1*[0,1]
+h4=[-1,-1]
+h5=[1,1]
+h6=[-1,1]
+h7=r*[0,-1]
+h8=r*[1,0]
+A=3^-1*(1|h1|h2|h3|h4|h5|h6|h7|h8)*A`;
 
 ## Overview
 
@@ -78,3 +92,12 @@ governed by the degree-7 polynomial above, giving
 $$\dim_H(\partial A) \approx 1.993 = \frac{2\log(8.935\ldots)}{\log 9}.$$
 
 The boundary is thus nearly 2-dimensional — it almost saturates the ambient plane.
+
+## Zoomed Boundary Detail
+
+The following canvas is zoomed to a small region of the boundary, making its near-planar
+fractal texture visible. The default canvas at the top of the page shows the full tile.
+
+<IFSCanvas id="hd-tile-zoom" aifs={aifsHD} width={480} height={480}
+  label="HD Tile — zoomed boundary"
+  camera={[0.1343992682175182, -0.1055559612504252, 0.001297772296920, 0]} />
