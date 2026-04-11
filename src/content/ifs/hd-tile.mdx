@@ -1,6 +1,6 @@
 ---
 name: "HD Tile"
-description: "A self-similar plane tile with 9 maps at scale 1/3, discovered by Mekhontsev using IFStile. Despite appearing to have overlaps, OSC holds; the boundary has Hausdorff dimension ≈ 1.993 — among the highest known for a self-similar tile."
+description: "A self-similar plane tile with 9 maps at scale 1/3, discovered by Mekhontsev using IFStile. OSC holds; the neighbor graph has only 13 boundary pieces, yet the boundary dimension ≈ 1.993 is the highest known among tiles with such a small neighbor graph — exceeding even the Lévy C curve (dim ≈ 1.934, 41 pieces)."
 cardDescription: "Self-similar tile with 9 maps, scale 1/3, and boundary dimension ≈ 1.993."
 dimension: "2"
 transforms: 9
@@ -48,14 +48,16 @@ central symmetry ($-1$) and axis-swapping reflections ($r$) — makes the IFS lo
 its images overlap. In fact, the **Open Set Condition** holds exactly: the neighbor
 graph has only 13 pairwise boundary components.
 
-What makes the HD Tile exceptional is its **boundary dimension ≈ 1.993**, the positive
-root of
+What makes the HD Tile exceptional is the combination of a **tiny neighbor graph** — only
+13 pairwise boundary pieces — and a **boundary dimension ≈ 1.993**, the positive root of
 
 $$x^7 - 12x^6 + 27x^5 + 10x^4 - 61x^3 + 20x^2 + 9x - 18 = 0.$$
 
-This is among the highest known boundary dimensions for a self-similar tile of this type.
-The boundary is an extremely "space-filling" fractal curve — it almost fills the plane
-while still having zero area.
+For comparison, the [Lévy C curve](/ifs/levy-c-curve) — widely regarded as one of the
+roughest self-similar boundaries — has dim ≈ 1.934 but requires **41 boundary pieces**
+to encode its neighbor structure. The HD Tile exceeds that boundary dimension with fewer
+than a third of the pieces. The boundary is an extremely space-filling fractal curve —
+it almost fills the plane while still having zero area.
 
 Discovered by D. Mekhontsev using the IFStile search engine.
 
@@ -92,11 +94,17 @@ governed by the degree-7 polynomial above, giving
 $$\dim_H(\partial A) \approx 1.993 = \frac{2\log(8.935\ldots)}{\log 9}.$$
 
 The boundary is thus nearly 2-dimensional — it almost saturates the ambient plane.
+Achieving dim > 1.99 with only 13 neighbor pairs (versus 41 for the Lévy C curve) makes
+the HD Tile stand out among known self-similar plane tiles.
 
 ## Zoomed Boundary Detail
 
 The following canvas is zoomed to a small region of the boundary, making its near-planar
 fractal texture visible. The default canvas at the top of the page shows the full tile.
+
+The zoom center is at approximately $(0.134,\,-0.106)$ — near the lower-right area of
+the tile — at a viewport radius of $0.0013$, corresponding to a **≈ 716× magnification**
+relative to the full-tile view (bounding radius ≈ 0.930).
 
 <IFSCanvas id="hd-tile-zoom" aifs={aifsHD} width={480} height={480}
   label="HD Tile — zoomed boundary"
