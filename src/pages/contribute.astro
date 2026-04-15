@@ -253,6 +253,43 @@ A2=g^-1*(h2*A1|h3*A2)\`;
   </figure>
 </div>`}</code></pre>
 
+    <h3>Zoomed fragment canvas</h3>
+    <p>
+      To highlight a specific region of the fractal (e.g. a magnified boundary detail),
+      pass a <code>camera</code> prop to <code>&lt;IFSCanvas&gt;</code>.
+      For 2D, it is an array <code>[cx, cy, r, angle_deg]</code>: center coordinates,
+      inscribed-circle radius, and rotation angle (use <code>0</code> for no rotation).
+    </p>
+    <p>
+      The easiest way to find the coordinates is to open the attractor in
+      <a href="https://app.ifstile.com" target="_blank" rel="noopener">app.ifstile.com</a>,
+      zoom and pan to the desired view, then copy the camera values from the IFStile UI.
+    </p>
+    <p>
+      The AIFS string for a zoomed canvas is the same as the main entry — do <em>not</em>
+      embed <code>$camera</code> inside the AIFS itself; pass it as a prop instead so the
+      canvas and the "Open in IFStile" link both work correctly.
+    </p>
+    <pre><code>{`import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsMain = \`@
+$dim=2
+...
+A=...\`;
+
+<!-- zoomed view of a boundary region -->
+<IFSCanvas
+  id="my-slug-zoom"
+  aifs={aifsMain}
+  width={480} height={480}
+  label="My Fractal — zoomed boundary"
+  camera={[0.554, 0.872, 0.006, 0]}
+/>`}</code></pre>
+    <p>
+      A <code>width</code>/<code>height</code> of 480 works well for zoomed canvases.
+      Reuse the same <code>export const</code> AIFS string — no need to duplicate it.
+    </p>
+
     <h2>6. Submit a pull request</h2>
     <ol>
       <li>Fork <a href="https://github.com/ifsdb/ifsdb.github.io" target="_blank" rel="noopener">github.com/ifsdb/ifsdb.github.io</a>.</li>

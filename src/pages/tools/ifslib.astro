@@ -128,16 +128,21 @@ wasm._initialize();
 
     <h3>Boundary IFS and boundary dimension</h3>
     <p>
-      <code>custom_ifs(0, 2)</code> uses the neighbor graph to construct a new IFS — the
-      <strong>boundary IFS</strong> — whose attractor is exactly the boundary ∂<var>A</var> of
-      the original tile. Each boundary piece corresponds to the intersection of two neighboring
-      copies of the tile. Loading this boundary IFS back into ifslib and running
-      <code>information("Dimension")</code> on it yields <strong>dim<sub>H</sub>(∂<var>A</var>)</strong>
-      — the Hausdorff dimension of the tile boundary. This pipeline is the method used to
-      compute all boundary dimensions listed in the encyclopedia.
+      To compute only the boundary dimension value, use <code>calc_neighbor_graph()</code> followed by
+      <code>calc_boundary_dim()</code> — this is the simplest path and is used by the analytics
+      worker on this site.
+    </p>
+    <p>
+      For the full boundary IFS program, <code>custom_ifs(0, 2)</code> uses the neighbor graph
+      to construct a new IFS — the <strong>boundary IFS</strong> — whose attractor is exactly
+      the boundary ∂<var>A</var> of the original tile. Each boundary piece corresponds to the
+      intersection of two neighboring copies of the tile. Loading this boundary IFS back into
+      ifslib and running <code>information("Dimension")</code> on it yields
+      <strong>dim<sub>H</sub>(∂<var>A</var>)</strong>. This full pipeline is needed when you
+      also want the boundary AIFS program or the characteristic polynomial of the dimension.
     </p>
 
-    <h3>Higher-order intersections and the disk-like criterion</h3>
+    <h3>Higher-order intersections</h3>
     <p>
       Passing <code>lim ≥ 3</code> to <code>custom_ifs</code> extends the construction to
       higher-order intersections: triples, quadruples, … of simultaneously neighboring tiles.
@@ -145,19 +150,11 @@ wasm._initialize();
       intersection pieces.
     </p>
     <p>
-      This gives access to a classical topological criterion:
-    </p>
-    <blockquote>
-      A connected 2D IFS tile <var>A</var> is <strong>disk-like</strong> (homeomorphic to a
-      closed disk) if and only if the intersection of any three mutually neighboring tiles
-      consists of at most one point.
-    </blockquote>
-    <p>
-      In practice: run <code>custom_ifs(0, 3)</code>, load the resulting AIFS, and call
-      <code>information("Dimension")</code> on it. If every <code>j*</code> component has
-      dimension 0 (point contacts), the tile is disk-like. If any <code>j*</code> component has
-      positive dimension, the triple intersection is a curve or area, and the tile is not
-      simply-connected.
+      If any <code>j*</code> component has positive Hausdorff dimension, some triple
+      intersection of neighboring tiles contains more than one point, which means the tile is
+      <strong>not disk-like</strong>. Conversely, if all triple intersections are at most single
+      points (dimension 0), that is a <em>necessary</em> condition for disk-likeness —
+      but not sufficient on its own.
     </p>
 
     <h2>Download</h2>
@@ -234,7 +231,7 @@ wasm._initialize();
             Override the root attractor set within the already-selected block (C string).
             Must be called after <code>set_block</code>.
             Can be called multiple times to switch root variables without calling <code>set_block()</code> again.
-            Returns 1 on success.
+            Returns the <strong>Euclidean dimension</strong> of the projected attractor (DIM ≥ 0) on success, or −1 on failure.
           </td>
         </tr>
         <tr>
@@ -261,6 +258,51 @@ wasm._initialize();
           <td><code>get_last_output()</code></td>
           <td><code>() → i32</code></td>
           <td>Returns a pointer to accumulated console output since the last call. Valid until the next ifslib call.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Attractor metrics</h3>
+    <p>
+      These functions return numeric properties of the currently selected root attractor.
+      All must be called after <code>set_block()</code>. Returned pointers are valid until the next ifslib call and must not be freed.
+    </p>
+    <table>
+      <thead><tr><th>Export</th><th>Signature</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>root_hdim()</code></td>
+          <td><code>() → f64</code></td>
+          <td>Hausdorff dimension of the current root attractor. Returns 0 for a single fixed point, 2 for a solid 2D tile, etc. Returns −1 if the attractor is empty, NaN on failure.</td>
+        </tr>
+        <tr>
+          <td><code>root_measure()</code></td>
+          <td><code>() → f64</code></td>
+          <td>d-dimensional Hausdorff measure of the root attractor (where d = <code>root_hdim()</code>). For dim=0: 1 for a single point, 2 for finitely many, ∞ for infinitely many.</td>
+        </tr>
+        <tr>
+          <td><code>root_enclosing_ball()</code></td>
+          <td><code>() → i32</code></td>
+          <td>
+            Approximate enclosing ball. Returns a pointer to DIM+1 <code>f64</code> values: <code>[radius, cx, cy, …]</code>.
+            The radius is at most 3/2 of the minimal enclosing ball.
+            Returns 0 (null) if no block/root is selected or the attractor is empty.
+          </td>
+        </tr>
+        <tr>
+          <td><code>root_mass_center()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Center of mass of the root attractor. Returns a pointer to DIM <code>f64</code> values <code>[x, y, …]</code> in rendering subspace coordinates. Returns 0 on error.</td>
+        </tr>
+        <tr>
+          <td><code>root_mass_moments()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Eigenvalues of the inertia tensor (principal moments), in descending order. Returns a pointer to DIM <code>f64</code> values. Equal moments indicate rotational symmetry. Returns 0 on error.</td>
+        </tr>
+        <tr>
+          <td><code>root_mass_matrix()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Principal-axes matrix of the inertia tensor, stored column-major (DIM×DIM <code>f64</code> values). Column <var>k</var> is the unit eigenvector for <code>root_mass_moments()[k]</code>. Returns 0 on error.</td>
         </tr>
       </tbody>
     </table>
@@ -298,10 +340,14 @@ wasm._initialize();
         <tr>
           <td><code>calc_boundary_dim()</code></td>
           <td>
-            Compute the Hausdorff dimension of the boundary ∂<var>A</var> directly,
-            after <code>calc_neighbor_graph()</code> has been called.
-            Returns the dimension as a <code>f64</code>; returns <code>NaN</code> on failure
-            or <code>-1</code> if the neighbor graph is empty (point contacts only).
+            Compute dim<sub>H</sub>(∂<var>A</var>) directly from the neighbor graph computed by
+            <code>calc_neighbor_graph()</code>. Returns the dimension as a <code>f64</code>.
+            Special return values: <code>0</code> = tiles touch only at isolated points
+            (0-dimensional contacts, e.g. Sierpiński triangle); <code>−1</code> = tiles are
+            completely disjoint (no contacts at all); <code>NaN</code> = error (call
+            <code>get_last_output()</code> for the message).
+            <strong>Preferred API</strong> when only the dimension value is needed — simpler than
+            the full <code>custom_ifs</code> → <code>information("Dimension")</code> pipeline.
           </td>
         </tr>
       </tbody>

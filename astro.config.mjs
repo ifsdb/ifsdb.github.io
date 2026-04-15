@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+﻿import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -18,7 +18,7 @@ export default defineConfig({
   },
   vite: {
     define: {
-      __IFSLIB_VERSION__: JSON.stringify('1.0.3'),
+      __IFSLIB_VERSION__: JSON.stringify('4.1.3'),
     },
   },
 });

@@ -417,6 +417,27 @@ A2=...`;
 CSS for `.canvas-row` / `.canvas-row figure` / `.canvas-row figcaption` is in `src/styles/global.css`.
 Use `export const` (not plain `const`) — plain `const` is inaccessible inside the compiled MDX content function.
 
+### Zoomed canvas
+
+To show a magnified fragment of the attractor, pass a `camera` prop to `IFSCanvas`.
+For 2D: `camera={[cx, cy, r, angle_deg]}` — center, inscribed-circle radius, rotation angle (degrees).
+
+**Rules:**
+- Do **not** embed `$camera` inside the AIFS string — use the `camera` prop instead (keeps the "Open in IFStile" link working correctly).
+- Reuse the same `export const` AIFS string as the main canvas — no duplication needed.
+- Find coordinates by zooming to the desired view in [app.ifstile.com](https://app.ifstile.com) and copying the camera values from the UI.
+- Use `width={480} height={480}` for zoomed canvases.
+
+```mdx
+<IFSCanvas
+  id="my-slug-zoom"
+  aifs={aifsMain}
+  width={480} height={480}
+  label="My Fractal — zoomed boundary"
+  camera={[0.554, 0.872, 0.006, 0]}
+/>
+```
+
 ---
 
 ## Content Collections Schema
@@ -455,7 +476,13 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
   - `_initialize()` — must be called once after instantiation
   - `init(ptr) → 0|1` — parse AIFS source (C string ptr)
   - `set_block(block_ptr) → 0|1` — select a block by identifier, display name, or 0-based numeric index (e.g. `"0"`). Pass `nullptr` (pointer 0) or empty string to select the first non-hidden block — **no `malloc` needed for the default: `wasm.set_block(0)`**. Resets root to block default (`$root` if defined, otherwise first visible variable). Can be called multiple times to switch blocks without re-calling `init()`.
-  - `set_root(root_ptr) → 0|1` — override the root attractor set within the already-selected block (C string). Must be called after `set_block()`. Can be called multiple times to switch roots without re-calling `set_block()`.
+  - `set_root(root_ptr) → DIM | -1` — override the root attractor set within the already-selected block (C string). Must be called after `set_block()`. Returns the Euclidean dimension of the projected attractor (DIM ≥ 0) on success, or -1 on failure. Can be called multiple times to switch roots without re-calling `set_block()`.
+  - `root_enclosing_ball() → doublePtr` — approximate enclosing ball of the current root attractor. Returns DIM+1 elements: `[radius, center[0], ..., center[DIM-1]]`. Not the exact minimal enclosing ball — radius is at most 3/2 of minimal. Returns `nullptr` if no block/root selected or attractor is empty. Valid until next ifslib call; must not be freed.
+  - `root_hdim() → double` — Hausdorff dimension of the current root attractor. Returns -1 if the attractor is empty, NaN on failure. Must be called after `set_block()`.
+  - `root_measure() → double` — d-dimensional Hausdorff measure of the root attractor (where d = `root_hdim()`). For dim=0: 1 for a single point, 2 for finitely many points, infinity for infinitely many. Must be called after `set_block()`.
+  - `root_mass_center() → doublePtr` — center of mass of the root attractor, DIM elements `[x, y, ...]` in rendering subspace coordinates. Returns `nullptr` on error. Valid until next ifslib call; must not be freed.
+  - `root_mass_moments() → doublePtr` — eigenvalues of the inertia tensor (principal moments) in descending order, DIM elements. Returns `nullptr` on error. Valid until next ifslib call; must not be freed.
+  - `root_mass_matrix() → doublePtr` — principal-axes matrix of the inertia tensor, stored column-major (DIM×DIM elements). Column k is the eigenvector for `root_mass_moments()[k]`. Returns `nullptr` on error. Valid until next ifslib call; must not be freed.
   - `set_camera(params_ptr, num_params) → 0|1` — override the camera/viewport for subsequent `render()` calls. Must be called after `set_block()`. Two layouts selected by `num_params`:
     - **2D** (`num_params=4`): `[cx, cy, r, angle_deg]` — viewport center, inscribed-circle radius, rotation angle in degrees.
     - **3D** (`num_params=10`): `[loc.x, loc.y, loc.z, ref.x, ref.y, ref.z, up.x, up.y, up.z, fov_deg]` — camera location, look-at point, up vector, field of view in degrees.
@@ -548,6 +575,8 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 
     **Detecting non-exact IFS:** IFS defined with `sin`, `cos`, or decimal literals like `0.5` will return `m_bits=0`. Decimal literals are intentional float-mode signals — do NOT auto-convert to fractions.
 
+  - `calc_boundary_dim() → double` — computes dim(∂A) from the neighbor graph computed by `calc_neighbor_graph()`. Must be called after `calc_neighbor_graph()` succeeds. Returns the Hausdorff dimension of the boundary as a `double`; `0` if tiles only touch at isolated points (0-dimensional contacts); `-1` if tiles are completely disjoint (no contacts at all); `NaN` on failure — call `get_last_output()` for the error. **This is the preferred API when only the dimension value is needed** — use the full `custom_ifs` → `information("Components")` → `information("Dimension")` pipeline only when you also need the boundary AIFS program or the characteristic polynomial.
+
   - `custom_ifs(bitmask, lim) → 0|1` — generates AIFS output from the neighbor graph computed by `calc_neighbor_graph()`. Must be called after `calc_neighbor_graph()`. Output goes to `get_last_output()` as a ready-to-use AIFS program (no comment header). **`bitmask=0`** is a special mode: boundary for every attractor. Individual bits: 0=intersections between neighbors, 1=connections between neighbors, 2=neighbourhoods, 3=neighbourhood graph, 4=relators (group encoding of neighbor graph), 5=alternative boundary. `lim=2` for boundary (pieces of the boundary are pairwise intersections of neighbors).
 
     **Variable name prefixes in the output AIFS** (names are `<prefix><1-based index>`, e.g. `i1`, `k3`):
@@ -571,7 +600,9 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 
 ### Boundary dimension pipeline
 
-The combination of `calc_neighbor_graph` + `custom_ifs` → `information("Components")` → `information("Dimension")` computes the Hausdorff dimension of the boundary ∂A of an IFS attractor A.
+**Simple path (dimension value only):** `calc_neighbor_graph` → `calc_boundary_dim()`. The analytics worker handles this automatically when `request: 'BoundaryDim'` is sent — it retries with tiered budgets (8000 → 50000 → 200000) and returns a `number` in `data`. Result semantics: `0` = point contacts (0-dimensional boundary), `-1` = disjoint tiles (no contacts), `NaN` = error, otherwise the dim(∂A) value.
+
+**Full path (also need boundary AIFS / polynomial):** The combination of `calc_neighbor_graph` + `custom_ifs` → `information("Components")` → `information("Dimension")` computes the Hausdorff dimension of the boundary ∂A of an IFS attractor A.
 
 **Step 1 — compute neighbor graph and boundary IFS:**
 ```js

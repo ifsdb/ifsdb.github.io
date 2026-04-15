@@ -22,6 +22,14 @@ references:
     url: "http://www.stewart.hinsley.me.uk/Fractals/IFS/Tiles/Tiles.php"
 ---
 
+import IFSCanvas from '../../components/IFSCanvas.astro';
+
+export const aifsZoom = `@
+$dim=2
+s=$companion([1,0])
+g=s+1
+A=(s*g^-1|g^-1*[0,1])*A`;
+
 ## Overview
 
 The **Lévy C curve** (also called the Lévy dragon) was studied by French mathematician Paul Lévy
@@ -64,6 +72,12 @@ $$
 \lambda^9 - 3\lambda^8 + 3\lambda^7 - 3\lambda^6 + 2\lambda^5 + 4\lambda^4 - 8\lambda^3 + 8\lambda^2 - 16\lambda + 8 = 0.
 $$
 
+The boundary is complex — the interior of the tile is densely filled, and the boundary
+dimension close to 2 reflects the intricate self-intersecting curve structure visible in any
+sufficiently magnified region:
+
+<IFSCanvas id="levy-c-curve-zoom" aifs={aifsZoom} width={480} height={480} label="Lévy C Curve — zoomed fragment" camera={[0.5548051744262755, 0.8720700678380161, 0.0061115345309085, 0]} />
+
 ## Related
 
 All three of the following IFS share the same algebraic skeleton — two maps contracting by $\frac{1}{\sqrt{2}}$ over $\mathbb{Z}[i]$ with expansion $g = 1+i$ — differing only in the power of $s$ for the second map and the choice of translations:
@@ -73,3 +87,7 @@ All three of the following IFS share the same algebraic skeleton — two maps co
 | Lévy C Curve | $-45°$ (`g^-1`) | $(0,0)$ and $(\tfrac{1}{2},\tfrac{1}{2})$ |
 | [Heighway Dragon](/ifs/heighway-dragon) | $+135°$ (`s^2*g^-1`) | $(0,0)$ and $(1,0)$ |
 | [Twin Dragon](/ifs/twin-dragon) | $-135°$ (`s^3*g^-1`) | $(0,0)$ and $(1,0)$ |
+
+The Lévy C curve is widely regarded as one of the roughest boundaries among well-known self-similar tiles.
+The [HD Tile](/ifs/hd-tile) surpasses it: boundary dimension $\approx 1.993$ with only 13 boundary
+pieces, compared to 41 for the Lévy C curve.

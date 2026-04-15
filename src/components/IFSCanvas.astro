@@ -341,9 +341,26 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics, came
     getWorker().postMessage({ id: ifsId, type: 'cancel' });
   }
 
+  function injectCamera(aifs: string, camera: number[]): string {
+    // Insert $camera line after the first block header line (@... or first non-empty line)
+    const lines = aifs.split('\n');
+    const headerIdx = lines.findIndex(l => l.trimStart().startsWith('@'));
+    const insertAt = headerIdx >= 0 ? headerIdx + 1 : 0;
+    const cameraLine = '$camera=[' + camera.join(', ') + ']';
+    lines.splice(insertAt, 0, cameraLine);
+    return lines.join('\n');
+  }
+
   function openInIFStile(canvas: HTMLCanvasElement) {
-    const aifs = canvas.dataset.aifs;
+    let aifs = canvas.dataset.aifs;
     if (!aifs) return;
+    const cameraRaw = canvas.dataset.ifsCamera;
+    if (cameraRaw) {
+      try {
+        const camera = JSON.parse(cameraRaw) as number[];
+        if (Array.isArray(camera) && camera.length > 0) aifs = injectCamera(aifs, camera);
+      } catch { /* ignore malformed camera */ }
+    }
     const b64 = btoa(encodeURIComponent(aifs).replace(/%([0-9A-F]{2})/g, (_, p) => String.fromCharCode(parseInt(p, 16))));
     window.open('https://app.ifstile.com?aifs=' + b64, '_blank', 'noopener');
   }
