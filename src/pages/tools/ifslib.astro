@@ -47,9 +47,8 @@ new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
 if (!wasm.init(ptr)) throw new Error(readCString(wasm, wasm.get_last_output()));
 wasm.free(ptr);
 
-const emptyPtr = writeCString(wasm, '');
-if (!wasm.ifs_select(emptyPtr, emptyPtr)) throw new Error('ifs_select failed');
-wasm.free(emptyPtr);
+// pass 0 (nullptr) for default block — no malloc needed
+if (!wasm.set_block(0)) throw new Error('set_block failed');
 
 const W = 256, H = 256;
 const pixPtr = wasm.render(W, H, 2, 1);  // quality=2, thickness=1
@@ -218,9 +217,36 @@ wasm._initialize();
           <td>Parse an AIFS source string (C string pointer). Returns 1 on success, 0 on parse error. Error text via <code>get_last_output()</code>.</td>
         </tr>
         <tr>
-          <td><code>ifs_select(block, root)</code></td>
+          <td><code>set_block(block)</code></td>
+          <td><code>(i32) → i32</code></td>
+          <td>
+            Select a block (C string). Accepts a block identifier, display name, or 0-based numeric index (e.g. <code>"0"</code>).
+            Pass <code>nullptr</code> (pointer 0) or an empty string to select the first non-hidden block — <strong>no <code>malloc</code> needed for the default</strong>: <code>wasm.set_block(0)</code>.
+            Resets the root set to the block default (<code>$root</code> if defined, otherwise first visible variable).
+            Can be called multiple times to switch blocks without calling <code>init()</code> again.
+            Returns 1 on success.
+          </td>
+        </tr>
+        <tr>
+          <td><code>set_root(root)</code></td>
+          <td><code>(i32) → i32</code></td>
+          <td>
+            Override the root attractor set within the already-selected block (C string).
+            Must be called after <code>set_block</code>.
+            Can be called multiple times to switch root variables without calling <code>set_block()</code> again.
+            Returns 1 on success.
+          </td>
+        </tr>
+        <tr>
+          <td><code>set_camera(params, n)</code></td>
           <td><code>(i32, i32) → i32</code></td>
-          <td>Select a block and root attractor set by name (C strings). Pass empty strings (<code>""</code>) for defaults (first non-hidden block / first set). Null pointers are not accepted. Returns 1 on success.</td>
+          <td>
+            Override the viewport for subsequent <code>render()</code> calls.
+            <code>n=4</code>: 2D — <code>[cx, cy, r, angle_deg]</code>;
+            <code>n=10</code>: 3D — <code>[loc.x,y,z, ref.x,y,z, up.x,y,z, fov_deg]</code>;
+            <code>n=0</code>: reset to automatic camera.
+            Must be called after <code>set_block</code>. Returns 1 on success.
+          </td>
         </tr>
         <tr>
           <td><code>render(w, h, quality, thickness)</code></td>
@@ -257,7 +283,7 @@ wasm._initialize();
           <td><code>calc_neighbor_graph(iresPtr, settingsPtr)</code></td>
           <td>
             Compute the neighbor intersection graph (needed for boundary dimension and
-            boundary IFS generation). Must be called after <code>ifs_select</code>.
+            boundary IFS generation). Must be called after <code>set_block</code>.
             Writes an <a href="/tools/aifs#calc-neighbor-graph">inter_result struct</a> (20 bytes) to <code>iresPtr</code>.
           </td>
         </tr>
@@ -269,6 +295,15 @@ wasm._initialize();
             Output goes to <code>get_last_output()</code>.
           </td>
         </tr>
+        <tr>
+          <td><code>calc_boundary_dim()</code></td>
+          <td>
+            Compute the Hausdorff dimension of the boundary ∂<var>A</var> directly,
+            after <code>calc_neighbor_graph()</code> has been called.
+            Returns the dimension as a <code>f64</code>; returns <code>NaN</code> on failure
+            or <code>-1</code> if the neighbor graph is empty (point contacts only).
+          </td>
+        </tr>
       </tbody>
     </table>
 
@@ -276,9 +311,9 @@ wasm._initialize();
     <p>Render a 256×256 Sierpiński triangle and draw it onto a <code>&lt;canvas&gt;</code>:</p>
     <pre><code set:text={codeMinimal} /></pre>
     <p class="note">
-      <strong>Note:</strong> pass empty C strings (<code>""</code>) for the block and root
-      arguments of <code>ifs_select</code> to use defaults (first non-hidden block / first set).
-      Null pointers are not accepted.
+      <strong>Note:</strong> to select the default block, pass <code>0</code> (null pointer) directly — <code>wasm.set_block(0)</code> — no <code>malloc</code> required.
+      <code>set_root</code> is only needed when you want a specific root set other than the block default.
+      Both functions can be called repeatedly to switch blocks/roots without reinitialising.
     </p>
 
     <h2>Using in a Web Worker</h2>

@@ -344,7 +344,7 @@ const { id, width = 400, height = 400, label, aifs, block, root, analytics, came
   function openInIFStile(canvas: HTMLCanvasElement) {
     const aifs = canvas.dataset.aifs;
     if (!aifs) return;
-    const b64 = btoa(unescape(encodeURIComponent(aifs)));
+    const b64 = btoa(encodeURIComponent(aifs).replace(/%([0-9A-F]{2})/g, (_, p) => String.fromCharCode(parseInt(p, 16))));
     window.open('https://app.ifstile.com?aifs=' + b64, '_blank', 'noopener');
   }
 

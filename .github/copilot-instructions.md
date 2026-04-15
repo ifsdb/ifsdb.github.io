@@ -53,6 +53,7 @@ public/
   ifslib-worker.js        # Web Worker that owns the WASM instance
   favicon.svg
 scratch/                  # Fully gitignored — use for all temporary/scratch files
+<scratch>/                 # External scratch folder outside the repository — use for temporary scripts and experiments
 ```
 
 ---
@@ -311,7 +312,7 @@ val    = constArr[1]    # access JS constant
 ```
 S=(f1|f2|f3)*S    # S is the unique compact attractor of the IFS {f1,f2,f3}
 ```
-**Mandatory**: without an attractor equation `ifs_select` returns 0 and nothing renders.
+**Mandatory**: without an attractor equation `set_block` returns 0 and nothing renders.
 
 #### GIFS (Generalized IFS — multiple attractors)
 When the self-similar system defines multiple interleaved attractors, each gets its own equation. The attractor variables appear on both sides:
@@ -453,8 +454,9 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 - **`public/ifslib.wasm`** — Pure WASI reactor. Exports:
   - `_initialize()` — must be called once after instantiation
   - `init(ptr) → 0|1` — parse AIFS source (C string ptr)
-  - `ifs_select(block_ptr, root_ptr) → 0|1` — select block and root attractor (empty → first non-hidden / default)
-  - `set_camera(params_ptr, num_params) → 0|1` — override the camera/viewport for subsequent `render()` calls. Must be called after `ifs_select()`. Two layouts selected by `num_params`:
+  - `set_block(block_ptr) → 0|1` — select a block by identifier, display name, or 0-based numeric index (e.g. `"0"`). Pass `nullptr` (pointer 0) or empty string to select the first non-hidden block — **no `malloc` needed for the default: `wasm.set_block(0)`**. Resets root to block default (`$root` if defined, otherwise first visible variable). Can be called multiple times to switch blocks without re-calling `init()`.
+  - `set_root(root_ptr) → 0|1` — override the root attractor set within the already-selected block (C string). Must be called after `set_block()`. Can be called multiple times to switch roots without re-calling `set_block()`.
+  - `set_camera(params_ptr, num_params) → 0|1` — override the camera/viewport for subsequent `render()` calls. Must be called after `set_block()`. Two layouts selected by `num_params`:
     - **2D** (`num_params=4`): `[cx, cy, r, angle_deg]` — viewport center, inscribed-circle radius, rotation angle in degrees.
     - **3D** (`num_params=10`): `[loc.x, loc.y, loc.z, ref.x, ref.y, ref.z, up.x, up.y, up.z, fov_deg]` — camera location, look-at point, up vector, field of view in degrees.
     - **Reset** (`num_params=0`): resets to automatic camera (fit to attractor on next `render()` call). `params_ptr` is ignored.
@@ -514,7 +516,7 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
 
     **Parsing note:** the `Component IDs:` line lists all component numbers that share the same dimension block (comma-separated). When filtering for i\* components, a block is relevant if **any** of its listed IDs is an i\* component.
 
-  - `calc_neighbor_graph(ires_ptr, settings_ptr) → 0|1` — computes the neighbor intersection graph. Must be called after `ifs_select()` and before `custom_ifs()`. Precision/budget parameters live here (not in `custom_ifs`).
+  - `calc_neighbor_graph(ires_ptr, settings_ptr) → 0|1` — computes the neighbor intersection graph. Must be called after `set_block()` and before `custom_ifs()`. Precision/budget parameters live here (not in `custom_ifs`).
 
     **`integer_ims::settings` input struct (20 bytes, align 4):**
     | Offset | Type | Field | Default | Meaning |
@@ -769,7 +771,7 @@ pending    : Map<id, {wasm, sizes, sizeIndex, width, height}>  — active render
 3. `_pending.set(id, canvas)` **immediately** (before any `await`) — makes cancel visible.
 4. HiDPI scaling: read `getBoundingClientRect()` for true CSS size, set `canvas.width/height` to physical pixels, lock `canvas.style.width/height` to CSS size (prevents aspect ratio distortion from CSS `max-width: 100%`).
 5. Post `{ id, aifs, width, height, version }` to worker.
-6. Worker: `await getWasmInstance(version)` → fresh instance → `init` → `ifs_select('','')` → add to `pending` Map → `runTick()`.
+6. Worker: `await getWasmInstance(version)` → fresh instance → `init` → `set_block('')` → add to `pending` Map → `runTick()`.
 7. `runTick()`: round-robin — finds the lowest `sizeIndex` across all pending, renders one frame per canvas at that step, posts `{ type: 'frame', pixels, width, height }`, yields via `setTimeout(0)`, loops until `pending` is empty.
 8. Main thread `onmessage`: for `frame` — draw only if `_pending.has(id)` (guards against stale frames after cancel). For `done` — move from `_pending` to `_done` **only if `_pending.has(id)`** (prevents marking a cancelled canvas as done).
 
@@ -812,7 +814,7 @@ Header nav order: Home | Catalog | Search | Tools | About
 - **Content store cache**: After changing `src/content.config.ts` schema, delete `.astro/` to clear the stale data store if entries fail to load. Also delete `.astro/` if a newly-created `.mdx` entry renders with `InvalidContentEntryDataError` (all required fields missing) — this means the cache stored an empty/stale entry for the new file. Symptom: build succeeds but dev-server render fails with schema validation errors for `name`, `description`, `transforms`, `aifs`. **Rule: always delete `.astro/` and restart the dev server after adding any new `.mdx` file.** The build (`npx astro build`) is not affected by this cache and can be used to verify pages work correctly.
 - **MDX `export const` in content collections**: Use `export const` (not plain `const`) for variables that are referenced in JSX expressions within MDX content entries (`src/content/ifs/*.mdx`). Plain `const` is NOT accessible inside the compiled `_createMdxContent` function. Also: never delete an `.md` file and add an `.mdx` file with the same slug while the dev server is running — clear `.astro/` cache to avoid a duplicate-ID error.
 - **`#` is a comment in AIFS**: Everything from `#` to end of line is ignored — including inside AIFS blocks fetched from GitHub (e.g. `Quaquaversal.aifs` has `# a^4=1` etc.). Never mistake commented-out lines for actual definitions when reading raw `.aifs` files.
-- **AIFS must have `S=(...)*S`**: The most common error — `init` succeeds but `ifs_select` fails with "No valid root reference found" if the attractor line is missing. Call `get_last_output()` after any failure to retrieve the error message.
+- **AIFS must have `S=(...)*S`**: The most common error — `init` succeeds but `set_block` fails with "No valid root reference found" if the attractor line is missing. Call `get_last_output()` after any failure to retrieve the error message.
 - **WASM has zero imports**: Instantiate with `WebAssembly.instantiate(buf, {})` — no WASI stubs needed.
 - **Fresh WASM instance per render**: `ifslib` has one global `g_renderer` per instance — the worker creates a new instance for every render request (module is compiled once and cached; re-instantiation is cheap).
 - **Never use a `cancelled` Set in the worker**: It creates a broken re-render race where a new render request sees its own id in `cancelled` (left by a prior cancel), skips itself, and the canvas stays black permanently. Let stale renders complete — they are silently dropped on the main thread (canvas not in `_pending`).

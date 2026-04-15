@@ -47,13 +47,21 @@ self.onmessage = async function ({ data }) {
       return;
     }
 
-    const bPtr = writeCStr(w, block ?? '');
-    const rPtr = writeCStr(w, root ?? '');
-    const selOk = w.ifs_select(bPtr, rPtr);
-    w.free(bPtr); w.free(rPtr);
+    const bPtr = block ? writeCStr(w, block) : 0;
+    const selOk = w.set_block(bPtr);
+    if (bPtr) w.free(bPtr);
     if (!selOk) {
-      self.postMessage({ id, type: 'error', request, message: 'ifs_select failed: ' + getOutput(w) });
+      self.postMessage({ id, type: 'error', request, message: 'set_block failed: ' + getOutput(w) });
       return;
+    }
+    if (root) {
+      const rPtr = writeCStr(w, root);
+      const rootOk = w.set_root(rPtr);
+      w.free(rPtr);
+      if (!rootOk) {
+        self.postMessage({ id, type: 'error', request, message: 'set_root failed: ' + getOutput(w) });
+        return;
+      }
     }
 
     const infPtr = writeCStr(w, request);

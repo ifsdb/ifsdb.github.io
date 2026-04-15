@@ -88,16 +88,25 @@ self.onmessage = async function (e) {
       self.postMessage({ id, type: 'error', message: 'init failed' + (output ? ': ' + output : '') });
       return;
     }
-    // Select specified block (empty = first non-hidden) and root (empty = default).
-    const blkPtr = writeCString(wasm, block ?? '');
-    const rootPtr = writeCString(wasm, root ?? '');
-    const selOk = wasm.ifs_select(blkPtr, rootPtr);
-    wasm.free(blkPtr);
-    wasm.free(rootPtr);
+    // Select specified block (0 = nullptr → first non-hidden block).
+    const blkPtr = block ? writeCString(wasm, block) : 0;
+    const selOk = wasm.set_block(blkPtr);
+    if (blkPtr) wasm.free(blkPtr);
     if (!selOk) {
       const output = getLastOutput(wasm);
-      self.postMessage({ id, type: 'error', message: 'ifs_select failed' + (output ? ': ' + output : '') });
+      self.postMessage({ id, type: 'error', message: 'set_block failed' + (output ? ': ' + output : '') });
       return;
+    }
+    // Override root variable if specified.
+    if (root) {
+      const rootPtr = writeCString(wasm, root);
+      const rootOk = wasm.set_root(rootPtr);
+      wasm.free(rootPtr);
+      if (!rootOk) {
+        const output = getLastOutput(wasm);
+        self.postMessage({ id, type: 'error', message: 'set_root failed' + (output ? ': ' + output : '') });
+        return;
+      }
     }
     // Apply camera override if provided (requires ifslib with set_camera export).
     if (camera && Array.isArray(camera) && (camera.length === 4 || camera.length === 10)) {
