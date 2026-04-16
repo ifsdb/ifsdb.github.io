@@ -217,8 +217,8 @@ wasm._initialize();
           <td><code>get_block_idx(block)</code></td>
           <td><code>(i32) → i32</code></td>
           <td>
-            Resolve a block string identifier (C string) to its <strong>0-based internal index</strong> without selecting it.
-            Accepts block ID, display name, or numeric string (e.g. <code>"0"</code>).
+            Resolve a block string ID to its <strong>0-based internal index</strong> without selecting it.
+            Accepts the block's string ID (the <code>@id</code> part of <code>@id:parentId</code>).
             Pass <code>nullptr</code> (pointer 0) or empty string to get the index of the first non-hidden block.
             Returns the index on success, or −1 if not found. Must be called after <code>init()</code>.
           </td>
@@ -295,7 +295,7 @@ wasm._initialize();
         <tr>
           <td><code>root_measure()</code></td>
           <td><code>() → f64</code></td>
-          <td>d-dimensional Hausdorff measure of the root attractor (where d = <code>root_hdim()</code>). For dim=0: 1 for a single point, 2 for finitely many, ∞ for infinitely many.</td>
+          <td>Normalized d-dimensional Hausdorff measure of the current root attractor, where the normalization is chosen so that the sum of measures over all attractors in the same connected component of the IFS graph equals 1 (where d = <code>root_hdim()</code>). For dim=0: 1 for a single point, 2 for finitely many, ∞ for infinitely many.</td>
         </tr>
         <tr>
           <td><code>root_enclosing_ball()</code></td>
@@ -398,7 +398,7 @@ wasm._initialize();
     <pre><code set:text={codeMinimal} /></pre>
     <p class="note">
       <strong>Note:</strong> to select the default block, pass <code>−1</code> to <code>wasm.set_block(-1)</code>.
-      To select by name, call <code>get_block_idx(ptr)</code> first to get the index, then pass it to <code>set_block(idx)</code>.
+      To select by block ID, call <code>get_block_idx(ptr)</code> first to get the index, then pass it to <code>set_block(idx)</code>.
       <code>set_root</code> is only needed when you want a specific root set other than the block default.
       Both functions can be called repeatedly to switch blocks/roots without reinitialising.
     </p>
