@@ -88,10 +88,15 @@ self.onmessage = async function (e) {
       self.postMessage({ id, type: 'error', message: 'init failed' + (output ? ': ' + output : '') });
       return;
     }
-    // Select specified block (0 = nullptr → first non-hidden block).
-    const blkPtr = block ? writeCString(wasm, block) : 0;
-    const selOk = wasm.set_block(blkPtr);
-    if (blkPtr) wasm.free(blkPtr);
+    // Select block: resolve name → index via get_block_idx, then set_block(idx).
+    // Pass -1 to set_block for default (first non-hidden) block.
+    let blkIdx = -1;
+    if (block) {
+      const blkPtr = writeCString(wasm, block);
+      blkIdx = wasm.get_block_idx(blkPtr);
+      wasm.free(blkPtr);
+    }
+    const selOk = wasm.set_block(blkIdx);
     if (!selOk) {
       const output = getLastOutput(wasm);
       self.postMessage({ id, type: 'error', message: 'set_block failed' + (output ? ': ' + output : '') });

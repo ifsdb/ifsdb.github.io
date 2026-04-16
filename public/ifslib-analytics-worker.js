@@ -91,9 +91,15 @@ self.onmessage = async function ({ data }) {
       return;
     }
 
-    const bPtr = block ? writeCStr(w, block) : 0;
-    const selOk = w.set_block(bPtr);
-    if (bPtr) w.free(bPtr);
+    // Resolve block name → index via get_block_idx, then set_block(idx).
+    // Pass -1 for default (first non-hidden) block.
+    let blkIdx = -1;
+    if (block) {
+      const bPtr = writeCStr(w, block);
+      blkIdx = w.get_block_idx(bPtr);
+      w.free(bPtr);
+    }
+    const selOk = w.set_block(blkIdx);
     if (!selOk) {
       self.postMessage({ id, type: 'error', request, message: 'set_block failed: ' + getOutput(w) });
       return;

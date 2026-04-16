@@ -47,8 +47,8 @@ new Uint8Array(wasm.memory.buffer).set(bytes, ptr);
 if (!wasm.init(ptr)) throw new Error(readCString(wasm, wasm.get_last_output()));
 wasm.free(ptr);
 
-// pass 0 (nullptr) for default block — no malloc needed
-if (!wasm.set_block(0)) throw new Error('set_block failed');
+// pass -1 to select the first non-hidden block
+if (!wasm.set_block(-1)) throw new Error('set_block failed');
 
 const W = 256, H = 256;
 const pixPtr = wasm.render(W, H, 2, 1);  // quality=2, thickness=1
@@ -211,17 +211,27 @@ wasm._initialize();
         <tr>
           <td><code>init(ptr)</code></td>
           <td><code>(i32) → i32</code></td>
-          <td>Parse an AIFS source string (C string pointer). Returns 1 on success, 0 on parse error. Error text via <code>get_last_output()</code>.</td>
+          <td>Parse an AIFS source string (C string pointer). Returns the <strong>number of blocks</strong> found (≥1) on success, 0 on parse error. <code>if (!wasm.init(ptr))</code> still works as a failure check. Error text via <code>get_last_output()</code>.</td>
         </tr>
         <tr>
-          <td><code>set_block(block)</code></td>
+          <td><code>get_block_idx(block)</code></td>
           <td><code>(i32) → i32</code></td>
           <td>
-            Select a block (C string). Accepts a block identifier, display name, or 0-based numeric index (e.g. <code>"0"</code>).
-            Pass <code>nullptr</code> (pointer 0) or an empty string to select the first non-hidden block — <strong>no <code>malloc</code> needed for the default</strong>: <code>wasm.set_block(0)</code>.
+            Resolve a block string identifier (C string) to its <strong>0-based internal index</strong> without selecting it.
+            Accepts block ID, display name, or numeric string (e.g. <code>"0"</code>).
+            Pass <code>nullptr</code> (pointer 0) or empty string to get the index of the first non-hidden block.
+            Returns the index on success, or −1 if not found. Must be called after <code>init()</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>set_block(block_idx)</code></td>
+          <td><code>(i32) → i32</code></td>
+          <td>
+            Select a block by its <strong>0-based numeric index</strong> (as returned by <code>get_block_idx</code>).
+            Pass <code>−1</code> to select the first non-hidden block.
             Resets the root set to the block default (<code>$root</code> if defined, otherwise first visible variable).
             Can be called multiple times to switch blocks without calling <code>init()</code> again.
-            Returns 1 on success.
+            Returns the <strong>number of variables</strong> in the block (≥1) on success, or 0 on error.
           </td>
         </tr>
         <tr>
@@ -232,8 +242,15 @@ wasm._initialize();
             Must be called after <code>set_block</code>.
             Can be called multiple times to switch root variables without calling <code>set_block()</code> again.
             Returns the <strong>Euclidean dimension</strong> of the projected attractor (DIM ≥ 0) on success, or −1 on failure.
-          </td>
-        </tr>
+          </td>        </tr>
+        <tr>
+          <td><code>get_root_name(root_idx)</code></td>
+          <td><code>(i32) → i32</code></td>
+          <td>
+            Return the variable name of the root attractor at 0-based <code>root_idx</code> within the currently selected block.
+            Returns a pointer to a null-terminated string valid until the next ifslib call, or 0 (null) if out of range or no block selected.
+            Must be called after <code>set_block</code>.
+          </td>        </tr>
         <tr>
           <td><code>set_camera(params, n)</code></td>
           <td><code>(i32, i32) → i32</code></td>
@@ -304,6 +321,29 @@ wasm._initialize();
           <td><code>() → i32</code></td>
           <td>Principal-axes matrix of the inertia tensor, stored column-major (DIM×DIM <code>f64</code> values). Column <var>k</var> is the unit eigenvector for <code>root_mass_moments()[k]</code>. Returns 0 on error.</td>
         </tr>
+        <tr>
+          <td><code>calc_diams(max_queue, max_result)</code></td>
+          <td><code>(i32, i32) → i32</code></td>
+          <td>
+            Compute all geometric diameters of the root attractor.
+            Returns a pointer to an array <code>[N, a1[0]…a1[DIM-1], b1[0]…b1[DIM-1], …]</code>
+            where N is the number of diameter pairs and each pair is two endpoints (2×DIM values).
+            Total elements: <code>1 + N×2×DIM</code>.
+            <code>max_queue</code> controls search budget; <code>max_result</code> caps the number of pairs.
+            Returns 0 on error. Must be called after <code>set_block()</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>calc_dists(pt, dim, max_queue, max_result)</code></td>
+          <td><code>(i32, i32, i32, i32) → i32</code></td>
+          <td>
+            Compute all points on the root attractor farthest from the given point <code>pt</code>
+            (pointer to <code>dim</code> <code>f64</code> values in WASM memory, where <code>dim</code>
+            must equal the rendering dimension).
+            Returns a pointer to <code>[N, a1[0]…a1[DIM-1], …]</code>, total <code>1 + N×DIM</code> elements.
+            Returns 0 on error. Must be called after <code>set_block()</code>.
+          </td>
+        </tr>
       </tbody>
     </table>
 
@@ -357,7 +397,8 @@ wasm._initialize();
     <p>Render a 256×256 Sierpiński triangle and draw it onto a <code>&lt;canvas&gt;</code>:</p>
     <pre><code set:text={codeMinimal} /></pre>
     <p class="note">
-      <strong>Note:</strong> to select the default block, pass <code>0</code> (null pointer) directly — <code>wasm.set_block(0)</code> — no <code>malloc</code> required.
+      <strong>Note:</strong> to select the default block, pass <code>−1</code> to <code>wasm.set_block(-1)</code>.
+      To select by name, call <code>get_block_idx(ptr)</code> first to get the index, then pass it to <code>set_block(idx)</code>.
       <code>set_root</code> is only needed when you want a specific root set other than the block default.
       Both functions can be called repeatedly to switch blocks/roots without reinitialising.
     </p>
