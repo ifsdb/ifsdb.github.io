@@ -1,0 +1,336 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const codeSettings = `// Write integer_ims::settings (20 bytes, align 4)
+function writeSettings(wasm, maxInters = 4000, maxDepth = 0xFFFFFFFF, maxBits = 63, prec = 0.0) {
+  const ptr = wasm.malloc(20);
+  const v = new DataView(wasm.memory.buffer);
+  v.setUint32 (ptr +  0, maxInters, true);
+  v.setUint32 (ptr +  4, maxDepth,  true);  // 0xFFFFFFFF = no limit
+  v.setUint32 (ptr +  8, maxBits,   true);
+  v.setFloat32(ptr + 12, prec,      true);  // 0.0 = exact rational
+  v.setUint8  (ptr + 16, 0);  // mode_ori
+  v.setUint8  (ptr + 17, 1);  // stop_on_overlap
+  v.setUint8  (ptr + 18, 1);  // stop_on_incomplete
+  v.setUint8  (ptr + 19, 0);  // padding
+  return ptr;  // caller must call wasm.free()
+}
+
+// Read inter_result (24 bytes, align 4)
+function readInterResult(wasm, ptr) {
+  const v = new DataView(wasm.memory.buffer);
+  return {
+    checked:    v.getUint32(ptr +  0, true),  // m_gcx
+    depth:      v.getUint32(ptr +  4, true),  // m_depth
+    bits:       v.getUint32(ptr +  8, true),  // m_bits (0 = non-exact IFS)
+    neigh:      v.getUint32(ptr + 12, true),  // m_neigh
+    oscDepth:   v.getUint32(ptr + 16, true),  // m_over_depth (0 = OSC holds)
+    completed:  v.getUint8 (ptr + 20),        // 1 = fully computed
+    overflowed: v.getUint8 (ptr + 21),        // 1 = rational overflow
+    mode:       v.getUint8 (ptr + 22),        // 0=rational,1=big_rational,2=real
+  };
+}`;
+
+const codeBoundaryDim = `// Prerequisite: init() and set_block() already called (see basic page)
+
+// Allocate structs
+const iresPtr = wasm.malloc(24);
+
+// Compute neighbor graph — retry with increasing budget if incomplete
+let ires;
+for (const maxInters of [4000, 8000, 50000, 200000]) {
+  const sp = writeSettings(wasm, maxInters);
+  wasm.calc_neighbor_graph(iresPtr, sp);
+  wasm.free(sp);
+  ires = readInterResult(wasm, iresPtr);
+  if (ires.completed) break;
+}
+wasm.free(iresPtr);
+
+if (ires.bits === 0)    { /* non-exact IFS (sin/cos or decimal literals) — inapplicable */ }
+if (ires.oscDepth > 0)  { /* OSC violated — overlap detected, result meaningless */ }
+if (!ires.completed)    { /* budget exhausted even at 200 000 */ }
+
+console.log('neighbours:', ires.neigh);
+
+// Option A: boundary dimension only (simple)
+const dim = wasm.calc_boundary_dim();
+// dim === 0    → tiles touch at isolated points only
+// dim === -1   → tiles are completely disjoint
+// isNaN(dim)   → error — call readCString(wasm, wasm.get_last_output())
+
+// Option B: boundary IFS program (full pipeline)
+wasm.custom_ifs(0, 2);
+const boundaryAifs = readCString(wasm, wasm.get_last_output());`;
+---
+<BaseLayout
+  title="ifslib — Advanced API"
+  description="Advanced ifslib API: attractor metrics, Hausdorff dimension, neighbor intersection graph, boundary IFS generation, and subspace decomposition."
+>
+  <main>
+    <nav class="breadcrumb"><a href="/tools/ifslib">← ifslib</a></nav>
+    <h1>ifslib — Advanced API</h1>
+
+    <p>
+      This page covers the analytics and advanced features of <strong>ifslib</strong>.
+      For the basic rendering API (instantiation, rendering pipeline, minimal example),
+      see <a href="/tools/ifslib">ifslib</a>.
+    </p>
+
+    <h2>Mathematical Capabilities</h2>
+    <p>Beyond rendering, ifslib implements several non-trivial algorithms from IFS theory:</p>
+
+    <h3>Hausdorff dimension</h3>
+    <p>
+      <code>information("Dimension")</code> computes the Hausdorff dimension of the attractor
+      using the substitution matrix of the IFS graph. For a self-similar IFS satisfying the
+      open set condition (OSC), the dimension <var>d</var> is the solution to the Moran equation
+      ∑ r<sub>i</sub><sup>d</sup> = 1. For more general (non-conformal, GIFS) systems, ifslib
+      builds the substitution matrix, finds its spectral radius λ with respect to the expansion
+      factor <var>p</var>, and returns <var>d = log λ / log p</var>. The output also includes the
+      minimal polynomial of λ.
+    </p>
+
+    <h3>Geometric measure</h3>
+    <p>
+      <code>information("Measure")</code> computes the natural self-similar measure on the
+      attractor and from it extracts: the centroid <var>C</var>, the principal inertia tensor
+      <var>I</var>, and the eigenvectors <var>Q</var>. Together these give the aspect ratio and
+      natural orientation of the attractor — useful for canonical placement in illustrations.
+      Fixed points (dimension-0 components) are also listed.
+    </p>
+
+    <h3>Affine subspace structure</h3>
+    <p>
+      <code>information("Subspaces")</code> computes, for each attractor set, the minimal affine
+      subspace (or union thereof) that contains it. Output is a set of spanning points per piece.
+      This determines whether boundary pieces are truly straight (contained in a hyperplane of
+      dimension lower than the ambient space) — a key step in verifying that a tiling is
+      polyhedral.
+    </p>
+
+    <h3>Neighbor intersection graph and OSC</h3>
+    <p>
+      <code>calc_neighbor_graph()</code> computes the complete self-similar neighbor graph of the
+      IFS: for each pair of tiles that share a boundary, it finds the conjugacy map between them
+      using exact rational arithmetic. The result includes the <strong>total number of
+      neighbours</strong> (<code>m_neigh</code> in the output struct) — the number of distinct
+      neighbor conjugacy classes in the graph. As a side-product it verifies the
+      <strong>open set condition (OSC)</strong>: if any two tiles overlap in a set of positive
+      measure, the algorithm detects this and reports the depth at which OSC is violated.
+      The computation is exact for IFS with rational (integer or fractional) coefficients.
+    </p>
+
+    <h3>Boundary IFS and boundary dimension</h3>
+    <p>
+      To compute only the boundary dimension value, use <code>calc_neighbor_graph()</code> followed by
+      <code>calc_boundary_dim()</code> — this is the simplest path and is used by the analytics
+      worker on this site.
+    </p>
+    <p>
+      For the full boundary IFS program, <code>custom_ifs(0, 2)</code> uses the neighbor graph
+      to construct a new IFS — the <strong>boundary IFS</strong> — whose attractor is exactly
+      the boundary ∂<var>A</var> of the original tile. Each boundary piece corresponds to the
+      intersection of two neighboring copies of the tile. Loading this boundary IFS back into
+      ifslib and running <code>information("Dimension")</code> on it yields
+      <strong>dim<sub>H</sub>(∂<var>A</var>)</strong>. This full pipeline is needed when you
+      also want the boundary AIFS program or the characteristic polynomial of the dimension.
+    </p>
+
+    <h3>Higher-order intersections</h3>
+    <p>
+      Passing <code>lim ≥ 3</code> to <code>custom_ifs</code> extends the construction to
+      higher-order intersections: triples, quadruples, … of simultaneously neighboring tiles.
+      The <code>j*</code> variables in the output IFS are the attractors of these higher-order
+      intersection pieces.
+    </p>
+    <p>
+      If any <code>j*</code> component has positive Hausdorff dimension, some triple
+      intersection of neighboring tiles contains more than one point, which means the tile is
+      <strong>not disk-like</strong>. Conversely, if all triple intersections are at most single
+      points (dimension 0), that is a <em>necessary</em> condition for disk-likeness —
+      but not sufficient on its own.
+    </p>
+
+    <h2>API Reference</h2>
+
+    <h3>Attractor metrics</h3>
+    <p>
+      These functions return numeric properties of the currently selected root attractor.
+      All must be called after <code>set_block()</code>. Returned pointers are valid until the next ifslib call and must not be freed.
+    </p>
+    <table>
+      <thead><tr><th>Export</th><th>Signature</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>root_hdim()</code></td>
+          <td><code>() → f64</code></td>
+          <td>Hausdorff dimension of the current root attractor. Returns 0 for a single fixed point, 2 for a solid 2D tile, etc. Returns −1 if the attractor is empty, NaN on failure.</td>
+        </tr>
+        <tr>
+          <td><code>root_measure()</code></td>
+          <td><code>() → f64</code></td>
+          <td>Normalized d-dimensional Hausdorff measure of the current root attractor, where the normalization is chosen so that the sum of measures over all attractors in the same connected component of the IFS graph equals 1 (where d = <code>root_hdim()</code>). For dim=0: 1 for a single point, 2 for finitely many, ∞ for infinitely many.</td>
+        </tr>
+        <tr>
+          <td><code>root_enclosing_ball()</code></td>
+          <td><code>() → i32</code></td>
+          <td>
+            Approximate enclosing ball. Returns a pointer to DIM+1 <code>f64</code> values: <code>[radius, cx, cy, …]</code>.
+            The radius is at most 3/2 of the minimal enclosing ball.
+            Returns 0 (null) if no block/root is selected or the attractor is empty.
+          </td>
+        </tr>
+        <tr>
+          <td><code>root_mass_center()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Center of mass of the root attractor. Returns a pointer to DIM <code>f64</code> values <code>[x, y, …]</code> in rendering subspace coordinates. Returns 0 on error.</td>
+        </tr>
+        <tr>
+          <td><code>root_mass_moments()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Eigenvalues of the inertia tensor (principal moments), in ascending order. Returns a pointer to DIM <code>f64</code> values. Equal moments indicate rotational symmetry. Returns 0 on error.</td>
+        </tr>
+        <tr>
+          <td><code>root_mass_matrix()</code></td>
+          <td><code>() → i32</code></td>
+          <td>Principal-axes matrix of the inertia tensor, stored column-major (DIM×DIM <code>f64</code> values). Column <var>k</var> is the unit eigenvector for <code>root_mass_moments()[k]</code>. Returns 0 on error.</td>
+        </tr>
+        <tr>
+          <td><code>calc_diams(max_queue, max_result)</code></td>
+          <td><code>(i32, i32) → i32</code></td>
+          <td>
+            Compute all geometric diameters of the root attractor.
+            Returns a pointer to an array <code>[N, a1[0]…a1[DIM-1], b1[0]…b1[DIM-1], …]</code>
+            where N is the number of diameter pairs and each pair is two endpoints (2×DIM values).
+            Total elements: <code>1 + N×2×DIM</code>.
+            <code>max_queue</code> controls search budget; <code>max_result</code> caps the number of pairs.
+            Returns 0 on error.
+          </td>
+        </tr>
+        <tr>
+          <td><code>calc_dists(pt, dim, max_queue, max_result)</code></td>
+          <td><code>(i32, i32, i32, i32) → i32</code></td>
+          <td>
+            Compute all points on the root attractor farthest from the given point <code>pt</code>
+            (pointer to <code>dim</code> <code>f64</code> values in WASM memory, where <code>dim</code>
+            must equal the rendering dimension).
+            Returns a pointer to <code>[N, a1[0]…a1[DIM-1], …]</code>, total <code>1 + N×DIM</code> elements.
+            Returns 0 on error.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Analytics</h3>
+    <table>
+      <thead><tr><th>Export</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>information(what)</code></td>
+          <td>
+            Compute analytics for the selected block. <code>what</code> is a C string.
+            Output goes to <code>get_last_output()</code>.
+            Values: <code>"Measure"</code>, <code>"Dimension"</code>, <code>"Subspaces"</code>,
+            <code>"Projection"</code>, <code>"Balls"</code>, <code>"Evaluation"</code>,
+            <code>"Components"</code>, <code>"AST"</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>calc_neighbor_graph(iresPtr, settingsPtr)</code></td>
+          <td>
+            <p>
+              Compute the neighbor intersection graph (needed for boundary dimension and
+              boundary IFS generation). Must be called after <code>set_block</code>.
+              Returns 1 on success, 0 on failure.
+            </p>
+            <p>
+              <strong><code>iresPtr</code></strong> — output: pointer to a caller-allocated
+              <code>inter_result</code> struct (24 bytes, align 4):
+            </p>
+            <table>
+              <thead><tr><th>Offset</th><th>Type</th><th>Field</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>uint32</td><td><code>m_gcx</code></td><td>intersections checked</td></tr>
+                <tr><td>4</td><td>uint32</td><td><code>m_depth</code></td><td>tree depth reached</td></tr>
+                <tr><td>8</td><td>uint32</td><td><code>m_bits</code></td><td>rational precision bits used; <strong>0</strong> = non-exact IFS (sin/cos/decimals)</td></tr>
+                <tr><td>12</td><td>uint32</td><td><code>m_neigh</code></td><td>number of neighbours found (valid when <code>m_completed</code> = 1)</td></tr>
+                <tr><td>16</td><td>uint32</td><td><code>m_over_depth</code></td><td><strong>0</strong> = OSC holds; <strong>&gt;0</strong> = OSC violated at this depth</td></tr>
+                <tr><td>20</td><td>uint8</td><td><code>m_completed</code></td><td>1 = fully computed; 0 = cut short by budget</td></tr>
+                <tr><td>21</td><td>uint8</td><td><code>m_overflowed</code></td><td>1 = rational overflow occurred</td></tr>
+                <tr><td>22</td><td>uint8</td><td><code>m_mode</code></td><td>0 = rational, 1 = big_rational, 2 = real</td></tr>
+                <tr><td>23</td><td>uint8</td><td>(padding)</td><td></td></tr>
+              </tbody>
+            </table>
+            <p>
+              <strong><code>settingsPtr</code></strong> — input: pointer to a
+              <code>settings</code> struct (20 bytes, align 4):
+            </p>
+            <table>
+              <thead><tr><th>Offset</th><th>Type</th><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>uint32</td><td><code>max_inters</code></td><td>4000</td><td>max elements in search tree; try 8000 → 50000 → 200000 for complex IFS</td></tr>
+                <tr><td>4</td><td>uint32</td><td><code>max_depth</code></td><td>0xFFFFFFFF</td><td>max tree depth; no limit</td></tr>
+                <tr><td>8</td><td>uint32</td><td><code>max_bits</code></td><td>63</td><td>rational precision bits; &gt;63 = big-rational (slow)</td></tr>
+                <tr><td>12</td><td>float32</td><td><code>prec</code></td><td>0.0</td><td>0.0 = exact rational arithmetic</td></tr>
+                <tr><td>16</td><td>uint8</td><td><code>mode_ori</code></td><td>0</td><td>1 = orientation-finding mode</td></tr>
+                <tr><td>17</td><td>uint8</td><td><code>stop_on_overlap</code></td><td>1</td><td>stop vertex on first overlap found</td></tr>
+                <tr><td>18</td><td>uint8</td><td><code>stop_on_incomplete</code></td><td>1</td><td>abort if any vertex cannot be fully processed</td></tr>
+                <tr><td>19</td><td>uint8</td><td>(padding)</td><td></td><td></td></tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td><code>custom_ifs(bitmask, lim)</code></td>
+          <td>
+            Generate derived AIFS output from the computed neighbor graph.
+            <code>bitmask=0, lim=2</code> generates the boundary IFS for every attractor.
+            Individual bits: 0=intersections, 1=connections, 2=neighbourhoods, 3=neighbourhood graph,
+            4=relators, 5=alternative boundary.
+            <code>lim ≥ 3</code> also enumerates triple/higher-order intersections (<code>j*</code> variables).
+            Output goes to <code>get_last_output()</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>calc_boundary_dim()</code></td>
+          <td>
+            Compute dim<sub>H</sub>(∂<var>A</var>) directly from the neighbor graph computed by
+            <code>calc_neighbor_graph()</code>. Returns the dimension as a <code>f64</code>.
+            Special return values: <code>0</code> = tiles touch only at isolated points
+            (0-dimensional contacts, e.g. Sierpiński triangle); <code>−1</code> = tiles are
+            completely disjoint (no contacts at all); <code>NaN</code> = error (call
+            <code>get_last_output()</code> for the message).
+            <strong>Preferred API</strong> when only the dimension value is needed — simpler than
+            the full <code>custom_ifs</code> → <code>information("Dimension")</code> pipeline.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Boundary Dimension — Example</h2>
+    <p>
+      Helper functions for writing/reading the C structs, plus the full boundary dimension pipeline:
+    </p>
+    <pre><code set:text={codeSettings} /></pre>
+    <pre><code set:text={codeBoundaryDim} /></pre>
+    <p class="note">
+      <strong>Tiered budget:</strong> some IFS need large budgets — Danzer needs ~50 000,
+      Quaquaversal needs ~200 000.
+      When <code>bits=0</code> and <code>checked=0</code>, the IFS uses non-exact coefficients
+      (<code>sin</code>/<code>cos</code> or decimal literals) —
+      <code>calc_neighbor_graph</code> is inapplicable in that case.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .note {
+    background: var(--color-surface);
+    border-left: 3px solid var(--color-accent);
+    padding: 0.6rem 1rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.9rem;
+    margin: -0.5rem 0 1rem;
+  }
+</style>

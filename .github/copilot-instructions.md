@@ -478,7 +478,7 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
   - `get_block_idx(block_ptr) → i32` — resolve a block string ID to its 0-based internal index **without** selecting it. Accepts the block's string ID (the `@id` part of `@id:parentId`). Pass `nullptr` (0) or empty string to get the index of the first non-hidden block. Returns the index on success, or -1 if not found. Must be called after `init()`.
   - `set_block(block_idx) → i32` — select a block by its **0-based numeric index**. Pass `-1` to select the first non-hidden block. To iterate over all blocks, use indices `0` to `nb-1` where `nb` is the count returned by `init()`. To select by block ID string, resolve it first with `get_block_idx()`. Resets root to block default (`$root` if defined, otherwise first visible variable). Returns the **number of variables** in the block (≥1) on success, or 0 on error. Can be called multiple times to switch blocks without re-calling `init()`. **Breaking change from previous API**: now takes `int32_t` index, not `const char*` — use `get_block_idx()` to resolve a name first.
   - `set_root(root_ptr) → DIM | -1` — override the root attractor set within the already-selected block (C string). Must be called after `set_block()`. Returns the Euclidean dimension of the projected attractor (DIM ≥ 0) on success, or -1 on failure. Can be called multiple times to switch roots without re-calling `set_block()`.
-  - `get_root_name(root_idx) → charPtr` — return the variable name at 0-based `root_idx` within the currently selected block. **Returns ALL variables in the block** (both map definitions and attractor sets), not just attractor variables. For example, for a block with `f1, f2, f3, S=(f1|f2|f3)*S`, indices 0–2 return `f1`/`f2`/`f3` and index 3 returns `S`. The variable count `vc` returned by `set_block()` gives the upper bound. Returns a null-terminated string valid until the next ifslib call, or `nullptr` if `root_idx` is out of range or no block selected. Must be called after `set_block()`.
+  - `get_var_name(var_idx) → charPtr` — return the variable name at 0-based `var_idx` within the currently selected block. **Returns ALL variables in the block** (both map definitions and attractor sets), not just attractor variables. For example, for a block with `f1, f2, f3, S=(f1|f2|f3)*S`, indices 0–2 return `f1`/`f2`/`f3` and index 3 returns `S`. The variable count `vc` returned by `set_block()` gives the upper bound. Returns a null-terminated string valid until the next ifslib call, or `nullptr` if `var_idx` is out of range or no block selected. Must be called after `set_block()`.
   - `root_enclosing_ball() → doublePtr` — approximate enclosing ball of the current root attractor. Returns DIM+1 elements: `[radius, center[0], ..., center[DIM-1]]`. Not the exact minimal enclosing ball — radius is at most 3/2 of minimal. Returns `nullptr` if no block/root selected or attractor is empty. Valid until next ifslib call; must not be freed.
   - `root_hdim() → double` — Hausdorff dimension of the current root attractor. Returns -1 if the attractor is empty, NaN on failure. Must be called after `set_block()`.
   - `root_measure() → double` — normalized d-dimensional Hausdorff measure of the current root attractor, where the normalization is chosen so that the sum of measures over all attractors in the same connected component of the IFS graph equals 1 (where d = `root_hdim()`). For dim=0: 1 for a single point, 2 for finitely many points, infinity for infinitely many. Must be called after `set_block()`.
@@ -558,17 +558,18 @@ Always use `entry.data.tags ?? []` when reading tags — never assume the array 
     | 18 | uint8 | `stop_on_incomplete` | 1 | abort if any vertex cannot be fully processed; ensures `m_completed=0` when budget exceeded |
     | 19 | uint8 | (padding) | 0 | |
 
-    **`inter_result` output struct (20 bytes, align 4):**
+    **`inter_result` output struct (24 bytes, align 4):**
     | Offset | Type | Field | Meaning |
     |---|---|---|---|
     | 0 | uint32 | `m_gcx` | intersections checked |
     | 4 | uint32 | `m_depth` | tree depth reached |
     | 8 | uint32 | `m_bits` | rational precision bits used; **0** = non-exact IFS (sin/cos/decimals) |
-    | 12 | uint32 | `m_over_depth` | **0** = OSC holds; **>0** = OSC violated at this depth |
-    | 16 | uint8 | `m_completed` | 1 = fully computed; 0 = cut short by budget — try larger `max_inters` |
-    | 17 | uint8 | `m_overflowed` | 1 = rational overflow occurred |
-    | 18 | uint8 | `m_mode` | arithmetic mode: 0=rational, 1=big_rational, 2=real |
-    | 19 | uint8 | (padding) | |
+    | 12 | uint32 | `m_neigh` | number of neighbours found (valid when `m_completed` = 1) |
+    | 16 | uint32 | `m_over_depth` | **0** = OSC holds; **>0** = OSC violated at this depth |
+    | 20 | uint8 | `m_completed` | 1 = fully computed; 0 = cut short by budget — try larger `max_inters` |
+    | 21 | uint8 | `m_overflowed` | 1 = rational overflow occurred |
+    | 22 | uint8 | `m_mode` | arithmetic mode: 0=rational, 1=big_rational, 2=real |
+    | 23 | uint8 | (padding) | |
 
     **Tiered `max_inters`:** some IFS need large budgets: try 8000 → 50000 → 200000. Danzer needs ~50 000, Quaquaversal needs ~200 000.
 
@@ -622,21 +623,22 @@ function writeSettings(wasm, maxInters, maxDepth, maxBits, prec) {
   return ptr;
 }
 
-// Read inter_result (20 bytes)
+// Read inter_result (24 bytes)
 function readInterResult(wasm, ptr) {
   const v = new DataView(wasm.memory.buffer);
   return {
     checked:   v.getUint32(ptr +  0, true),  // m_gcx
     depth:     v.getUint32(ptr +  4, true),  // m_depth
     bits:      v.getUint32(ptr +  8, true),  // m_bits (0 = non-exact IFS)
-    oscDepth:  v.getUint32(ptr + 12, true),  // m_over_depth (0 = OSC holds)
-    completed: v.getUint8 (ptr + 16),        // m_completed
-    overflow:  v.getUint8 (ptr + 17),        // m_overflowed
-    mode:      v.getUint8 (ptr + 18),        // 0=rational,1=big_rational,2=real
+    neigh:     v.getUint32(ptr + 12, true),  // m_neigh (neighbour count, valid if completed)
+    oscDepth:  v.getUint32(ptr + 16, true),  // m_over_depth (0 = OSC holds)
+    completed: v.getUint8 (ptr + 20),        // m_completed
+    overflow:  v.getUint8 (ptr + 21),        // m_overflowed
+    mode:      v.getUint8 (ptr + 22),        // 0=rational,1=big_rational,2=real
   };
 }
 
-const iresPtr = wasm.malloc(20);
+const iresPtr = wasm.malloc(24);
 const settingsPtr = writeSettings(wasm, 4000, 0xFFFFFFFF, 63, 0.0);
 const ok = wasm.calc_neighbor_graph(iresPtr, settingsPtr);
 wasm.free(settingsPtr);

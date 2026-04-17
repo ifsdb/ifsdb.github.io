@@ -41,7 +41,7 @@ function getOutput(w) { return readCStr(w, w.get_last_output()); }
 // dim === -1 means tiles are completely disjoint (no contacts at all).
 function tryCalcBoundaryDim(w, maxInters) {
   const settingsPtr = w.malloc(20);
-  const iresPtr     = w.malloc(20);
+  const iresPtr     = w.malloc(24);
   {
     const dv = new DataView(w.memory.buffer);
     dv.setUint32  (settingsPtr +  0, maxInters,   true); // max_inters
@@ -65,8 +65,9 @@ function tryCalcBoundaryDim(w, maxInters) {
 
   const dv = new DataView(w.memory.buffer);
   const bits      = dv.getUint32(iresPtr +  8, true); // m_bits
-  const oscDepth  = dv.getUint32(iresPtr + 12, true); // m_over_depth
-  const completed = dv.getUint8 (iresPtr + 16);       // m_completed
+  const neigh     = dv.getUint32(iresPtr + 12, true); // m_neigh
+  const oscDepth  = dv.getUint32(iresPtr + 16, true); // m_over_depth
+  const completed = dv.getUint8 (iresPtr + 20);       // m_completed
   w.free(iresPtr);
 
   if (bits === 0)      return { error: 'non-exact IFS (sin/cos or decimal literals)' };
