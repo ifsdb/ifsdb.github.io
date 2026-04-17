@@ -297,6 +297,51 @@ footer {
   text-align: center;
 }
 
+/* ===== Polyomino figure (MDX) ===== */
+.polyomino-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.polyomino-figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+.polyomino-figure figcaption {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.polyomino-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.polyomino-row figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 360px;
+}
+
+.polyomino-row figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* ===== Catalog grid ===== */
 .catalog-controls {
   display: flex;
